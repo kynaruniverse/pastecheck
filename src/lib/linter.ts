@@ -499,6 +499,12 @@ function lintHTML(code: string): CodeLine[] {
     if (/\b(TODO|FIXME)\b/i.test(text)) {
       ann.add(idx, "warning", "Unresolved TODO/FIXME in comment");
     }
+    if (new RegExp(`</(${[...VOID_ELEMENTS].join("|")})\\s*>`, "i").test(text)) {
+      const match = text.match(new RegExp(`</(${[...VOID_ELEMENTS].join("|")})\\s*>`, "i"));
+      if (match) {
+        ann.add(idx, "error", `<${match[1].toLowerCase()}> is a void element and cannot have a closing tag`);
+      }
+    }
   });
 
   return buildLines(rawLines, ann);
