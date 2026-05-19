@@ -1,8 +1,8 @@
 import * as acorn from "acorn";
 import * as walk from "acorn-walk";
 import { parser as pythonParser } from "@lezer/python";
-import { parse as parseHTML } from "parse5";
-
+import { parse as parseHTML, defaultTreeAdapter } from "parse5";
+import type { Document, Element, ChildNode } from "parse5/dist/tree-adapters/default";
 export type LineType = "normal" | "error" | "warning";
 export type Language = "javascript" | "python" | "html" | "unknown";
 
@@ -256,6 +256,14 @@ function lintPython(code: string): CodeLine[] {
   return buildLines(rawLines, ann);
 }
 
+// ─── DROP-IN REPLACEMENT ────────────────────────────────────────────────────
+// Replace everything from `const HTML_ERROR_MESSAGES` to the end of
+// `function lintHTML` in your existing linter.ts with this block.
+// Everything above (imports, types, JS linter, Python linter) stays unchanged.
+// ────────────────────────────────────────────────────────────────────────────
+
+// ─── Parse error code → human message ───────────────────────────────────────
+
 const HTML_ERROR_MESSAGES: Record<string, string> = {
   "missing-end-tag-before-doctype": "Missing end tag before DOCTYPE",
   "unexpected-character-in-attribute-name": "Unexpected character in attribute name",
@@ -269,7 +277,8 @@ const HTML_ERROR_MESSAGES: Record<string, string> = {
   "unexpected-solidus-in-tag": "Unexpected '/' inside a tag",
   "end-tag-with-attributes": "End tags must not have attributes",
   "duplicate-attribute": "Duplicate attribute on element",
-  "non-void-html-element-start-tag-with-trailing-solidus": "Self-closing syntax is only valid on void elements",
+  "non-void-html-element-start-tag-with-trailing-solidus":
+    "Self-closing syntax is only valid on void elements",
   "abrupt-closing-of-empty-comment": "Comment is not properly closed",
   "eof-in-comment": "Unexpected end of file inside a comment",
   "eof-in-tag": "Unexpected end of file inside a tag",
@@ -279,13 +288,238 @@ const HTML_ERROR_MESSAGES: Record<string, string> = {
   "missing-end-tag": "Missing closing tag",
 };
 
+// ─── Constants ───────────────────────────────────────────────────────────────
+
+// Tags that must NOT have a closing tag
+const VOID_ELEMENTS = new Set([
+  "area", "base", "br", "col", "embed", "hr", "img", "input",
+  "link", "meta", "param", "source", "track", "wbr",
+]);
+
+// Deprecated HTML tags that have CSS/semantic replacements
+const DEPRECATED_TAGS: Record<string, string> = {
+  center:   "Use CSS 'text-align: center' instead of <center>",
+  font:     "<font> is deprecated — use CSS for styling text",
+  marquee:  "<marquee> is deprecated — use CSS animations instead",
+  blink:    "<blink> is deprecated and unsupported in modern browsers",
+  big:      "<big> is deprecated — use CSS font-size instead",
+  strike:   "<strike> is deprecated — use <del> or CSS text-decoration",
+  tt:       "<tt> is deprecated — use <code> or <kbd> instead",
+  frame:    "<frame> is obsolete — use <iframe> or standard layout",
+  frameset: "<frameset> is obsolete",
+  noframes: "<noframes> is obsolete",
+  applet:   "<applet> is obsolete — use <object> or modern embeds",
+  basefont: "<basefont> is deprecated — use CSS instead",
+  dir:      "<dir> is deprecated — use <ul> instead",
+  isindex:  "<isindex> is obsolete",
+};
+
+// Block-level elements that must NOT appear inside inline elements
+const BLOCK_ELEMENTS = new Set([
+  "div", "p", "h1", "h2", "h3", "h4", "h5", "h6",
+  "ul", "ol", "li", "table", "thead", "tbody", "tr", "th", "td",
+  "blockquote", "pre", "figure", "figcaption", "section", "article",
+  "aside", "header", "footer", "main", "nav", "form", "fieldset",
+]);
+
+const INLINE_ELEMENTS = new Set([
+  "span", "a", "strong", "em", "b", "i", "u", "small",
+  "label", "abbr", "cite", "code", "kbd", "samp", "sub", "sup",
+]);
+
+// ─── Source-line helpers ─────────────────────────────────────────────────────
+
+/**
+ * Build a map of { tagName → [1-based line numbers] } by scanning raw source.
+ * parse5's location data isn't always reliable for all nodes, so we use
+ * a lightweight regex scan as a fallback line-finder.
+ */
+function buildTagLineMap(source: string): Map<string, number[]> {
+  const map = new Map<string, number[]>();
+  const lines = source.split("\n");
+  lines.forEach((lineText, idx) => {
+    const tagMatches = lineText.matchAll(/<\/?([a-zA-Z][a-zA-Z0-9-]*)/g);
+    for (const m of tagMatches) {
+      const tag = m[1].toLowerCase();
+      if (!map.has(tag)) map.set(tag, []);
+      map.get(tag)!.push(idx + 1); // 1-based
+    }
+  });
+  return map;
+}
+
+/**
+ * Find what 1-based line a character offset falls on.
+ */
+function offsetToLine(source: string, offset: number): number {
+  return source.slice(0, offset).split("\n").length;
+}
+
+// ─── Tree walker ─────────────────────────────────────────────────────────────
+
+interface WalkResult {
+  unclosedTags:    Array<{ tag: string; line: number }>;
+  voidMisuse:      Array<{ tag: string; line: number }>;
+  deprecatedTags:  Array<{ tag: string; line: number; message: string }>;
+  blockInInline:   Array<{ block: string; inline: string; line: number }>;
+  missingAlt:      Array<{ line: number }>;
+  missingLang:     boolean;
+  missingCharset:  boolean;
+  missingTitle:    boolean;
+}
+
+function walkTree(doc: Document, source: string, tagLineMap: Map<string, number[]>): WalkResult {
+  const result: WalkResult = {
+    unclosedTags:   [],
+    voidMisuse:     [],
+    deprecatedTags: [],
+    blockInInline:  [],
+    missingAlt:     [],
+    missingLang:    false,
+    missingCharset: false,
+    missingTitle:   false,
+  };
+
+  let hasHtmlLang  = false;
+  let hasCharset   = false;
+  let hasTitle     = false;
+
+  // Helper: get source line for a node (uses parse5 sourceCodeLocation when available)
+  function lineOf(node: Element): number {
+    const loc = (node as unknown as { sourceCodeLocation?: { startLine?: number; startOffset?: number } })
+      .sourceCodeLocation;
+    if (loc?.startLine) return loc.startLine;
+    if (loc?.startOffset !== undefined) return offsetToLine(source, loc.startOffset);
+    // Fallback: first occurrence of this tag in source
+    const occurrences = tagLineMap.get(node.tagName.toLowerCase());
+    return occurrences?.[0] ?? 1;
+  }
+
+  function getAttr(node: Element, name: string): string | undefined {
+    return node.attrs?.find((a) => a.name === name)?.value;
+  }
+
+  function visit(node: ChildNode, parentInlineTag: string | null) {
+    if (node.nodeName === "#text" || node.nodeName === "#comment") return;
+    if (node.nodeName === "#document" || node.nodeName === "#document-fragment") {
+      const doc = node as unknown as { childNodes: ChildNode[] };
+      doc.childNodes?.forEach((c) => visit(c, null));
+      return;
+    }
+
+    const el = node as Element;
+    if (!el.tagName) return;
+
+    const tag = el.tagName.toLowerCase();
+    const line = lineOf(el);
+
+    // ── <html lang="..."> ────────────────────────────────────────────────────
+    if (tag === "html") {
+      const lang = getAttr(el, "lang");
+      if (lang && lang.trim().length > 0) hasHtmlLang = true;
+    }
+
+    // ── <meta charset="..."> ────────────────────────────────────────────────
+    if (tag === "meta") {
+      if (getAttr(el, "charset") !== undefined) hasCharset = true;
+      // <meta http-equiv="Content-Type"> also counts
+      if (
+        getAttr(el, "http-equiv")?.toLowerCase() === "content-type" &&
+        getAttr(el, "content")?.toLowerCase().includes("charset")
+      ) {
+        hasCharset = true;
+      }
+    }
+
+    // ── <title> ──────────────────────────────────────────────────────────────
+    if (tag === "title") hasTitle = true;
+
+    // ── Deprecated tags ──────────────────────────────────────────────────────
+    if (DEPRECATED_TAGS[tag]) {
+      result.deprecatedTags.push({ tag, line, message: DEPRECATED_TAGS[tag] });
+    }
+
+    // ── Void element children (e.g. <br>text</br>) ───────────────────────────
+    if (VOID_ELEMENTS.has(tag) && el.childNodes && el.childNodes.length > 0) {
+      const hasRealChildren = el.childNodes.some(
+        (c) => c.nodeName !== "#text" || (c as unknown as { value: string }).value.trim().length > 0
+      );
+      if (hasRealChildren) {
+        result.voidMisuse.push({ tag, line });
+      }
+    }
+
+    // ── <img alt="..."> ──────────────────────────────────────────────────────
+    if (tag === "img") {
+      if (getAttr(el, "alt") === undefined) {
+        result.missingAlt.push({ line });
+      }
+    }
+
+    // ── Block element inside inline element ──────────────────────────────────
+    if (parentInlineTag && BLOCK_ELEMENTS.has(tag)) {
+      result.blockInInline.push({ block: tag, inline: parentInlineTag, line });
+    }
+
+    // ── Recurse ──────────────────────────────────────────────────────────────
+    const nextInlineParent = INLINE_ELEMENTS.has(tag) ? tag : parentInlineTag;
+    el.childNodes?.forEach((child) => visit(child, nextInlineParent));
+  }
+
+  // Kick off walk from document root
+  doc.childNodes?.forEach((c) => visit(c, null));
+
+  // ── Unclosed tag detection ───────────────────────────────────────────────
+  // parse5 silently auto-closes unclosed tags. We detect them by comparing
+  // how many opening tags appear in raw source vs what the corrected tree has.
+  const openCounts  = new Map<string, number>();
+  const closeCounts = new Map<string, number>();
+
+  const openMatches  = source.matchAll(/<([a-zA-Z][a-zA-Z0-9-]*)(?:\s[^>]*)?\s*\/?>/g);
+  const closeMatches = source.matchAll(/<\/([a-zA-Z][a-zA-Z0-9-]*)\s*>/g);
+
+  for (const m of openMatches) {
+    const t = m[1].toLowerCase();
+    if (!VOID_ELEMENTS.has(t)) openCounts.set(t, (openCounts.get(t) ?? 0) + 1);
+  }
+  for (const m of closeMatches) {
+    const t = m[1].toLowerCase();
+    closeCounts.set(t, (closeCounts.get(t) ?? 0) + 1);
+  }
+
+  for (const [tag, openCount] of openCounts) {
+    const closeCount = closeCounts.get(tag) ?? 0;
+    if (openCount > closeCount) {
+      const diff = openCount - closeCount;
+      const occurrences = tagLineMap.get(tag) ?? [1];
+      // Report the last unclosed occurrence(s)
+      for (let i = 0; i < diff; i++) {
+        const lineNum = occurrences[occurrences.length - 1 - i] ?? occurrences[0];
+        result.unclosedTags.push({ tag, line: lineNum });
+      }
+    }
+  }
+
+  // ── Document-level checks ────────────────────────────────────────────────
+  result.missingLang    = !hasHtmlLang;
+  result.missingCharset = !hasCharset;
+  result.missingTitle   = !hasTitle;
+
+  return result;
+}
+
+// ─── Main lintHTML ────────────────────────────────────────────────────────────
+
 function lintHTML(code: string): CodeLine[] {
   const rawLines = code.split("\n");
   const ann = new AnnotationMap();
+  const tagLineMap = buildTagLineMap(code);
 
-  parseHTML(code, {
+  // ── 1. parse5 parse-error callback (token-level errors) ──────────────────
+  const doc = parseHTML(code, {
+    sourceCodeLocationInfo: true,
     onParseError(err) {
-      const lineIdx = err.startLine - 1;
+      const lineIdx = (err.startLine ?? 1) - 1;
       const msg =
         HTML_ERROR_MESSAGES[err.code] ??
         `Parse error: ${err.code.replace(/-/g, " ")}`;
@@ -293,6 +527,50 @@ function lintHTML(code: string): CodeLine[] {
     },
   });
 
+  // ── 2. Tree-walk structural checks ───────────────────────────────────────
+  const walked = walkTree(doc as unknown as Document, code, tagLineMap);
+
+  walked.unclosedTags.forEach(({ tag, line }) => {
+    ann.add(line - 1, "error", `<${tag}> is never closed — add a closing </${tag}> tag`);
+  });
+
+  walked.voidMisuse.forEach(({ tag, line }) => {
+    ann.add(line - 1, "error", `<${tag}> is a void element and cannot have children or a closing tag`);
+  });
+
+  walked.deprecatedTags.forEach(({ line, message }) => {
+    ann.add(line - 1, "warning", message);
+  });
+
+  walked.blockInInline.forEach(({ block, inline, line }) => {
+    ann.add(
+      line - 1,
+      "warning",
+      `Block element <${block}> nested inside inline element <${inline}> — invalid HTML structure`,
+    );
+  });
+
+  walked.missingAlt.forEach(({ line }) => {
+    ann.add(line - 1, "warning", "<img> is missing an 'alt' attribute — required for accessibility");
+  });
+
+  // ── 3. Document-level warnings (pin to line 0) ───────────────────────────
+  // Only fire these for what looks like a full document (has <html> or <!DOCTYPE>)
+  const looksLikeFullDoc = /<!doctype\s+html/i.test(code) || /<html[\s>]/i.test(code);
+
+  if (looksLikeFullDoc) {
+    if (walked.missingLang) {
+      ann.add(0, "warning", "<html> is missing a 'lang' attribute (e.g. lang=\"en\") — required for accessibility");
+    }
+    if (walked.missingCharset) {
+      ann.add(0, "warning", "No character encoding declared — add <meta charset=\"UTF-8\"> inside <head>");
+    }
+    if (walked.missingTitle) {
+      ann.add(0, "warning", "Document is missing a <title> element inside <head>");
+    }
+  }
+
+  // ── 4. Line-by-line pattern checks (style, events, todos) ────────────────
   rawLines.forEach((text, idx) => {
     if (/\bstyle\s*=\s*["'][^"']+["']/.test(text)) {
       ann.add(idx, "warning", "Inline style — consider moving to a CSS class");
@@ -303,13 +581,11 @@ function lintHTML(code: string): CodeLine[] {
     if (/\b(TODO|FIXME)\b/i.test(text)) {
       ann.add(idx, "warning", "Unresolved TODO/FIXME in comment");
     }
-    if (/<img\b(?![^>]*\balt\s*=)[^>]*>/i.test(text)) {
-      ann.add(idx, "warning", "<img> is missing an 'alt' attribute — required for accessibility");
-    }
   });
 
   return buildLines(rawLines, ann);
 }
+
 
 export function lint(code: string): LintResult {
   const language = detectLanguage(code);
