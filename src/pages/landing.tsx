@@ -1,4 +1,5 @@
 import { useLocation } from "wouter";
+import { Helmet } from "react-helmet-async";
 
 const features = [
   {
@@ -41,6 +42,12 @@ export default function Landing() {
       className="min-h-screen w-full flex flex-col"
       style={{ background: "hsl(222 16% 10%)" }}
     >
+      <Helmet>
+        <title>PasteCheck — Free Online Code Error Checker</title>
+        <meta name="description" content="Paste your JavaScript, TypeScript, Python or HTML and instantly see every error highlighted. Free, no sign-up, works on mobile." />
+        <meta property="og:title" content="PasteCheck — Free Online Code Error Checker" />
+        <meta property="og:description" content="Paste your JavaScript, TypeScript, Python or HTML and instantly see every error highlighted. Free, no sign-up, works on mobile." />
+      </Helmet>
       <div className="mx-auto w-full max-w-2xl px-5 flex flex-col flex-1">
 
         {/* Nav */}

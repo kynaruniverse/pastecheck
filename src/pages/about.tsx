@@ -1,4 +1,5 @@
 import { useLocation } from "wouter";
+import { Helmet } from "react-helmet-async";
 
 export default function About() {
   const [, navigate] = useLocation();
@@ -8,6 +9,12 @@ export default function About() {
       className="min-h-screen w-full flex flex-col"
       style={{ background: "hsl(222 16% 10%)" }}
     >
+      <Helmet>
+        <title>About PasteCheck — How It Works & Supported Languages</title>
+        <meta name="description" content="Learn how PasteCheck checks JavaScript, TypeScript, Python and HTML for errors instantly. Free online linter that works on mobile with no sign-up required." />
+        <meta property="og:title" content="About PasteCheck — How It Works & Supported Languages" />
+        <meta property="og:description" content="Learn how PasteCheck checks JavaScript, TypeScript, Python and HTML for errors instantly. Free online linter that works on mobile with no sign-up required." />
+      </Helmet>
       <div className="mx-auto w-full max-w-2xl px-5 flex flex-col flex-1">
 
         {/* Nav */}
