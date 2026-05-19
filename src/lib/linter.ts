@@ -597,6 +597,79 @@ function lintEmbeddedScripts(source: string, ann: AnnotationMap): void {
   }
 }
 
+const COMMON_CSS_MISSPELLINGS: Record<string, string> = {
+  "colour":            "color",
+  "backround":         "background",
+  "backround-color":   "background-color",
+  "backgroud":         "background",
+  "backgroud-color":   "background-color",
+  "font-weigh":        "font-weight",
+  "font-wieght":       "font-weight",
+  "font-stlye":        "font-style",
+  "font-styel":        "font-style",
+  "marign":            "margin",
+  "marign-top":        "margin-top",
+  "marign-left":       "margin-left",
+  "marign-right":      "margin-right",
+  "marign-bottom":     "margin-bottom",
+  "paddig":            "padding",
+  "pading":            "padding",
+  "positon":           "position",
+  "postion":           "position",
+  "dipslay":           "display",
+  "disply":            "display",
+  "dispaly":           "display",
+  "heigth":            "height",
+  "hieght":            "height",
+  "widht":             "width",
+  "wdith":             "width",
+  "boreder":           "border",
+  "boder":             "border",
+  "boreder-radius":    "border-radius",
+  "border-raduis":     "border-radius",
+  "border-raidus":     "border-radius",
+  "overfow":           "overflow",
+  "overlow":           "overflow",
+  "visiblity":         "visibility",
+  "visibilty":         "visibility",
+  "opactiy":           "opacity",
+  "opcaity":           "opacity",
+  "trasition":         "transition",
+  "tranistion":        "transition",
+  "transtion":         "transition",
+  "animaiton":         "animation",
+  "animaton":          "animation",
+  "flexdirection":     "flex-direction",
+  "flex-direcion":     "flex-direction",
+  "aign-items":        "align-items",
+  "algn-items":        "align-items",
+  "jusify-content":    "justify-content",
+  "justfy-content":    "justify-content",
+  "justify-contnet":   "justify-content",
+  "z-idex":            "z-index",
+  "zindex":            "z-index",
+  "cursur":            "cursor",
+  "cusor":             "cursor",
+  "pinter-events":     "pointer-events",
+  "pointer-evnets":    "pointer-events",
+  "text-aign":         "text-align",
+  "text-algn":         "text-align",
+  "text-decoraion":    "text-decoration",
+  "text-decortion":    "text-decoration",
+  "box-shaodw":        "box-shadow",
+  "box-shdaow":        "box-shadow",
+  "leter-spacing":     "letter-spacing",
+  "letter-spacng":     "letter-spacing",
+  "line-heigth":       "line-height",
+  "line-hieght":       "line-height",
+  "white-spce":        "white-space",
+  "whit-space":        "white-space",
+  "word-brek":         "word-break",
+  "word-braek":        "word-break",
+  "transform-orgin":   "transform-origin",
+  "transform-origni":  "transform-origin",
+};
+
 function lintEmbeddedStyles(source: string, ann: AnnotationMap): void {
   const styleRegex = /<style(?:\s[^>]*)?>([\s\S]*?)<\/style>/gi;
   let match;
@@ -610,10 +683,21 @@ function lintEmbeddedStyles(source: string, ann: AnnotationMap): void {
       const trimmed = text.trim();
       if (!trimmed || trimmed.startsWith("/*") || trimmed.startsWith("*")) return;
       const absLine = lineOffset + idx;
+
       if (/!important/.test(trimmed))
         ann.add(absLine, "warning", "'!important' overrides the cascade — use a more specific selector instead");
       if (/\b(TODO|FIXME)\b/i.test(trimmed))
         ann.add(absLine, "warning", "Unresolved TODO/FIXME in CSS");
+
+      // Misspelled property check
+      const propMatch = trimmed.match(/^([\w-]+)\s*:/);
+      if (propMatch) {
+        const prop = propMatch[1].toLowerCase();
+        const suggestion = COMMON_CSS_MISSPELLINGS[prop];
+        if (suggestion) {
+          ann.add(absLine, "error", `Unknown CSS property '${prop}' — did you mean '${suggestion}'?`);
+        }
+      }
     });
   }
 }
