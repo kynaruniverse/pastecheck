@@ -475,8 +475,12 @@ function walkTree(doc: Document, source: string, tagLineMap: Map<string, number[
     if (tag === "input") {
       const type = getAttr(el, "type")?.toLowerCase();
       if (type !== "hidden" && type !== "submit" && type !== "button" && type !== "reset") {
-        const inputId = getAttr(el, "id")?.trim();
-        inputsNeedingLabels.push({ line, id: inputId ?? "" } as { line: number; id: string });
+        const ariaLabel = getAttr(el, "aria-label")?.trim();
+        const ariaLabelledBy = getAttr(el, "aria-labelledby")?.trim();
+        if (!ariaLabel && !ariaLabelledBy) {
+          const inputId = getAttr(el, "id")?.trim();
+          inputsNeedingLabels.push({ line, id: inputId ?? "" } as { line: number; id: string });
+        }
       }
     }
 
