@@ -1,11 +1,12 @@
 import * as acorn from "acorn";
 import * as walk from "acorn-walk";
+import acornTs from "acorn-typescript";
 import { parser as pythonParser } from "@lezer/python";
 import { parse as parseHTML } from "parse5";
 import type { Document, Element, ChildNode } from "parse5/dist/tree-adapters/default";
 
 export type LineType = "normal" | "error" | "warning";
-export type Language = "javascript" | "python" | "html" | "unknown";
+export type Language = "javascript" | "typescript" | "python" | "html" | "unknown";
 
 export interface CodeLine {
   text: string;
@@ -87,6 +88,18 @@ export function detectLanguage(code: string): Language {
   ) {
     return "python";
   }
+  
+  // TypeScript detection — must sit above the JS fallback
+  if (
+    /\binterface\s+\w+[\s<{]/.test(trimmed) ||
+    /\btype\s+\w+\s*(<[^>]+>)?\s*=/.test(trimmed) ||
+    /\bimport\s+type\s/.test(trimmed) ||
+    /\benum\s+\w+\s*\{/.test(trimmed) ||
+    /\b(public|private|protected|readonly)\s+\w+[\s:(!]/.test(trimmed) ||
+    /:\s*(string|number|boolean|void|any|never|unknown|object)\b/.test(trimmed)
+  ) {
+    return "typescript";
+  }
 
   return "javascript";
 }
@@ -96,7 +109,10 @@ function getLoc(node: acorn.Node): NodeLoc | undefined {
   return (node as unknown as { loc?: NodeLoc }).loc;
 }
 
-function lintJavaScript(code: string): CodeLine[] {
+// Before the function, create the TS-extended parser once
+const TSParser = acorn.Parser.extend(acornTs() as any);
+
+function lintJavaScript(code: string, useTypeScript = false): CodeLine[] {
   const rawLines = code.split("\n");
   const ann = new AnnotationMap();
 
@@ -106,12 +122,16 @@ function lintJavaScript(code: string): CodeLine[] {
 
   let ast: acorn.Node | null = null;
   try {
-    ast = acorn.parse(code, {
+    const parseOptions: acorn.Options = {
       ecmaVersion: "latest",
       sourceType: "module",
       locations: true,
-    });
+    };
+    ast = useTypeScript
+      ? TSParser.parse(code, parseOptions)
+      : acorn.parse(code, parseOptions);
   } catch (e: unknown) {
+
     if (e && typeof e === "object") {
       const err = e as { loc?: { line: number }; message?: string };
       if (err.loc) {
@@ -122,6 +142,7 @@ function lintJavaScript(code: string): CodeLine[] {
     return buildLines(rawLines, ann);
   }
 
+try {
   walk.simple(ast, {
     VariableDeclaration(node: acorn.Node) {
       const n = node as unknown as { kind: string; loc?: NodeLoc };
@@ -180,7 +201,17 @@ function lintJavaScript(code: string): CodeLine[] {
       const loc = getLoc(node);
       if (loc) addAt(loc.start.line, "error", "'with' statement is forbidden in strict mode and confuses scope");
     },
+    // TS-specific: flag 'any' type usage
+    Identifier(node: acorn.Node) {
+      const n = node as unknown as { name: string; loc?: NodeLoc };
+      if (useTypeScript && n.name === "any" && n.loc) {
+        addAt(n.loc.start.line, "warning", "Avoid 'any' — use a specific type or 'unknown' for safer typing");
+      }
+    },
   });
+  } catch {
+    // TS-specific AST nodes that acorn-walk can't traverse — skip semantic checks
+  }
 
   return buildLines(rawLines, ann);
 }
@@ -516,7 +547,10 @@ export function lint(code: string): LintResult {
 
   switch (language) {
     case "javascript":
-      lines = lintJavaScript(code);
+      lines = lintJavaScript(code, false);
+      break;
+    case "typescript":
+      lines = lintJavaScript(code, true);
       break;
     case "python":
       lines = lintPython(code);

@@ -76,6 +76,7 @@
     "@lezer/python": "^1.1.18",
     "acorn": "^8.16.0",
     "acorn-walk": "^8.3.5",
+    "acorn-typescript": "^1.4.13",
     "parse5": "^8.0.1"
   }
 }
