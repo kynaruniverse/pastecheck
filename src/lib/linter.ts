@@ -472,7 +472,7 @@ function walkTree(doc: Document, source: string, tagLineMap: Map<string, number[
 }
 
 function lintEmbeddedScripts(source: string, ann: AnnotationMap): void {
-  const scriptRegex = /<script(?:\s[^>]*)?>([\\s\\S]*?)<\/script>/gi;
+  const scriptRegex = /<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi;
   let match;
   while ((match = scriptRegex.exec(source)) !== null) {
     const content = match[1];
@@ -538,7 +538,7 @@ function lintEmbeddedScripts(source: string, ann: AnnotationMap): void {
 }
 
 function lintEmbeddedStyles(source: string, ann: AnnotationMap): void {
-  const styleRegex = /<style(?:\s[^>]*)?>([\\s\\S]*?)<\/style>/gi;
+  const styleRegex = /<style(?:\s[^>]*)?>([\s\S]*?)<\/style>/gi;
   let match;
   while ((match = styleRegex.exec(source)) !== null) {
     const content = match[1];
