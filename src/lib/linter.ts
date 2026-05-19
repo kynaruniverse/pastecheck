@@ -344,6 +344,8 @@ interface WalkResult {
   deprecatedTags:  Array<{ tag: string; line: number; message: string }>;
   blockInInline:   Array<{ block: string; inline: string; line: number }>;
   missingAlt:      Array<{ line: number }>;
+  duplicateIds:    Array<{ id: string; line: number }>;
+  unlabelledInputs: Array<{ line: number }>;
   missingLang:     boolean;
   missingCharset:  boolean;
   missingTitle:    boolean;
@@ -351,15 +353,21 @@ interface WalkResult {
 
 function walkTree(doc: Document, source: string, tagLineMap: Map<string, number[]>): WalkResult {
   const result: WalkResult = {
-    unclosedTags:   [],
-    voidMisuse:     [],
-    deprecatedTags: [],
-    blockInInline:  [],
-    missingAlt:     [],
-    missingLang:    false,
-    missingCharset: false,
-    missingTitle:   false,
+    unclosedTags:    [],
+    voidMisuse:      [],
+    deprecatedTags:  [],
+    blockInInline:   [],
+    missingAlt:      [],
+    duplicateIds:    [],
+    unlabelledInputs: [],
+    missingLang:     false,
+    missingCharset:  false,
+    missingTitle:    false,
   };
+
+  const seenIds = new Map<string, number>();
+  const labelledForIds = new Set<string>();
+  const inputsNeedingLabels: Array<{ line: number }> = [];
 
   let hasHtmlLang  = false;
   let hasCharset   = false;
@@ -426,6 +434,31 @@ function walkTree(doc: Document, source: string, tagLineMap: Map<string, number[
       result.missingAlt.push({ line });
     }
 
+    const idAttr = getAttr(el, "id");
+    if (idAttr && idAttr.trim().length > 0) {
+      const idVal = idAttr.trim();
+      if (seenIds.has(idVal)) {
+        result.duplicateIds.push({ id: idVal, line });
+      } else {
+        seenIds.set(idVal, line);
+      }
+    }
+
+    if (tag === "label") {
+      const forAttr = getAttr(el, "for");
+      if (forAttr && forAttr.trim().length > 0) {
+        labelledForIds.add(forAttr.trim());
+      }
+    }
+
+    if (tag === "input") {
+      const type = getAttr(el, "type")?.toLowerCase();
+      if (type !== "hidden" && type !== "submit" && type !== "button" && type !== "reset") {
+        const inputId = getAttr(el, "id")?.trim();
+        inputsNeedingLabels.push({ line, id: inputId ?? "" } as { line: number; id: string });
+      }
+    }
+
     if (parentInlineTag && BLOCK_ELEMENTS.has(tag)) {
       result.blockInInline.push({ block: tag, inline: parentInlineTag, line });
     }
@@ -461,6 +494,12 @@ function walkTree(doc: Document, source: string, tagLineMap: Map<string, number[
         const lineNum = occurrences[occurrences.length - 1 - i] ?? occurrences[0];
         result.unclosedTags.push({ tag, line: lineNum });
       }
+    }
+  }
+
+  for (const inp of inputsNeedingLabels as Array<{ line: number; id: string }>) {
+    if (!inp.id || !labelledForIds.has(inp.id)) {
+      result.unlabelledInputs.push({ line: inp.line });
     }
   }
 
@@ -592,6 +631,14 @@ function lintHTML(code: string): CodeLine[] {
 
   walked.missingAlt.forEach(({ line }) => {
     ann.add(line - 1, "warning", "<img> is missing an 'alt' attribute — required for accessibility");
+  });
+
+  walked.duplicateIds.forEach(({ id, line }) => {
+    ann.add(line - 1, "error", `Duplicate id="${id}" — IDs must be unique across the entire document`);
+  });
+
+  walked.unlabelledInputs.forEach(({ line }) => {
+    ann.add(line - 1, "warning", "<input> has no associated <label> — add a label with a matching 'for' attribute for accessibility");
   });
 
   const looksLikeFullDoc = /<!doctype\s+html/i.test(code) || /<html[\s>]/i.test(code);
