@@ -235,12 +235,33 @@ function lintPython(code: string): CodeLine[] {
     }
   } while (cursor.next());
 
-  rawLines.forEach((text, idx) => {
-    const trimmed = text.trim();
-    // Safely ignore full line comments to minimize false positives
-    if (trimmed.startsWith("#")) return;
+  // Indentation checks
+    let detectedIndentChar: "spaces" | "tabs" | null = null;
+    rawLines.forEach((text, idx) => {
+      if (!text.trim() || text.trim().startsWith("#")) return;
+      const indentMatch = text.match(/^(\s+)/);
+      if (!indentMatch) return;
+      const indent = indentMatch[1];
+      const hasTabs = indent.includes("\t");
+      const hasSpaces = indent.includes(" ");
+      if (hasTabs && hasSpaces) {
+        ann.add(idx, "error", "Mixed tabs and spaces in indentation");
+        return;
+      }
+      const charUsed = hasTabs ? "tabs" : "spaces";
+      if (!detectedIndentChar) {
+        detectedIndentChar = charUsed;
+      } else if (charUsed !== detectedIndentChar) {
+        ann.add(idx, "warning", `Inconsistent indentation — file uses ${detectedIndentChar} but this line uses ${charUsed}`);
+      }
+    });
 
-    if (/^except\s*:/.test(trimmed)) {
+    rawLines.forEach((text, idx) => {
+      const trimmed = text.trim();
+      // Safely ignore full line comments to minimize false positives
+      if (trimmed.startsWith("#")) return;
+
+      if (/^except\s*:/.test(trimmed)) {
       ann.add(idx, "warning", "Bare 'except:' catches everything — be specific (e.g. 'except ValueError:')");
     }
     if (/^print\s+[^(=]/.test(trimmed)) {
