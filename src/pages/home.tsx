@@ -4,12 +4,14 @@ import FeedbackForm from "@/components/FeedbackForm";
 
 const LANG_LABELS: Record<Exclude<Language, "unknown">, string> = {
   javascript: "JavaScript",
+  typescript: "TypeScript",
   python: "Python",
   html: "HTML",
 };
 
 const LANG_COLOR: Record<Exclude<Language, "unknown">, string> = {
   javascript: "rgb(250,204,21)",
+  typescript: "rgb(49,168,172)",
   python: "rgb(96,165,250)",
   html: "rgb(251,146,60)",
 };
