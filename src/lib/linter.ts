@@ -1,8 +1,9 @@
 import * as acorn from "acorn";
 import * as walk from "acorn-walk";
 import { parser as pythonParser } from "@lezer/python";
-import { parse as parseHTML, defaultTreeAdapter } from "parse5";
+import { parse as parseHTML } from "parse5";
 import type { Document, Element, ChildNode } from "parse5/dist/tree-adapters/default";
+
 export type LineType = "normal" | "error" | "warning";
 export type Language = "javascript" | "python" | "html" | "unknown";
 
@@ -48,37 +49,27 @@ function buildLines(rawLines: string[], ann: AnnotationMap): CodeLine[] {
 
 function looksLikeCode(code: string): boolean {
   const trimmed = code.trim();
-
-  // Obvious code characters: brackets, operators, semicolons, angle brackets
   const codeChars = (trimmed.match(/[{}\[\]();=<>+\-*\/|&!%^~`]/g) ?? []).length;
   const nonSpaceChars = trimmed.replace(/\s/g, "").length;
   const ratio = codeChars / Math.max(nonSpaceChars, 1);
 
   if (ratio >= 0.02) return true;
 
-  // Common keywords from any supported language
-  if (
+  return (
     /\b(function|const|let|var|if|else|for|while|return|class|import|export|async|await)\b/.test(trimmed) ||
     /\b(def|elif|except|lambda|yield|pass|None|True|False)\b/.test(trimmed) ||
     /<[a-zA-Z][\w-]*[\s/>]/.test(trimmed)
-  ) {
-    return true;
-  }
-
-  return false;
+  );
 }
 
 export function detectLanguage(code: string): Language {
   const trimmed = code.trim();
-
-  if (!looksLikeCode(trimmed)) {
-    return "unknown";
-  }
+  if (!looksLikeCode(trimmed)) return "unknown";
 
   if (
     /^<!doctype\s+html/i.test(trimmed) ||
     /^<html[\s>]/i.test(trimmed) ||
-    /<(div|span|p|h[1-6]|body|head|script|style|link|meta|img|a\b|ul|ol|li|table|form|input)\b/i.test(
+    /<(div|span|p|h[1-6]|body|head|script|style|link|meta|img|a\b|ul|ol|li|table|form|input|br|hr|button|select|textarea|section|article|aside|header|footer|main|nav|figure|center|marquee|font|frame|frameset|iframe|canvas|video|audio|source|track|picture|details|summary|dialog|template)\b/i.test(
       trimmed.slice(0, 600)
     )
   ) {
@@ -114,7 +105,6 @@ function lintJavaScript(code: string): CodeLine[] {
   }
 
   let ast: acorn.Node | null = null;
-
   try {
     ast = acorn.parse(code, {
       ecmaVersion: "latest",
@@ -139,21 +129,16 @@ function lintJavaScript(code: string): CodeLine[] {
         addAt(n.loc.start.line, "warning", "Prefer 'let' or 'const' over 'var'");
       }
     },
-
     DebuggerStatement(node: acorn.Node) {
       const loc = getLoc(node);
       if (loc) addAt(loc.start.line, "warning", "'debugger' statement left in code");
     },
-
     BinaryExpression(node: acorn.Node) {
       const n = node as unknown as { operator: string; loc?: NodeLoc };
       if (!n.loc) return;
-      if (n.operator === "==")
-        addAt(n.loc.start.line, "warning", "Use '===' instead of '==' for strict equality");
-      if (n.operator === "!=")
-        addAt(n.loc.start.line, "warning", "Use '!==' instead of '!=' for strict inequality");
+      if (n.operator === "==") addAt(n.loc.start.line, "warning", "Use '===' instead of '==' for strict equality");
+      if (n.operator === "!=") addAt(n.loc.start.line, "warning", "Use '!==' instead of '!=' for strict inequality");
     },
-
     CallExpression(node: acorn.Node) {
       const n = node as unknown as {
         callee: { type: string; object?: { name?: string }; property?: { name?: string }; name?: string };
@@ -164,27 +149,23 @@ function lintJavaScript(code: string): CodeLine[] {
 
       if (callee.type === "MemberExpression" && callee.object?.name === "console") {
         const method = callee.property?.name;
-        if (method === "log") addAt(n.loc.start.line, "warning", "'console.log' left in code");
-        if (method === "error") addAt(n.loc.start.line, "warning", "'console.error' left in code");
-        if (method === "warn") addAt(n.loc.start.line, "warning", "'console.warn' left in code");
+        if (method === "log" || method === "error" || method === "warn") {
+          addAt(n.loc.start.line, "warning", `'console.${method}' left in code`);
+        }
       }
-
       if (callee.type === "Identifier" && callee.name === "eval") {
         addAt(n.loc.start.line, "error", "'eval()' executes arbitrary code — dangerous and a security risk");
       }
-
       if (callee.type === "Identifier" && callee.name === "alert") {
         addAt(n.loc.start.line, "warning", "'alert()' blocks the browser — avoid in production");
       }
     },
-
     ThrowStatement(node: acorn.Node) {
       const n = node as unknown as { argument: { type: string }; loc?: NodeLoc };
       if (n.loc && n.argument.type === "Literal") {
         addAt(n.loc.start.line, "warning", "Throwing a string literal — use 'new Error(...)' instead");
       }
     },
-
     TryStatement(node: acorn.Node) {
       const n = node as unknown as {
         handler?: acorn.Node & { body: { body: unknown[] } };
@@ -195,7 +176,6 @@ function lintJavaScript(code: string): CodeLine[] {
         if (loc) addAt(loc.start.line, "warning", "Empty catch block — errors are silently swallowed");
       }
     },
-
     WithStatement(node: acorn.Node) {
       const loc = getLoc(node);
       if (loc) addAt(loc.start.line, "error", "'with' statement is forbidden in strict mode and confuses scope");
@@ -208,7 +188,6 @@ function lintJavaScript(code: string): CodeLine[] {
 function lintPython(code: string): CodeLine[] {
   const rawLines = code.split("\n");
   const ann = new AnnotationMap();
-
   const tree = pythonParser.parse(code);
   const cursor = tree.cursor();
   const reportedLines = new Set<number>();
@@ -227,27 +206,24 @@ function lintPython(code: string): CodeLine[] {
 
   rawLines.forEach((text, idx) => {
     const trimmed = text.trim();
+    // Safely ignore full line comments to minimize false positives
+    if (trimmed.startsWith("#")) return;
 
     if (/^except\s*:/.test(trimmed)) {
       ann.add(idx, "warning", "Bare 'except:' catches everything — be specific (e.g. 'except ValueError:')");
     }
-
     if (/^print\s+[^(=]/.test(trimmed)) {
       ann.add(idx, "error", "Python 3: 'print' is a function — use print(...)");
     }
-
     if (/\bdef\s+\w+\s*\([^)]*=\s*[\[{]/.test(trimmed)) {
       ann.add(idx, "warning", "Mutable default argument — use None and assign inside the function body");
     }
-
     if (/[!=]=\s*None\b/.test(text)) {
       ann.add(idx, "warning", "Use 'is None' or 'is not None' instead of '== None' / '!= None'");
     }
-
     if (/\b(TODO|FIXME|HACK|XXX)\b/i.test(text)) {
       ann.add(idx, "warning", "Unresolved TODO/FIXME left in code");
     }
-
     if (/^import\s+\*/.test(trimmed) || /from\s+\S+\s+import\s+\*/.test(trimmed)) {
       ann.add(idx, "warning", "Wildcard import makes it hard to know what names are in scope");
     }
@@ -255,14 +231,6 @@ function lintPython(code: string): CodeLine[] {
 
   return buildLines(rawLines, ann);
 }
-
-// ─── DROP-IN REPLACEMENT ────────────────────────────────────────────────────
-// Replace everything from `const HTML_ERROR_MESSAGES` to the end of
-// `function lintHTML` in your existing linter.ts with this block.
-// Everything above (imports, types, JS linter, Python linter) stays unchanged.
-// ────────────────────────────────────────────────────────────────────────────
-
-// ─── Parse error code → human message ───────────────────────────────────────
 
 const HTML_ERROR_MESSAGES: Record<string, string> = {
   "missing-end-tag-before-doctype": "Missing end tag before DOCTYPE",
@@ -277,8 +245,7 @@ const HTML_ERROR_MESSAGES: Record<string, string> = {
   "unexpected-solidus-in-tag": "Unexpected '/' inside a tag",
   "end-tag-with-attributes": "End tags must not have attributes",
   "duplicate-attribute": "Duplicate attribute on element",
-  "non-void-html-element-start-tag-with-trailing-solidus":
-    "Self-closing syntax is only valid on void elements",
+  "non-void-html-element-start-tag-with-trailing-solidus": "Self-closing syntax is only valid on void elements",
   "abrupt-closing-of-empty-comment": "Comment is not properly closed",
   "eof-in-comment": "Unexpected end of file inside a comment",
   "eof-in-tag": "Unexpected end of file inside a tag",
@@ -288,15 +255,11 @@ const HTML_ERROR_MESSAGES: Record<string, string> = {
   "missing-end-tag": "Missing closing tag",
 };
 
-// ─── Constants ───────────────────────────────────────────────────────────────
-
-// Tags that must NOT have a closing tag
 const VOID_ELEMENTS = new Set([
   "area", "base", "br", "col", "embed", "hr", "img", "input",
   "link", "meta", "param", "source", "track", "wbr",
 ]);
 
-// Deprecated HTML tags that have CSS/semantic replacements
 const DEPRECATED_TAGS: Record<string, string> = {
   center:   "Use CSS 'text-align: center' instead of <center>",
   font:     "<font> is deprecated — use CSS for styling text",
@@ -314,7 +277,6 @@ const DEPRECATED_TAGS: Record<string, string> = {
   isindex:  "<isindex> is obsolete",
 };
 
-// Block-level elements that must NOT appear inside inline elements
 const BLOCK_ELEMENTS = new Set([
   "div", "p", "h1", "h2", "h3", "h4", "h5", "h6",
   "ul", "ol", "li", "table", "thead", "tbody", "tr", "th", "td",
@@ -327,13 +289,6 @@ const INLINE_ELEMENTS = new Set([
   "label", "abbr", "cite", "code", "kbd", "samp", "sub", "sup",
 ]);
 
-// ─── Source-line helpers ─────────────────────────────────────────────────────
-
-/**
- * Build a map of { tagName → [1-based line numbers] } by scanning raw source.
- * parse5's location data isn't always reliable for all nodes, so we use
- * a lightweight regex scan as a fallback line-finder.
- */
 function buildTagLineMap(source: string): Map<string, number[]> {
   const map = new Map<string, number[]>();
   const lines = source.split("\n");
@@ -342,20 +297,15 @@ function buildTagLineMap(source: string): Map<string, number[]> {
     for (const m of tagMatches) {
       const tag = m[1].toLowerCase();
       if (!map.has(tag)) map.set(tag, []);
-      map.get(tag)!.push(idx + 1); // 1-based
+      map.get(tag)!.push(idx + 1);
     }
   });
   return map;
 }
 
-/**
- * Find what 1-based line a character offset falls on.
- */
 function offsetToLine(source: string, offset: number): number {
   return source.slice(0, offset).split("\n").length;
 }
-
-// ─── Tree walker ─────────────────────────────────────────────────────────────
 
 interface WalkResult {
   unclosedTags:    Array<{ tag: string; line: number }>;
@@ -384,13 +334,11 @@ function walkTree(doc: Document, source: string, tagLineMap: Map<string, number[
   let hasCharset   = false;
   let hasTitle     = false;
 
-  // Helper: get source line for a node (uses parse5 sourceCodeLocation when available)
   function lineOf(node: Element): number {
     const loc = (node as unknown as { sourceCodeLocation?: { startLine?: number; startOffset?: number } })
       .sourceCodeLocation;
     if (loc?.startLine) return loc.startLine;
     if (loc?.startOffset !== undefined) return offsetToLine(source, loc.startOffset);
-    // Fallback: first occurrence of this tag in source
     const occurrences = tagLineMap.get(node.tagName.toLowerCase());
     return occurrences?.[0] ?? 1;
   }
@@ -402,8 +350,8 @@ function walkTree(doc: Document, source: string, tagLineMap: Map<string, number[
   function visit(node: ChildNode, parentInlineTag: string | null) {
     if (node.nodeName === "#text" || node.nodeName === "#comment") return;
     if (node.nodeName === "#document" || node.nodeName === "#document-fragment") {
-      const doc = node as unknown as { childNodes: ChildNode[] };
-      doc.childNodes?.forEach((c) => visit(c, null));
+      const docNode = node as unknown as { childNodes: ChildNode[] };
+      docNode.childNodes?.forEach((c) => visit(c, null));
       return;
     }
 
@@ -413,16 +361,13 @@ function walkTree(doc: Document, source: string, tagLineMap: Map<string, number[
     const tag = el.tagName.toLowerCase();
     const line = lineOf(el);
 
-    // ── <html lang="..."> ────────────────────────────────────────────────────
     if (tag === "html") {
       const lang = getAttr(el, "lang");
       if (lang && lang.trim().length > 0) hasHtmlLang = true;
     }
 
-    // ── <meta charset="..."> ────────────────────────────────────────────────
     if (tag === "meta") {
       if (getAttr(el, "charset") !== undefined) hasCharset = true;
-      // <meta http-equiv="Content-Type"> also counts
       if (
         getAttr(el, "http-equiv")?.toLowerCase() === "content-type" &&
         getAttr(el, "content")?.toLowerCase().includes("charset")
@@ -431,15 +376,12 @@ function walkTree(doc: Document, source: string, tagLineMap: Map<string, number[
       }
     }
 
-    // ── <title> ──────────────────────────────────────────────────────────────
     if (tag === "title") hasTitle = true;
 
-    // ── Deprecated tags ──────────────────────────────────────────────────────
     if (DEPRECATED_TAGS[tag]) {
       result.deprecatedTags.push({ tag, line, message: DEPRECATED_TAGS[tag] });
     }
 
-    // ── Void element children (e.g. <br>text</br>) ───────────────────────────
     if (VOID_ELEMENTS.has(tag) && el.childNodes && el.childNodes.length > 0) {
       const hasRealChildren = el.childNodes.some(
         (c) => c.nodeName !== "#text" || (c as unknown as { value: string }).value.trim().length > 0
@@ -449,33 +391,25 @@ function walkTree(doc: Document, source: string, tagLineMap: Map<string, number[
       }
     }
 
-    // ── <img alt="..."> ──────────────────────────────────────────────────────
-    if (tag === "img") {
-      if (getAttr(el, "alt") === undefined) {
-        result.missingAlt.push({ line });
-      }
+    if (tag === "img" && getAttr(el, "alt") === undefined) {
+      result.missingAlt.push({ line });
     }
 
-    // ── Block element inside inline element ──────────────────────────────────
     if (parentInlineTag && BLOCK_ELEMENTS.has(tag)) {
       result.blockInInline.push({ block: tag, inline: parentInlineTag, line });
     }
 
-    // ── Recurse ──────────────────────────────────────────────────────────────
     const nextInlineParent = INLINE_ELEMENTS.has(tag) ? tag : parentInlineTag;
     el.childNodes?.forEach((child) => visit(child, nextInlineParent));
   }
 
-  // Kick off walk from document root
   doc.childNodes?.forEach((c) => visit(c, null));
 
-  // ── Unclosed tag detection ───────────────────────────────────────────────
-  // parse5 silently auto-closes unclosed tags. We detect them by comparing
-  // how many opening tags appear in raw source vs what the corrected tree has.
+  // Hardened multiline / s-flag regex matching for unclosed tags
   const openCounts  = new Map<string, number>();
   const closeCounts = new Map<string, number>();
 
-  const openMatches  = source.matchAll(/<([a-zA-Z][a-zA-Z0-9-]*)(?:\s[^>]*)?\s*\/?>/g);
+  const openMatches  = source.matchAll(/<([a-zA-Z][a-zA-Z0-9-]*)(?:[^>]*)\s*\/?>/gs);
   const closeMatches = source.matchAll(/<\/([a-zA-Z][a-zA-Z0-9-]*)\s*>/g);
 
   for (const m of openMatches) {
@@ -492,7 +426,6 @@ function walkTree(doc: Document, source: string, tagLineMap: Map<string, number[
     if (openCount > closeCount) {
       const diff = openCount - closeCount;
       const occurrences = tagLineMap.get(tag) ?? [1];
-      // Report the last unclosed occurrence(s)
       for (let i = 0; i < diff; i++) {
         const lineNum = occurrences[occurrences.length - 1 - i] ?? occurrences[0];
         result.unclosedTags.push({ tag, line: lineNum });
@@ -500,7 +433,6 @@ function walkTree(doc: Document, source: string, tagLineMap: Map<string, number[
     }
   }
 
-  // ── Document-level checks ────────────────────────────────────────────────
   result.missingLang    = !hasHtmlLang;
   result.missingCharset = !hasCharset;
   result.missingTitle   = !hasTitle;
@@ -508,26 +440,20 @@ function walkTree(doc: Document, source: string, tagLineMap: Map<string, number[
   return result;
 }
 
-// ─── Main lintHTML ────────────────────────────────────────────────────────────
-
 function lintHTML(code: string): CodeLine[] {
   const rawLines = code.split("\n");
   const ann = new AnnotationMap();
   const tagLineMap = buildTagLineMap(code);
 
-  // ── 1. parse5 parse-error callback (token-level errors) ──────────────────
   const doc = parseHTML(code, {
     sourceCodeLocationInfo: true,
     onParseError(err) {
       const lineIdx = (err.startLine ?? 1) - 1;
-      const msg =
-        HTML_ERROR_MESSAGES[err.code] ??
-        `Parse error: ${err.code.replace(/-/g, " ")}`;
+      const msg = HTML_ERROR_MESSAGES[err.code] ?? `Parse error: ${err.code.replace(/-/g, " ")}`;
       ann.add(lineIdx, "error", msg);
     },
   });
 
-  // ── 2. Tree-walk structural checks ───────────────────────────────────────
   const walked = walkTree(doc as unknown as Document, code, tagLineMap);
 
   walked.unclosedTags.forEach(({ tag, line }) => {
@@ -543,34 +469,26 @@ function lintHTML(code: string): CodeLine[] {
   });
 
   walked.blockInInline.forEach(({ block, inline, line }) => {
-    ann.add(
-      line - 1,
-      "warning",
-      `Block element <${block}> nested inside inline element <${inline}> — invalid HTML structure`,
-    );
+    ann.add(line - 1, "warning", `Block element <${block}> nested inside inline element <${inline}> — invalid HTML structure`);
   });
 
   walked.missingAlt.forEach(({ line }) => {
     ann.add(line - 1, "warning", "<img> is missing an 'alt' attribute — required for accessibility");
   });
 
-  // ── 3. Document-level warnings (pin to line 0) ───────────────────────────
-  // Only fire these for what looks like a full document (has <html> or <!DOCTYPE>)
   const looksLikeFullDoc = /<!doctype\s+html/i.test(code) || /<html[\s>]/i.test(code);
-
   if (looksLikeFullDoc) {
     if (walked.missingLang) {
-      ann.add(0, "warning", "<html> is missing a 'lang' attribute (e.g. lang=\"en\") — required for accessibility");
+      ann.add(0, "warning", '<html> is missing a ' + '"lang" attribute (e.g. lang="en") — required for accessibility');
     }
     if (walked.missingCharset) {
-      ann.add(0, "warning", "No character encoding declared — add <meta charset=\"UTF-8\"> inside <head>");
+      ann.add(0, "warning", 'No character encoding declared — add <meta charset="UTF-8"> inside <head>');
     }
     if (walked.missingTitle) {
       ann.add(0, "warning", "Document is missing a <title> element inside <head>");
     }
   }
 
-  // ── 4. Line-by-line pattern checks (style, events, todos) ────────────────
   rawLines.forEach((text, idx) => {
     if (/\bstyle\s*=\s*["'][^"']+["']/.test(text)) {
       ann.add(idx, "warning", "Inline style — consider moving to a CSS class");
@@ -586,11 +504,10 @@ function lintHTML(code: string): CodeLine[] {
   return buildLines(rawLines, ann);
 }
 
-
 export function lint(code: string): LintResult {
   const language = detectLanguage(code);
-
   let lines: CodeLine[];
+
   switch (language) {
     case "javascript":
       lines = lintJavaScript(code);
