@@ -26,6 +26,7 @@ export default function Home() {
 
   const errorCount = result?.lines.filter((l) => l.type === "error").length ?? 0;
   const warningCount = result?.lines.filter((l) => l.type === "warning").length ?? 0;
+  const isLowConfidence = code.trim().split("\n").filter((l) => l.trim().length > 0).length < 5;
 
   function handleCodeChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
     setCode(e.target.value);
@@ -198,10 +199,23 @@ export default function Home() {
                   style={{ background: "hsl(220 13% 16%)", border: "1px solid hsl(220 13% 24%)" }}
                 >
                   <span
-                    className="text-xs font-semibold"
+                    className="text-xs font-semibold flex items-center gap-1"
                     style={{ color: LANG_COLOR[result.language] }}
                   >
                     {LANG_LABELS[result.language]}
+                    {isLowConfidence && (
+                      <span
+                        title="Short snippet — language detection may be approximate"
+                        style={{
+                          color: "hsl(215 14% 50%)",
+                          fontSize: "10px",
+                          fontWeight: "normal",
+                          cursor: "help",
+                        }}
+                      >
+                        ?
+                      </span>
+                    )}
                   </span>
                   <span className="text-xs mt-0.5" style={{ color: "hsl(215 14% 45%)" }}>
                     detected
