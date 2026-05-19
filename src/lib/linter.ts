@@ -471,6 +471,93 @@ function walkTree(doc: Document, source: string, tagLineMap: Map<string, number[
   return result;
 }
 
+function lintEmbeddedScripts(source: string, ann: AnnotationMap): void {
+  const scriptRegex = /<script(?:\s[^>]*)?>([\\s\\S]*?)<\/script>/gi;
+  let match;
+  while ((match = scriptRegex.exec(source)) !== null) {
+    const content = match[1];
+    if (!content.trim()) continue;
+    const contentStart = match.index + match[0].length - content.length - "</script>".length;
+    const lineOffset = source.slice(0, contentStart).split("\n").length - 1;
+
+    let ast: acorn.Node | null = null;
+    try {
+      ast = acorn.parse(content, { ecmaVersion: "latest", sourceType: "script", locations: true });
+    } catch (e: unknown) {
+      if (e && typeof e === "object") {
+        const err = e as { loc?: { line: number }; message?: string };
+        if (err.loc) {
+          const msg = (err.message ?? "Syntax error").replace(/\s*\(\d+:\d+\)\s*$/, "");
+          ann.add(lineOffset + err.loc.line - 1, "error", `<script> syntax error: ${msg}`);
+        }
+      }
+      continue;
+    }
+
+    try {
+      walk.simple(ast, {
+        VariableDeclaration(node: acorn.Node) {
+          const n = node as unknown as { kind: string; loc?: NodeLoc };
+          if (n.kind === "var" && n.loc)
+            ann.add(lineOffset + n.loc.start.line - 1, "warning", "Prefer 'let' or 'const' over 'var'");
+        },
+        DebuggerStatement(node: acorn.Node) {
+          const loc = getLoc(node);
+          if (loc) ann.add(lineOffset + loc.start.line - 1, "warning", "'debugger' statement left in code");
+        },
+        BinaryExpression(node: acorn.Node) {
+          const n = node as unknown as { operator: string; loc?: NodeLoc };
+          if (!n.loc) return;
+          if (n.operator === "==") ann.add(lineOffset + n.loc.start.line - 1, "warning", "Use '===' instead of '==' for strict equality");
+          if (n.operator === "!=") ann.add(lineOffset + n.loc.start.line - 1, "warning", "Use '!==' instead of '!=' for strict inequality");
+        },
+        CallExpression(node: acorn.Node) {
+          const n = node as unknown as {
+            callee: { type: string; object?: { name?: string }; property?: { name?: string }; name?: string };
+            loc?: NodeLoc;
+          };
+          if (!n.loc) return;
+          const callee = n.callee;
+          if (callee.type === "MemberExpression" && callee.object?.name === "console") {
+            const method = callee.property?.name;
+            if (method === "log" || method === "error" || method === "warn")
+              ann.add(lineOffset + n.loc.start.line - 1, "warning", `'console.${method}' left in code`);
+          }
+          if (callee.type === "Identifier" && callee.name === "eval")
+            ann.add(lineOffset + n.loc.start.line - 1, "error", "'eval()' executes arbitrary code — dangerous and a security risk");
+          if (callee.type === "Identifier" && callee.name === "alert")
+            ann.add(lineOffset + n.loc.start.line - 1, "warning", "'alert()' blocks the browser — avoid in production");
+        },
+        WithStatement(node: acorn.Node) {
+          const loc = getLoc(node);
+          if (loc) ann.add(lineOffset + loc.start.line - 1, "error", "'with' statement is forbidden in strict mode and confuses scope");
+        },
+      });
+    } catch { /* skip unknown nodes */ }
+  }
+}
+
+function lintEmbeddedStyles(source: string, ann: AnnotationMap): void {
+  const styleRegex = /<style(?:\s[^>]*)?>([\\s\\S]*?)<\/style>/gi;
+  let match;
+  while ((match = styleRegex.exec(source)) !== null) {
+    const content = match[1];
+    if (!content.trim()) continue;
+    const contentStart = match.index + match[0].length - content.length - "</style>".length;
+    const lineOffset = source.slice(0, contentStart).split("\n").length - 1;
+
+    content.split("\n").forEach((text, idx) => {
+      const trimmed = text.trim();
+      if (!trimmed || trimmed.startsWith("/*") || trimmed.startsWith("*")) return;
+      const absLine = lineOffset + idx;
+      if (/!important/.test(trimmed))
+        ann.add(absLine, "warning", "'!important' overrides the cascade — use a more specific selector instead");
+      if (/\b(TODO|FIXME)\b/i.test(trimmed))
+        ann.add(absLine, "warning", "Unresolved TODO/FIXME in CSS");
+    });
+  }
+}
+
 function lintHTML(code: string): CodeLine[] {
   const rawLines = code.split("\n");
   const ann = new AnnotationMap();
@@ -538,8 +625,11 @@ function lintHTML(code: string): CodeLine[] {
     }
   });
 
-  return buildLines(rawLines, ann);
-}
+  lintEmbeddedScripts(code, ann);
+    lintEmbeddedStyles(code, ann);
+
+    return buildLines(rawLines, ann);
+  }
 
 export function lint(code: string): LintResult {
   const language = detectLanguage(code);
