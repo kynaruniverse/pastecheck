@@ -26,6 +26,16 @@ export default function Home() {
   const [inputError, setInputError] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const [history, setHistory] = useState<Array<{ code: string; result: LintResult }>>(() => {
+    try {
+      const stored = localStorage.getItem("pastecheck_history");
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [showHistory, setShowHistory] = useState(false);
+  
   const errorCount = result?.lines.filter((l) => l.type === "error").length ?? 0;
   const warningCount = result?.lines.filter((l) => l.type === "warning").length ?? 0;
   const isLowConfidence = code.trim().split("\n").filter((l) => l.trim().length > 0).length < 5;
@@ -49,6 +59,12 @@ export default function Home() {
     setChecked(true);
     setExpanded(new Set());
     setInputError(null);
+
+    setHistory((prev) => {
+      const updated = [{ code, result: r }, ...prev].slice(0, 10);
+      try { localStorage.setItem("pastecheck_history", JSON.stringify(updated)); } catch {}
+      return updated;
+    });
   }
 
   function handleReset() {
@@ -148,6 +164,68 @@ export default function Home() {
               >
                 <span className="shrink-0">⚠</span>
                 <span>{inputError}</span>
+              </div>
+            )}
+
+            {history.length > 0 && (
+              <button
+                onClick={() => setShowHistory((v) => !v)}
+                className="w-full rounded-xl py-2.5 text-sm font-medium tracking-wide transition-all duration-150"
+                style={{
+                  background: "hsl(220 13% 16%)",
+                  color: "hsl(215 14% 55%)",
+                  border: "1px solid hsl(220 13% 22%)",
+                  cursor: "pointer",
+                }}
+              >
+                {showHistory ? "Hide History" : `Recent Checks (${history.length})`}
+              </button>
+            )}
+
+            {showHistory && history.length > 0 && (
+              <div className="flex flex-col gap-2">
+                {history.map((item, idx) => {
+                  const errors = item.result.lines.filter((l) => l.type === "error").length;
+                  const warnings = item.result.lines.filter((l) => l.type === "warning").length;
+                  const preview = item.code.trim().split("\n")[0].slice(0, 48);
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        setCode(item.code);
+                        setResult(item.result);
+                        setChecked(true);
+                        setExpanded(new Set());
+                        setShowHistory(false);
+                      }}
+                      className="w-full rounded-xl px-4 py-3 text-left transition-all duration-150"
+                      style={{
+                        background: "hsl(222 16% 13%)",
+                        border: "1px solid hsl(220 13% 22%)",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <div className="text-xs font-mono truncate" style={{ color: "hsl(210 20% 72%)" }}>
+                        {preview}
+                      </div>
+                      <div className="flex gap-3 mt-1">
+                        {errors > 0 && (
+                          <span className="text-xs" style={{ color: "rgb(248,113,113)" }}>
+                            {errors} {errors === 1 ? "error" : "errors"}
+                          </span>
+                        )}
+                        {warnings > 0 && (
+                          <span className="text-xs" style={{ color: "rgb(253,224,71)" }}>
+                            {warnings} {warnings === 1 ? "warning" : "warnings"}
+                          </span>
+                        )}
+                        {errors === 0 && warnings === 0 && (
+                          <span className="text-xs" style={{ color: "rgb(134,239,172)" }}>clean</span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             )}
 
