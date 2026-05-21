@@ -30,7 +30,7 @@ const features = [
       </svg>
     ),
     title: "Tap for Details",
-    desc: "Tap any highlighted line for a plain-English explanation of the issue.",
+    desc: "Tap any highlighted line for a plain-English explanation. Your last 10 checks are saved so you can jump back instantly.",
   },
 ];
 
@@ -44,9 +44,9 @@ export default function Landing() {
     >
       <Helmet>
         <title>PasteCheck — Free Online Code Error Checker</title>
-        <meta name="description" content="Paste your JavaScript, TypeScript, Python or HTML and instantly see every error highlighted. Free, no sign-up, works on mobile." />
+        <<meta name="description" content="Paste your JavaScript, TypeScript, Python, HTML or CSS and instantly see every error highlighted. Free, no sign-up, works on mobile." />
         <meta property="og:title" content="PasteCheck — Free Online Code Error Checker" />
-        <meta property="og:description" content="Paste your JavaScript, TypeScript, Python or HTML and instantly see every error highlighted. Free, no sign-up, works on mobile." />
+        <meta property="og:description" content="Paste your JavaScript, TypeScript, Python, HTML or CSS and instantly see every error highlighted. Free, no sign-up, works on mobile." />
       </Helmet>
       <div className="mx-auto w-full max-w-2xl px-5 flex flex-col flex-1">
 
@@ -94,7 +94,7 @@ export default function Landing() {
             className="text-base leading-relaxed mb-10 max-w-sm"
             style={{ color: "hsl(215 14% 58%)" }}
           >
-            Paste your JavaScript, TypeScript, Python or HTML and see every error highlighted in seconds.
+            Paste your JavaScript, TypeScript, Python, HTML or CSS and see every error highlighted in seconds.
           </p>
 
           <button
