@@ -6,7 +6,7 @@ import { parse as parseHTML } from "parse5";
 import type { Document, Element, ChildNode } from "parse5/dist/tree-adapters/default";
 
 export type LineType = "normal" | "error" | "warning";
-export type Language = "javascript" | "typescript" | "python" | "html" | "unknown";
+export type Language = "javascript" | "typescript" | "python" | "html" | "css" | "unknown";
 
 export interface CodeLine {
   text: string;
@@ -66,6 +66,14 @@ function looksLikeCode(code: string): boolean {
 export function detectLanguage(code: string): Language {
   const trimmed = code.trim();
   if (!looksLikeCode(trimmed)) return "unknown";
+
+  if (
+    /^[\s\S]*\{[\s\S]*:[\s\S]*\}/.test(trimmed) &&
+    !/<[a-zA-Z]/.test(trimmed) &&
+    /^\s*([.#]?[\w-]+|\*|\[[\w-]+\])\s*\{/.test(trimmed)
+  ) {
+    return "css";
+  }
 
   if (
     /^<!doctype\s+html/i.test(trimmed) ||
@@ -202,9 +210,9 @@ try {
       if (loc) addAt(loc.start.line, "error", "'with' statement is forbidden in strict mode and confuses scope");
     },
     // TS-specific: flag 'any' type usage
-    Identifier(node: acorn.Node) {
-      const n = node as unknown as { name: string; loc?: NodeLoc };
-      if (useTypeScript && n.name === "any" && n.loc) {
+    TSTypeAnnotation(node: acorn.Node) {
+      const n = node as unknown as { typeAnnotation?: { type: string; loc?: NodeLoc }; loc?: NodeLoc };
+      if (useTypeScript && n.typeAnnotation?.type === "TSAnyKeyword" && n.loc) {
         addAt(n.loc.start.line, "warning", "Avoid 'any' — use a specific type or 'unknown' for safer typing");
       }
     },
@@ -787,6 +795,31 @@ function lintHTML(code: string): CodeLine[] {
     return buildLines(rawLines, ann);
   }
 
+function lintCSS(code: string): CodeLine[] {
+  const rawLines = code.split("\n");
+  const ann = new AnnotationMap();
+
+  rawLines.forEach((text, idx) => {
+    const trimmed = text.trim();
+    if (!trimmed || trimmed.startsWith("/*") || trimmed.startsWith("*")) return;
+
+    if (/!important/.test(trimmed))
+      ann.add(idx, "warning", "'!important' overrides the cascade — use a more specific selector instead");
+    if (/\b(TODO|FIXME)\b/i.test(trimmed))
+      ann.add(idx, "warning", "Unresolved TODO/FIXME in CSS");
+
+    const propMatch = trimmed.match(/^([\w-]+)\s*:/);
+    if (propMatch) {
+      const prop = propMatch[1].toLowerCase();
+      const suggestion = COMMON_CSS_MISSPELLINGS[prop];
+      if (suggestion)
+        ann.add(idx, "error", `Unknown CSS property '${prop}' — did you mean '${suggestion}'?`);
+    }
+  });
+
+  return buildLines(rawLines, ann);
+}
+
 export function lint(code: string): LintResult {
   const language = detectLanguage(code);
   let lines: CodeLine[];
@@ -803,6 +836,9 @@ export function lint(code: string): LintResult {
       break;
     case "html":
       lines = lintHTML(code);
+      break;
+    case "css":
+      lines = lintCSS(code);
       break;
     default:
       lines = code.split("\n").map((text) => ({ text, type: "normal", messages: [] }));

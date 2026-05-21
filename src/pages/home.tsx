@@ -7,6 +7,7 @@ const LANG_LABELS: Record<Exclude<Language, "unknown">, string> = {
   typescript: "TypeScript",
   python: "Python",
   html: "HTML",
+  css: "CSS",
 };
 
 const LANG_COLOR: Record<Exclude<Language, "unknown">, string> = {
@@ -14,6 +15,7 @@ const LANG_COLOR: Record<Exclude<Language, "unknown">, string> = {
   typescript: "rgb(49,168,172)",
   python: "rgb(96,165,250)",
   html: "rgb(251,146,60)",
+  css: "rgb(139,92,246)",
 };
 
 export default function Home() {
@@ -259,10 +261,9 @@ export default function Home() {
               </div>
 
               <div
-                className="overflow-x-auto overflow-y-auto"
+                className="overflow-x-auto"
                 style={{
                   background: "hsl(222 16% 12%)",
-                  maxHeight: "420px",
                   fontFamily: "var(--app-font-mono)",
                   fontSize: "12.5px",
                   lineHeight: "1.7",

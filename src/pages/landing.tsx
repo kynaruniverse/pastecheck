@@ -94,7 +94,7 @@ export default function Landing() {
             className="text-base leading-relaxed mb-10 max-w-sm"
             style={{ color: "hsl(215 14% 58%)" }}
           >
-            Paste your JavaScript, Python or HTML and see every error highlighted in seconds.
+            Paste your JavaScript, TypeScript, Python or HTML and see every error highlighted in seconds.
           </p>
 
           <button
