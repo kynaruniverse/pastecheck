@@ -129,6 +129,8 @@ function lintJavaScript(code: string, useTypeScript = false): CodeLine[] {
   }
 
   let ast: acorn.Node | null = null;
+  const syntaxErrors: Array<{ line: number; msg: string }> = [];
+
   try {
     const parseOptions: acorn.Options = {
       ecmaVersion: "latest",
@@ -139,14 +141,35 @@ function lintJavaScript(code: string, useTypeScript = false): CodeLine[] {
       ? TSParser.parse(code, parseOptions)
       : acorn.parse(code, parseOptions);
   } catch (e: unknown) {
-
     if (e && typeof e === "object") {
       const err = e as { loc?: { line: number }; message?: string };
       if (err.loc) {
         const msg = (err.message ?? "Syntax error").replace(/\s*\(\d+:\d+\)\s*$/, "");
-        addAt(err.loc.line, "error", `Syntax error: ${msg}`);
+        syntaxErrors.push({ line: err.loc.line, msg: `Syntax error: ${msg}` });
       }
     }
+
+    // Attempt line-by-line recovery to surface more errors
+    const lines = code.split("\n");
+    for (let i = 0; i < lines.length; i++) {
+      const partial = lines.slice(0, i + 1).join("\n");
+      try {
+        acorn.parse(partial, { ecmaVersion: "latest", sourceType: "module", locations: true });
+      } catch (e2: unknown) {
+        if (e2 && typeof e2 === "object") {
+          const err2 = e2 as { loc?: { line: number }; message?: string };
+          if (err2.loc && err2.loc.line === i + 1) {
+            const msg2 = (err2.message ?? "Syntax error").replace(/\s*\(\d+:\d+\)\s*$/, "");
+            const entry = `Syntax error: ${msg2}`;
+            if (!syntaxErrors.find((e) => e.line === err2.loc!.line)) {
+              syntaxErrors.push({ line: err2.loc.line, msg: entry });
+            }
+          }
+        }
+      }
+    }
+
+    syntaxErrors.forEach(({ line, msg }) => addAt(line, "error", msg));
     return buildLines(rawLines, ann);
   }
 
