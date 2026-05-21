@@ -11,9 +11,9 @@ export default function About() {
     >
       <Helmet>
         <title>About PasteCheck — How It Works & Supported Languages</title>
-        <meta name="description" content="Learn how PasteCheck checks JavaScript, TypeScript, Python and HTML for errors instantly. Free online linter that works on mobile with no sign-up required." />
+        <meta name="description" content="Learn how PasteCheck checks JavaScript, TypeScript, Python, HTML and CSS for errors instantly. Free online linter that works on mobile with no sign-up required." />
         <meta property="og:title" content="About PasteCheck — How It Works & Supported Languages" />
-        <meta property="og:description" content="Learn how PasteCheck checks JavaScript, TypeScript, Python and HTML for errors instantly. Free online linter that works on mobile with no sign-up required." />
+        <meta property="og:description" content="Learn how PasteCheck checks JavaScript, TypeScript, Python, HTML and CSS for errors instantly. Free online linter that works on mobile with no sign-up required." />
       </Helmet>
       <div className="mx-auto w-full max-w-2xl px-5 flex flex-col flex-1">
 
@@ -85,6 +85,7 @@ export default function About() {
                 { lang: "TypeScript", detail: "Full TypeScript syntax support including type annotations, interfaces, generics, and TS-specific constructs — detected and linted separately from JavaScript." },
                 { lang: "Python", detail: "Syntax errors including missing colons, unclosed brackets, and malformed function definitions. Detected using a dedicated Python parser." },
                 { lang: "HTML", detail: "Unclosed tags, mismatched nesting, duplicate IDs, deprecated elements, void element misuse, missing accessibility labels, and embedded JavaScript and CSS errors." },
+                { lang: "CSS", detail: "Unknown and misspelled properties with 'did you mean' suggestions, !important overuse warnings, and unresolved TODO/FIXME comments. Works on standalone CSS and embedded style blocks." },
               ].map((item) => (
                 <div
                   key={item.lang}
@@ -107,7 +108,7 @@ export default function About() {
             </h2>
             <div className="flex flex-col gap-3">
               {[
-                { step: "1", title: "Paste your code", detail: "Copy any JavaScript, TypeScript, Python, or HTML snippet and paste it into the text area." },
+                { step: "1", title: "Paste your code", detail: "Copy any JavaScript, TypeScript, Python, HTML, or CSS snippet and paste it into the text area." },
                 { step: "2", title: "Hit Check Code", detail: "PasteCheck automatically detects the language and runs the appropriate parser instantly." },
                 { step: "3", title: "See every error highlighted", detail: "Errors glow red, warnings glow yellow. Tap any highlighted line for a plain-English explanation." },
               ].map((item) => (
@@ -143,7 +144,7 @@ export default function About() {
                 { q: "Is PasteCheck free?", a: "Yes, completely free. No sign-up, no payment, no limits." },
                 { q: "Does it work on mobile?", a: "Yes. PasteCheck is built mobile-first and works on any Android or iOS browser." },
                 { q: "Is my code stored or sent anywhere?", a: "No. All checking happens locally in your browser. Your code never leaves your device." },
-                { q: "Which languages are supported?", a: "JavaScript, TypeScript, Python, and HTML — including embedded scripts and styles inside HTML." },
+                { q: "Which languages are supported?", a: "JavaScript, TypeScript, Python, HTML, and CSS — including embedded scripts and style blocks inside HTML." },
                 { q: "How is this different from pasting into ChatGPT or Claude?", a: "AI assistants are inconsistent — they sometimes miss errors, reformat your code, or introduce new bugs. PasteCheck uses dedicated language parsers that give precise, reliable results every time." },
               ].map((item) => (
                 <div
