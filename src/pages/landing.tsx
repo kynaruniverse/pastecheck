@@ -44,7 +44,7 @@ export default function Landing() {
     >
       <Helmet>
         <title>PasteCheck — Free Online Code Error Checker</title>
-        <<meta name="description" content="Paste your JavaScript, TypeScript, Python, HTML or CSS and instantly see every error highlighted. Free, no sign-up, works on mobile." />
+        <meta name="description" content="Paste your JavaScript, TypeScript, Python, HTML or CSS and instantly see every error highlighted. Free, no sign-up, works on mobile." />
         <meta property="og:title" content="PasteCheck — Free Online Code Error Checker" />
         <meta property="og:description" content="Paste your JavaScript, TypeScript, Python, HTML or CSS and instantly see every error highlighted. Free, no sign-up, works on mobile." />
       </Helmet>
