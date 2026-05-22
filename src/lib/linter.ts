@@ -253,11 +253,25 @@ try {
       const loc = getLoc(node);
       if (loc) addAt(loc.start.line, "error", "'with' statement is forbidden in strict mode and confuses scope");
     },
-    ...tsStubs,
   });
   } catch {
     // TS-specific AST nodes that acorn-walk can't traverse — skip semantic checks
   }
+
+  // Duplicate variable name check — scoped per block via regex
+  const declaredNames = new Map<string, number>();
+  rawLines.forEach((text, idx) => {
+    const trimmed = text.trim();
+    if (trimmed.startsWith("//")) return;
+    const match = trimmed.match(/^(?:const|let)\s+([a-zA-Z_$][\w$]*)\s*[=;:,]/);
+    if (!match) return;
+    const name = match[1];
+    if (declaredNames.has(name)) {
+      ann.add(idx, "error", `'${name}' is already declared — duplicate variable name in this scope`);
+    } else {
+      declaredNames.set(name, idx);
+    }
+  });
 
   // TS-specific regex fallbacks — more reliable than AST walk for TS files
   if (useTypeScript) {
