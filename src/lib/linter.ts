@@ -199,18 +199,18 @@ try {
     VariableDeclaration(node: acorn.Node) {
       const n = node as unknown as { kind: string; loc?: NodeLoc };
       if (n.kind === "var" && n.loc) {
-        addAt(n.loc.start.line, "warning", "Prefer 'let' or 'const' over 'var'");
+        addAt(n.loc.start.line, "warning", "Prefer 'let' or 'const' over 'var' — use 'const' if the value never changes, 'let' if it does");
       }
     },
     DebuggerStatement(node: acorn.Node) {
       const loc = getLoc(node);
-      if (loc) addAt(loc.start.line, "warning", "'debugger' statement left in code");
+      if (loc) addAt(loc.start.line, "warning", "'debugger' statement left in code — remove this line before pushing to production");
     },
     BinaryExpression(node: acorn.Node) {
       const n = node as unknown as { operator: string; loc?: NodeLoc };
       if (!n.loc) return;
-      if (n.operator === "==") addAt(n.loc.start.line, "warning", "Use '===' instead of '==' for strict equality");
-      if (n.operator === "!=") addAt(n.loc.start.line, "warning", "Use '!==' instead of '!=' for strict inequality");
+      if (n.operator === "==") addAt(n.loc.start.line, "warning", "Use '===' instead of '==' for strict equality — '==' can produce unexpected results due to type coercion");
+      if (n.operator === "!=") addAt(n.loc.start.line, "warning", "Use '!==' instead of '!=' for strict inequality — '!=' can produce unexpected results due to type coercion");
     },
     CallExpression(node: acorn.Node) {
       const n = node as unknown as {
@@ -223,20 +223,20 @@ try {
       if (callee.type === "MemberExpression" && callee.object?.name === "console") {
         const method = callee.property?.name;
         if (method === "log" || method === "error" || method === "warn") {
-          addAt(n.loc.start.line, "warning", `'console.${method}' left in code`);
+          addAt(n.loc.start.line, "warning", `'console.${method}' left in code — remove before deploying, or wrap in a debug flag`);
         }
       }
       if (callee.type === "Identifier" && callee.name === "eval") {
-        addAt(n.loc.start.line, "error", "'eval()' executes arbitrary code — dangerous and a security risk");
+        addAt(n.loc.start.line, "error", "'eval()' executes arbitrary code — dangerous and a security risk — remove it and find a safer alternative like JSON.parse() or a lookup object");
       }
       if (callee.type === "Identifier" && callee.name === "alert") {
-        addAt(n.loc.start.line, "warning", "'alert()' blocks the browser — avoid in production");
+        addAt(n.loc.start.line, "warning", "'alert()' blocks the browser — avoid in production — use a custom modal or console.log() for debugging instead");
       }
     },
     ThrowStatement(node: acorn.Node) {
       const n = node as unknown as { argument: { type: string }; loc?: NodeLoc };
       if (n.loc && n.argument.type === "Literal") {
-        addAt(n.loc.start.line, "warning", "Throwing a string literal — use 'new Error(...)' instead");
+        addAt(n.loc.start.line, "warning", "Throwing a string literal — use 'new Error(...)' instead — this gives you a proper stack trace when debugging");
       }
     },
     TryStatement(node: acorn.Node) {
@@ -246,12 +246,12 @@ try {
       };
       if (n.handler && n.handler.body.body.length === 0) {
         const loc = getLoc(n.handler);
-        if (loc) addAt(loc.start.line, "warning", "Empty catch block — errors are silently swallowed");
+        if (loc) addAt(loc.start.line, "warning", "Empty catch block — errors are silently swallowed — add at least console.error(e) so failures don't disappear silently");
       }
     },
     WithStatement(node: acorn.Node) {
       const loc = getLoc(node);
-      if (loc) addAt(loc.start.line, "error", "'with' statement is forbidden in strict mode and confuses scope");
+      if (loc) addAt(loc.start.line, "error", "'with' statement is forbidden in strict mode and confuses scope — remove it and reference the object properties directly");
     },
   });
   } catch {
@@ -281,7 +281,7 @@ try {
     const name = match[1];
     const currentScope = scopeStack[scopeStack.length - 1];
     if (currentScope.has(name)) {
-      ann.add(idx, "error", `'${name}' is already declared — duplicate variable name in this scope`);
+      ann.add(idx, "error", `'${name}' is already declared — duplicate variable name in this scope — rename one of them or remove the redeclaration`);
     } else {
       currentScope.set(name, idx);
     }
@@ -293,13 +293,13 @@ try {
       const trimmed = text.trim();
       if (trimmed.startsWith("//")) return;
       if (/:\s*any\b/.test(text)) {
-        ann.add(idx, "warning", "Avoid 'any' — use a specific type or 'unknown' for safer typing");
+        ann.add(idx, "warning", "Avoid 'any' — use a specific type or 'unknown' for safer typing — 'any' disables TypeScript's type checking on this value");
       }
       if (/\bvar\s+/.test(text)) {
-        ann.add(idx, "warning", "Prefer 'let' or 'const' over 'var'");
+        ann.add(idx, "warning", "Prefer 'let' or 'const' over 'var' — use 'const' if the value never changes, 'let' if it does");
       }
       if (/\bconsole\s*\./.test(text)) {
-        ann.add(idx, "warning", "Avoid console statements in production code");
+        ann.add(idx, "warning", "Avoid console statements in production code — remove before deploying or wrap in a debug flag");
       }
     });
   }
@@ -337,14 +337,14 @@ function lintPython(code: string): CodeLine[] {
     const hasTabs = indent.includes("\t");
     const hasSpaces = indent.includes(" ");
     if (hasTabs && hasSpaces) {
-      ann.add(idx, "error", "Mixed tabs and spaces in indentation");
+      ann.add(idx, "error", "Mixed tabs and spaces in indentation — pick one and use it consistently throughout the file");
       return;
     }
     const charUsed = hasTabs ? "tabs" : "spaces";
     if (!detectedIndentChar) {
       detectedIndentChar = charUsed;
     } else if (charUsed !== detectedIndentChar) {
-      ann.add(idx, "warning", `Inconsistent indentation — file uses ${detectedIndentChar} but this line uses ${charUsed}`);
+      ann.add(idx, "warning", `Inconsistent indentation — file uses ${detectedIndentChar} but this line uses ${charUsed} — convert this line to match the rest of the file`);
       return;
     }
     // Indent size consistency check (spaces only) — unit = smallest indent seen
@@ -360,7 +360,7 @@ function lintPython(code: string): CodeLine[] {
           detectedIndentSize = size;
         }
         if (size % detectedIndentSize !== 0) {
-          ann.add(idx, "warning", `Inconsistent indentation size — expected a multiple of ${detectedIndentSize} spaces but this line has ${size}`);
+          ann.add(idx, "warning", `Inconsistent indentation size — expected a multiple of ${detectedIndentSize} spaces but this line has ${size} — adjust to match the indentation unit used elsewhere in the file`);
         }
       }
     }
@@ -371,22 +371,22 @@ function lintPython(code: string): CodeLine[] {
     if (trimmed.startsWith("#")) return;
 
     if (/^except\s*:/.test(trimmed)) {
-      ann.add(idx, "warning", "Bare 'except:' catches everything — be specific (e.g. 'except ValueError:')");
+      ann.add(idx, "warning", "Bare 'except:' catches everything including system exits — be specific, e.g. 'except ValueError:' to only catch what you expect");
     }
     if (/^print\s+[^(=]/.test(trimmed)) {
-      ann.add(idx, "error", "Python 3: 'print' is a function — use print(...)");
+      ann.add(idx, "error", "Python 3: 'print' is a function — replace with print(...) and wrap your value in parentheses");
     }
     if (/\bdef\s+\w+\s*\([^)]*=\s*[\[{]/.test(trimmed)) {
-      ann.add(idx, "warning", "Mutable default argument — use None and assign inside the function body");
+      ann.add(idx, "warning", "Mutable default argument — lists and dicts as defaults are shared across all calls — use None as the default and assign inside the function body instead");
     }
     if (/[!=]=\s*None\b/.test(text)) {
-      ann.add(idx, "warning", "Use 'is None' or 'is not None' instead of '== None' / '!= None'");
+      ann.add(idx, "warning", "Use 'is None' or 'is not None' instead of '== None' / '!= None' — identity comparison is correct here, not equality");
     }
     if (/\b(TODO|FIXME|HACK|XXX)\b/i.test(text)) {
       ann.add(idx, "warning", "Unresolved TODO/FIXME left in code");
     }
     if (/^import\s+\*/.test(trimmed) || /from\s+\S+\s+import\s+\*/.test(trimmed)) {
-      ann.add(idx, "warning", "Wildcard import makes it hard to know what names are in scope");
+      ann.add(idx, "warning", "Wildcard import makes it hard to know what names are in scope — import only what you need, e.g. 'from module import specific_function'");
     }
   });
 
@@ -401,7 +401,7 @@ function lintPython(code: string): CodeLine[] {
       const nextIndent = next.match(/^(\s*)/)?.[1].length ?? 0;
       if (nextIndent < passIndent) break;
       if (nextIndent >= passIndent) {
-        ann.add(idx, "warning", "'pass' is redundant — the block already contains other statements");
+        ann.add(idx, "warning", "'pass' is redundant — the block already contains other statements — remove this line");
         break;
       }
     }
@@ -689,17 +689,17 @@ function lintEmbeddedScripts(source: string, ann: AnnotationMap): void {
         VariableDeclaration(node: acorn.Node) {
           const n = node as unknown as { kind: string; loc?: NodeLoc };
           if (n.kind === "var" && n.loc)
-            ann.add(lineOffset + n.loc.start.line - 1, "warning", "Prefer 'let' or 'const' over 'var'");
+            ann.add(lineOffset + n.loc.start.line - 1, "warning", "Prefer 'let' or 'const' over 'var' — use 'const' if the value never changes, 'let' if it does");
         },
         DebuggerStatement(node: acorn.Node) {
           const loc = getLoc(node);
-          if (loc) ann.add(lineOffset + loc.start.line - 1, "warning", "'debugger' statement left in code");
+          if (loc) ann.add(lineOffset + loc.start.line - 1, "warning", "'debugger' statement left in code — remove this line before pushing to production");
         },
         BinaryExpression(node: acorn.Node) {
           const n = node as unknown as { operator: string; loc?: NodeLoc };
           if (!n.loc) return;
-          if (n.operator === "==") ann.add(lineOffset + n.loc.start.line - 1, "warning", "Use '===' instead of '==' for strict equality");
-          if (n.operator === "!=") ann.add(lineOffset + n.loc.start.line - 1, "warning", "Use '!==' instead of '!=' for strict inequality");
+          if (n.operator === "==") ann.add(lineOffset + n.loc.start.line - 1, "warning", "Use '===' instead of '==' for strict equality — '==' can produce unexpected results due to type coercion");
+          if (n.operator === "!=") ann.add(lineOffset + n.loc.start.line - 1, "warning", "Use '!==' instead of '!=' for strict inequality — '!=' can produce unexpected results due to type coercion");
         },
         CallExpression(node: acorn.Node) {
           const n = node as unknown as {
@@ -711,16 +711,16 @@ function lintEmbeddedScripts(source: string, ann: AnnotationMap): void {
           if (callee.type === "MemberExpression" && callee.object?.name === "console") {
             const method = callee.property?.name;
             if (method === "log" || method === "error" || method === "warn")
-              ann.add(lineOffset + n.loc.start.line - 1, "warning", `'console.${method}' left in code`);
+              ann.add(lineOffset + n.loc.start.line - 1, "warning", `'console.${method}' left in code — remove before deploying, or wrap in a debug flag`);
           }
           if (callee.type === "Identifier" && callee.name === "eval")
-            ann.add(lineOffset + n.loc.start.line - 1, "error", "'eval()' executes arbitrary code — dangerous and a security risk");
+            ann.add(lineOffset + n.loc.start.line - 1, "error", "'eval()' executes arbitrary code — dangerous and a security risk — remove it and find a safer alternative like JSON.parse() or a lookup object");
           if (callee.type === "Identifier" && callee.name === "alert")
-            ann.add(lineOffset + n.loc.start.line - 1, "warning", "'alert()' blocks the browser — avoid in production");
+            ann.add(lineOffset + n.loc.start.line - 1, "warning", "'alert()' blocks the browser — avoid in production — use a custom modal or console.log() for debugging instead");
         },
         WithStatement(node: acorn.Node) {
           const loc = getLoc(node);
-          if (loc) ann.add(lineOffset + loc.start.line - 1, "error", "'with' statement is forbidden in strict mode and confuses scope");
+          if (loc) ann.add(lineOffset + loc.start.line - 1, "error", "'with' statement is forbidden in strict mode and confuses scope — remove it and reference the object properties directly");
         },
       });
     } catch { /* skip unknown nodes */ }
@@ -815,7 +815,7 @@ function lintEmbeddedStyles(source: string, ann: AnnotationMap): void {
       const absLine = lineOffset + idx;
 
       if (/!important/.test(trimmed))
-        ann.add(absLine, "warning", "'!important' overrides the cascade — use a more specific selector instead");
+        ann.add(absLine, "warning", "'!important' overrides the cascade — use a more specific selector instead — overusing it makes CSS very hard to debug");
       if (/\b(TODO|FIXME)\b/i.test(trimmed))
         ann.add(absLine, "warning", "Unresolved TODO/FIXME in CSS");
 
@@ -825,7 +825,7 @@ function lintEmbeddedStyles(source: string, ann: AnnotationMap): void {
         const prop = propMatch[1].toLowerCase();
         const suggestion = COMMON_CSS_MISSPELLINGS[prop];
         if (suggestion) {
-          ann.add(absLine, "error", `Unknown CSS property '${prop}' — did you mean '${suggestion}'?`);
+          ann.add(absLine, "error", `Unknown CSS property '${prop}' — did you mean '${suggestion}'? — fix the spelling and the rule will apply correctly`);
         }
       }
     });
@@ -865,15 +865,15 @@ function lintHTML(code: string): CodeLine[] {
   });
 
   walked.missingAlt.forEach(({ line }) => {
-    ann.add(line - 1, "warning", "<img> is missing an 'alt' attribute — required for accessibility");
+    ann.add(line - 1, "warning", "<img> is missing an 'alt' attribute — add alt=\"description of image\" or alt=\"\" if the image is decorative");
   });
 
   walked.duplicateIds.forEach(({ id, line }) => {
-    ann.add(line - 1, "error", `Duplicate id="${id}" — IDs must be unique across the entire document`);
+    ann.add(line - 1, "error", `Duplicate id="${id}" — IDs must be unique across the entire document — rename one of them or switch to a class`);
   });
 
   walked.unlabelledInputs.forEach(({ line }) => {
-    ann.add(line - 1, "warning", "<input> has no associated <label> — add a label with a matching 'for' attribute for accessibility");
+    ann.add(line - 1, "warning", "<input> has no associated <label> — add <label for=\"inputId\"> above it, or add aria-label=\"description\" directly on the input");
   });
 
   const looksLikeFullDoc = /<!doctype\s+html/i.test(code) || /<html[\s>]/i.test(code);
@@ -894,10 +894,10 @@ function lintHTML(code: string): CodeLine[] {
 
   rawLines.forEach((text, idx) => {
     if (/\bstyle\s*=\s*["'][^"']+["']/.test(text)) {
-      ann.add(idx, "warning", "Inline style — consider moving to a CSS class");
+      ann.add(idx, "warning", "Inline style — consider moving to a CSS class — inline styles are hard to maintain and override");
     }
     if (/\bon\w+\s*=/.test(text)) {
-      ann.add(idx, "warning", "Inline event handler — prefer addEventListener() in JavaScript");
+      ann.add(idx, "warning", "Inline event handler — move this to JavaScript using addEventListener() — keeps your HTML clean and your logic in one place");
     }
     if (/\b(TODO|FIXME)\b/i.test(text)) {
       ann.add(idx, "warning", "Unresolved TODO/FIXME in comment");
@@ -951,7 +951,7 @@ function lintCSS(code: string): CodeLine[] {
       const prop = unitPropMatch[1].toLowerCase();
       const val = unitPropMatch[2];
       if (UNIT_PROPS.has(prop) && val !== "0") {
-        ann.add(idx, "warning", `'${prop}: ${val}' is missing a unit — did you mean '${val}px'?`);
+        ann.add(idx, "warning", `'${prop}: ${val}' is missing a unit — did you mean '${val}px'? — unitless values on dimension properties are ignored by the browser`);
       }
     }
   });

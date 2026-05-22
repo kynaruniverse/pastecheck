@@ -80,6 +80,88 @@ function InAppSurvey({ onDismiss }: { onDismiss: () => void }) {
   );
 }
 
+function DebugNudge({ errorCount, warningCount }: { errorCount: number; warningCount: number }) {
+  const [open, setOpen] = useState(false);
+
+  const bullets: string[] = [];
+
+  if (errorCount > 0) {
+    bullets.push(
+      `Fix the first error before worrying about the rest — errors cascade. One missing bracket can cause several false positives below it.`
+    );
+    bullets.push(
+      `After each fix, run the check again. Don't try to fix everything at once.`
+    );
+  }
+
+  if (errorCount === 0 && warningCount > 0) {
+    bullets.push(
+      `No errors — good. Warnings won't stop your code running but they signal habits that cause bugs later.`
+    );
+    bullets.push(
+      `Work through warnings one at a time. Each one has a suggested fix in the description above.`
+    );
+  }
+
+  if (errorCount > 0 && warningCount > 0) {
+    bullets.push(
+      `Ignore the warnings for now — fix the errors first. Warnings can wait until your code runs.`
+    );
+  }
+
+  return (
+    <div
+      className="rounded-xl overflow-hidden"
+      style={{
+        background: "hsl(222 16% 13%)",
+        border: "1px solid hsl(220 13% 26%)",
+      }}
+    >
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between px-4 py-3"
+        style={{
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          WebkitTapHighlightColor: "transparent",
+        }}
+      >
+        <span className="text-xs font-medium" style={{ color: "hsl(210 20% 72%)" }}>
+          🛠 What to do next
+        </span>
+        <span
+          className="text-xs"
+          style={{
+            color: "hsl(215 14% 45%)",
+            display: "inline-block",
+            transform: open ? "rotate(90deg)" : "rotate(0deg)",
+            transition: "transform 0.15s",
+          }}
+        >
+          ›
+        </span>
+      </button>
+
+      {open && (
+        <div
+          className="px-4 pb-4 flex flex-col gap-2"
+          style={{ borderTop: "1px solid hsl(220 13% 20%)" }}
+        >
+          {bullets.map((b, i) => (
+            <div key={i} className="flex items-start gap-2 pt-2">
+              <span style={{ color: "hsl(210 80% 60%)", fontSize: "10px", marginTop: "2px", shrink: 0 }}>●</span>
+              <span className="text-xs" style={{ color: "hsl(210 20% 65%)", lineHeight: "1.6" }}>
+                {b}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ResultRating({ language, errorCount, warningCount }: { language: string; errorCount: number; warningCount: number }) {
   const [rated, setRated] = useState<"up" | "down" | null>(null);
 
@@ -597,8 +679,12 @@ export default function Home() {
               <InAppSurvey onDismiss={() => { setShowSurvey(false); setSurveyDismissed(true); }} />
             )}
 
-            <ResultRating language={result?.language ?? "unknown"} errorCount={errorCount} warningCount={warningCount} />
+            {(errorCount > 0 || warningCount > 0) && (
+              <DebugNudge errorCount={errorCount} warningCount={warningCount} />
+            )}
 
+            <ResultRating language={result?.language ?? "unknown"} errorCount={errorCount} warningCount={warningCount} />
+            
             <button
               onClick={handleReset}
               className="w-full rounded-xl py-3.5 text-sm font-semibold tracking-wide transition-all duration-150 active:scale-[0.98]"
