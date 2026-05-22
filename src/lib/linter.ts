@@ -867,5 +867,13 @@ export function lint(code: string): LintResult {
       lines = code.split("\n").map((text) => ({ text, type: "normal", messages: [] }));
   }
 
+  // GA: track language used
+  if (typeof window !== "undefined" && typeof (window as any).gtag === "function" && language !== "unknown") {
+    (window as any).gtag("event", "language_checked", {
+      event_category: "Linter",
+      event_label: language,
+    });
+  }
+
   return { language, lines };
 }

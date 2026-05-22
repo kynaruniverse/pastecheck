@@ -18,6 +18,117 @@ const LANG_COLOR: Record<Exclude<Language, "unknown">, string> = {
   css: "rgb(139,92,246)",
 };
 
+const SURVEY_OPTIONS = [
+  "Learning to code",
+  "Debugging my own project",
+  "Checking AI generated code",
+  "Something else",
+];
+
+function InAppSurvey({ onDismiss }: { onDismiss: () => void }) {
+  function handleOption(option: string) {
+    if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
+      (window as any).gtag("event", "survey_response", {
+        event_category: "Survey",
+        event_label: option,
+      });
+    }
+    onDismiss();
+  }
+
+  return (
+    <div
+      className="rounded-xl px-4 py-4 flex flex-col gap-3"
+      style={{
+        background: "hsl(222 16% 13%)",
+        border: "1px solid hsl(220 13% 26%)",
+      }}
+    >
+      <p className="text-xs font-medium text-center" style={{ color: "hsl(210 20% 72%)" }}>
+        Quick question — what are you using PasteCheck for?
+      </p>
+      <div className="flex flex-col gap-2">
+        {SURVEY_OPTIONS.map((option) => (
+          <button
+            key={option}
+            onClick={() => handleOption(option)}
+            className="w-full rounded-lg py-2 text-xs font-medium transition-all duration-150 active:scale-[0.98]"
+            style={{
+              background: "hsl(220 13% 18%)",
+              color: "hsl(210 20% 72%)",
+              border: "1px solid hsl(220 13% 26%)",
+              cursor: "pointer",
+            }}
+          >
+            {option}
+          </button>
+        ))}
+      </div>
+      <button
+        onClick={onDismiss}
+        className="text-xs text-center"
+        style={{
+          background: "none",
+          border: "none",
+          color: "hsl(215 14% 40%)",
+          cursor: "pointer",
+        }}
+      >
+        Skip
+      </button>
+    </div>
+  );
+}
+
+function ResultRating({ language, errorCount, warningCount }: { language: string; errorCount: number; warningCount: number }) {
+  const [rated, setRated] = useState<"up" | "down" | null>(null);
+
+  function handleRate(value: "up" | "down") {
+    if (rated) return;
+    setRated(value);
+    if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
+      (window as any).gtag("event", "result_rated", {
+        event_category: "Feedback",
+        event_label: value,
+        event_value: value === "up" ? 1 : 0,
+        language,
+        error_count: errorCount,
+        warning_count: warningCount,
+      });
+    }
+  }
+
+  if (rated) {
+    return (
+      <div className="text-center text-xs py-2" style={{ color: "hsl(215 14% 45%)" }}>
+        Thanks for the feedback
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center justify-center gap-4 py-2">
+      <span className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>Was this result helpful?</span>
+      <button
+        onClick={() => handleRate("up")}
+        className="text-lg transition-opacity hover:opacity-70 active:scale-90"
+        style={{ background: "none", border: "none", cursor: "pointer" }}
+        aria-label="Helpful"
+      >
+        👍
+      </button>
+      <button
+        onClick={() => handleRate("down")}
+        className="text-lg transition-opacity hover:opacity-70 active:scale-90"
+        style={{ background: "none", border: "none", cursor: "pointer" }}
+        aria-label="Not helpful"
+      >
+        👎
+      </button>
+    </div>
+  );
+}
+
 export default function Home() {
   const [code, setCode] = useState("");
   const [result, setResult] = useState<LintResult | null>(null);
@@ -35,6 +146,8 @@ export default function Home() {
     }
   });
   const [showHistory, setShowHistory] = useState(false);
+  const [showSurvey, setShowSurvey] = useState(false);
+  const [surveyDismissed, setSurveyDismissed] = useState(false);
   
   const errorCount = result?.lines.filter((l) => l.type === "error").length ?? 0;
   const warningCount = result?.lines.filter((l) => l.type === "warning").length ?? 0;
@@ -63,6 +176,23 @@ export default function Home() {
     setHistory((prev) => {
       const updated = [{ code, result: r }, ...prev].slice(0, 10);
       try { localStorage.setItem("pastecheck_history", JSON.stringify(updated)); } catch {}
+
+      // GA: track check milestones
+      const checkNumber = updated.length;
+      if ([3, 5, 10].includes(checkNumber)) {
+        if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
+          (window as any).gtag("event", "check_milestone", {
+            event_category: "Engagement",
+            event_label: `check_${checkNumber}`,
+          });
+        }
+      }
+
+      // Show survey on 3rd check
+      if (checkNumber === 3 && !surveyDismissed) {
+        setShowSurvey(true);
+      }
+
       return updated;
     });
   }
@@ -76,11 +206,21 @@ export default function Home() {
     setTimeout(() => textareaRef.current?.focus(), 0);
   }
 
-  function toggleExpanded(idx: number) {
+  function toggleExpanded(idx: number, lineType?: string) {
     setExpanded((prev) => {
       const next = new Set(prev);
-      if (next.has(idx)) next.delete(idx);
-      else next.add(idx);
+      if (next.has(idx)) {
+        next.delete(idx);
+      } else {
+        next.add(idx);
+        // GA: track error/warning tap
+        if (typeof window !== "undefined" && typeof (window as any).gtag === "function" && lineType) {
+          (window as any).gtag("event", "error_tapped", {
+            event_category: "Engagement",
+            event_label: lineType,
+          });
+        }
+      }
       return next;
     });
   }
@@ -354,7 +494,7 @@ export default function Home() {
                   return (
                     <div key={i}>
                       <div
-                        onClick={isFlagged ? () => toggleExpanded(i) : undefined}
+                        onClick={isFlagged ? () => toggleExpanded(i, line.type) : undefined}
                         className="flex gap-0 px-0"
                         style={{
                           background:
@@ -453,6 +593,12 @@ export default function Home() {
                 })}
               </div>
             </div>
+
+            {showSurvey && (
+              <InAppSurvey onDismiss={() => { setShowSurvey(false); setSurveyDismissed(true); }} />
+            )}
+
+            <ResultRating language={result?.language ?? "unknown"} errorCount={errorCount} warningCount={warningCount} />
 
             <button
               onClick={handleReset}
