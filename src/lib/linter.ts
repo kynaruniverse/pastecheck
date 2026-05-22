@@ -344,6 +344,24 @@ function lintPython(code: string): CodeLine[] {
     }
   });
 
+  // pass in non-empty block check
+  rawLines.forEach((text, idx) => {
+    if (text.trim() !== "pass") return;
+    const passIndent = text.match(/^(\s*)/)?.[1].length ?? 0;
+    // look ahead — if any sibling line has same or deeper indent and real code, pass is redundant
+    for (let j = idx + 1; j < rawLines.length; j++) {
+      const next = rawLines[j];
+      const nextTrimmed = next.trim();
+      if (!nextTrimmed || nextTrimmed.startsWith("#")) continue;
+      const nextIndent = next.match(/^(\s*)/)?.[1].length ?? 0;
+      if (nextIndent < passIndent) break;
+      if (nextIndent >= passIndent) {
+        ann.add(idx, "warning", "'pass' is redundant — the block already contains other statements");
+        break;
+      }
+    }
+  });
+
   return buildLines(rawLines, ann);
 }
 
