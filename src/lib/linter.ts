@@ -258,18 +258,30 @@ try {
     // TS-specific AST nodes that acorn-walk can't traverse — skip semantic checks
   }
 
-  // Duplicate variable name check — scoped per block via regex
-  const declaredNames = new Map<string, number>();
+  // Duplicate variable name check — resets scope at each function/block boundary
+  const scopeStack: Map<string, number>[] = [new Map()];
   rawLines.forEach((text, idx) => {
     const trimmed = text.trim();
     if (trimmed.startsWith("//")) return;
+
+    // Push a new scope on function/arrow/class/block open
+    if (/(\bfunction\b|\bclass\b|=>|\b(if|else|for|while|try|catch)\b)[^{]*\{/.test(trimmed) || /^\{/.test(trimmed)) {
+      scopeStack.push(new Map());
+    }
+
+    // Pop scope on closing brace
+    if (/^\}/.test(trimmed) && scopeStack.length > 1) {
+      scopeStack.pop();
+    }
+
     const match = trimmed.match(/^(?:const|let)\s+([a-zA-Z_$][\w$]*)\s*[=;:,]/);
     if (!match) return;
     const name = match[1];
-    if (declaredNames.has(name)) {
+    const currentScope = scopeStack[scopeStack.length - 1];
+    if (currentScope.has(name)) {
       ann.add(idx, "error", `'${name}' is already declared — duplicate variable name in this scope`);
     } else {
-      declaredNames.set(name, idx);
+      currentScope.set(name, idx);
     }
   });
 
