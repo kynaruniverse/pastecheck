@@ -259,11 +259,19 @@ try {
     // TS-specific AST nodes that acorn-walk can't traverse — skip semantic checks
   }
 
-  // TS-specific: flag 'any' type usage via regex (more reliable than AST walk for TS nodes)
+  // TS-specific regex fallbacks — more reliable than AST walk for TS files
   if (useTypeScript) {
     rawLines.forEach((text, idx) => {
-      if (/:\s*any\b/.test(text) && !text.trim().startsWith("//")) {
+      const trimmed = text.trim();
+      if (trimmed.startsWith("//")) return;
+      if (/:\s*any\b/.test(text)) {
         ann.add(idx, "warning", "Avoid 'any' — use a specific type or 'unknown' for safer typing");
+      }
+      if (/\bvar\s+/.test(text)) {
+        ann.add(idx, "warning", "Prefer 'let' or 'const' over 'var'");
+      }
+      if (/\bconsole\s*\./.test(text)) {
+        ann.add(idx, "warning", "Avoid console statements in production code");
       }
     });
   }
