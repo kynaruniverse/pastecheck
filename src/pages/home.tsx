@@ -382,7 +382,6 @@ export default function Home() {
             >
               Check Code
             </button>
-            <FeedbackForm />
           </div>
         ) : (
           <div className="flex flex-col gap-4">

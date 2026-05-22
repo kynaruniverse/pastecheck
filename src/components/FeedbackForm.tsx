@@ -45,18 +45,18 @@ export default function FeedbackForm() {
   return (
     <div className="w-full">
       {!open ? (
-        <div className="flex justify-center pt-2 pb-4">
+        <div className="flex justify-center pt-1 pb-4">
           <button
             onClick={() => setOpen(true)}
-            className="text-xs px-4 py-2 rounded-full transition-all duration-150 active:scale-[0.97]"
+            className="w-full rounded-xl py-3 text-sm font-medium transition-all duration-150 active:scale-[0.98]"
             style={{
-              background: "transparent",
-              color: "hsl(215 14% 42%)",
-              border: "1px solid hsl(220 13% 22%)",
+              background: "hsl(222 16% 16%)",
+              color: "hsl(210 20% 72%)",
+              border: "1px solid hsl(220 13% 26%)",
               cursor: "pointer",
             }}
           >
-            Leave feedback
+            💬 Was this helpful? Leave feedback
           </button>
         </div>
       ) : (
