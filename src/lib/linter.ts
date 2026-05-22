@@ -348,15 +348,14 @@ function lintPython(code: string): CodeLine[] {
         return;
       }
       // Indent size consistency check (spaces only)
-      if (charUsed === "spaces") {
-        const size = indent.length;
-        // Only record indent sizes that are a clean unit (2, 3, 4, 8)
-        if (detectedIndentSize === null) {
-          detectedIndentSize = size;
-        } else if (size % detectedIndentSize !== 0 && detectedIndentSize % size !== 0) {
-          ann.add(idx, "warning", `Inconsistent indentation size — expected multiples of ${detectedIndentSize} space${detectedIndentSize > 1 ? "s" : ""} but found ${size}`);
-        }
+    if (charUsed === "spaces") {
+      const size = indent.length;
+      if (detectedIndentSize === null) {
+        detectedIndentSize = size;
+      } else if (size % detectedIndentSize !== 0) {
+        ann.add(idx, "warning", `Inconsistent indentation size — file uses ${detectedIndentSize}-space indentation but this line has ${size} spaces`);
       }
+    }
     });
 
     rawLines.forEach((text, idx) => {
