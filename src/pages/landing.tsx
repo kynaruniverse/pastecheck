@@ -29,8 +29,8 @@ const features = [
         <line x1="12" y1="16" x2="12.01" y2="16" />
       </svg>
     ),
-    title: "Tap for Details",
-    desc: "Tap any highlighted line for a plain-English explanation. Your last 10 checks are saved so you can jump back instantly.",
+    title: "Understand, Not Just Find",
+    desc: "Tap any highlighted line for a plain-English explanation of what broke and why. Your last 10 checks are saved so you can jump back instantly.",
   },
 ];
 
@@ -94,7 +94,7 @@ export default function Landing() {
             className="text-base leading-relaxed mb-10 max-w-sm"
             style={{ color: "hsl(215 14% 58%)" }}
           >
-            Paste your JavaScript, TypeScript, Python, HTML or CSS and see every error highlighted in seconds.
+            Paste your JavaScript, TypeScript, Python, HTML or CSS and see every error highlighted instantly — with plain-English explanations, not just line numbers.
           </p>
 
           <button

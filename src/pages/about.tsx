@@ -67,8 +67,11 @@ export default function About() {
             <p className="text-base leading-relaxed mb-4" style={{ color: "hsl(215 14% 58%)" }}>
               Most developers have pasted broken code into an AI assistant hoping it will catch errors — only to get inconsistent results, reformatted code, or new bugs introduced. PasteCheck solves that by running dedicated language parsers directly on your code, giving you precise, reliable error locations every time.
             </p>
-            <p className="text-base leading-relaxed" style={{ color: "hsl(215 14% 58%)" }}>
+            <p className="text-base leading-relaxed mb-4" style={{ color: "hsl(215 14% 58%)" }}>
               Built specifically with mobile developers in mind, PasteCheck works seamlessly on Android and iOS — no desktop required.
+            </p>
+            <p className="text-base leading-relaxed" style={{ color: "hsl(215 14% 58%)" }}>
+              PasteCheck doesn't auto-fix your code. It shows you exactly what's wrong and why — so you learn from mistakes when you make them, not when they reach production.
             </p>
           </div>
 
@@ -110,7 +113,7 @@ export default function About() {
               {[
                 { step: "1", title: "Paste your code", detail: "Copy any JavaScript, TypeScript, Python, HTML, or CSS snippet and paste it into the text area." },
                 { step: "2", title: "Hit Check Code", detail: "PasteCheck automatically detects the language and runs the appropriate parser instantly." },
-                { step: "3", title: "See every error highlighted", detail: "Errors glow red, warnings glow yellow. Tap any highlighted line for a plain-English explanation." },
+                { step: "3", title: "See every error highlighted", detail: "Errors glow red, warnings glow yellow. Tap any highlighted line for a plain-English explanation of what broke and why — not just where." },
               ].map((item) => (
                 <div
                   key={item.step}
@@ -146,6 +149,7 @@ export default function About() {
                 { q: "Is my code stored or sent anywhere?", a: "No. All checking happens locally in your browser. Your code never leaves your device." },
                 { q: "Which languages are supported?", a: "JavaScript, TypeScript, Python, HTML, and CSS — including embedded scripts and style blocks inside HTML." },
                 { q: "How is this different from pasting into ChatGPT or Claude?", a: "AI assistants are inconsistent — they sometimes miss errors, reformat your code, or introduce new bugs. PasteCheck uses dedicated language parsers that give precise, reliable results every time." },
+                { q: "Does it just find errors or does it explain them?", a: "Both. Every flagged line includes a plain-English description of what's wrong and why — not just a line number. The goal is to help you understand the mistake, not just locate it." },
               ].map((item) => (
                 <div
                   key={item.q}
