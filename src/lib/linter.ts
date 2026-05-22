@@ -327,43 +327,50 @@ function lintPython(code: string): CodeLine[] {
   } while (cursor.next());
 
   // Indentation checks
-    let detectedIndentChar: "spaces" | "tabs" | null = null;
-    let detectedIndentSize: number | null = null;
-    rawLines.forEach((text, idx) => {
-      if (!text.trim() || text.trim().startsWith("#")) return;
-      const indentMatch = text.match(/^(\s+)/);
-      if (!indentMatch) return;
-      const indent = indentMatch[1];
-      const hasTabs = indent.includes("\t");
-      const hasSpaces = indent.includes(" ");
-      if (hasTabs && hasSpaces) {
-        ann.add(idx, "error", "Mixed tabs and spaces in indentation");
-        return;
-      }
-      const charUsed = hasTabs ? "tabs" : "spaces";
-      if (!detectedIndentChar) {
-        detectedIndentChar = charUsed;
-      } else if (charUsed !== detectedIndentChar) {
-        ann.add(idx, "warning", `Inconsistent indentation — file uses ${detectedIndentChar} but this line uses ${charUsed}`);
-        return;
-      }
-      // Indent size consistency check (spaces only)
+  let detectedIndentChar: "spaces" | "tabs" | null = null;
+  let detectedIndentSize: number | null = null;
+  rawLines.forEach((text, idx) => {
+    if (!text.trim() || text.trim().startsWith("#")) return;
+    const indentMatch = text.match(/^(\s+)/);
+    if (!indentMatch) return;
+    const indent = indentMatch[1];
+    const hasTabs = indent.includes("\t");
+    const hasSpaces = indent.includes(" ");
+    if (hasTabs && hasSpaces) {
+      ann.add(idx, "error", "Mixed tabs and spaces in indentation");
+      return;
+    }
+    const charUsed = hasTabs ? "tabs" : "spaces";
+    if (!detectedIndentChar) {
+      detectedIndentChar = charUsed;
+    } else if (charUsed !== detectedIndentChar) {
+      ann.add(idx, "warning", `Inconsistent indentation — file uses ${detectedIndentChar} but this line uses ${charUsed}`);
+      return;
+    }
+    // Indent size consistency check (spaces only) — unit = smallest indent seen
     if (charUsed === "spaces") {
       const size = indent.length;
       if (detectedIndentSize === null) {
         detectedIndentSize = size;
-      } else if (size % detectedIndentSize !== 0) {
-        ann.add(idx, "warning", `Inconsistent indentation size — file uses ${detectedIndentSize}-space indentation but this line has ${size} spaces`);
+      } else {
+        // If a smaller indent size is seen, adopt it as the new unit.
+        // This handles files where some functions use 2-space and others use 4-space
+        // indentation — both are valid as long as each is internally consistent.
+        if (size < detectedIndentSize) {
+          detectedIndentSize = size;
+        }
+        if (size % detectedIndentSize !== 0) {
+          ann.add(idx, "warning", `Inconsistent indentation size — expected a multiple of ${detectedIndentSize} spaces but this line has ${size}`);
+        }
       }
     }
-    });
+  });
 
-    rawLines.forEach((text, idx) => {
-      const trimmed = text.trim();
-      // Safely ignore full line comments to minimize false positives
-      if (trimmed.startsWith("#")) return;
+  rawLines.forEach((text, idx) => {
+    const trimmed = text.trim();
+    if (trimmed.startsWith("#")) return;
 
-      if (/^except\s*:/.test(trimmed)) {
+    if (/^except\s*:/.test(trimmed)) {
       ann.add(idx, "warning", "Bare 'except:' catches everything — be specific (e.g. 'except ValueError:')");
     }
     if (/^print\s+[^(=]/.test(trimmed)) {
@@ -387,7 +394,6 @@ function lintPython(code: string): CodeLine[] {
   rawLines.forEach((text, idx) => {
     if (text.trim() !== "pass") return;
     const passIndent = text.match(/^(\s*)/)?.[1].length ?? 0;
-    // look ahead — if any sibling line has same or deeper indent and real code, pass is redundant
     for (let j = idx + 1; j < rawLines.length; j++) {
       const next = rawLines[j];
       const nextTrimmed = next.trim();
