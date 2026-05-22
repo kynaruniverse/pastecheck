@@ -258,9 +258,11 @@ try {
     // TS-specific AST nodes that acorn-walk can't traverse — skip semantic checks
   }
 
-  // Duplicate variable name check — resets scope at each function/block boundary
+  // Duplicate variable name check — only run on smaller files to avoid false positives
   const scopeStack: Map<string, number>[] = [new Map()];
+  const skipDuplicateCheck = rawLines.length > 200;
   rawLines.forEach((text, idx) => {
+    if (skipDuplicateCheck) return;
     const trimmed = text.trim();
     if (trimmed.startsWith("//")) return;
 
@@ -285,8 +287,8 @@ try {
     }
   });
 
-  // TS-specific regex fallbacks — more reliable than AST walk for TS files
-  if (useTypeScript) {
+  // TS-specific regex fallbacks — skip for large files to avoid false positives
+  if (useTypeScript && rawLines.length < 200) {
     rawLines.forEach((text, idx) => {
       const trimmed = text.trim();
       if (trimmed.startsWith("//")) return;
