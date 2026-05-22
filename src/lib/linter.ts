@@ -328,6 +328,7 @@ function lintPython(code: string): CodeLine[] {
 
   // Indentation checks
     let detectedIndentChar: "spaces" | "tabs" | null = null;
+    let detectedIndentSize: number | null = null;
     rawLines.forEach((text, idx) => {
       if (!text.trim() || text.trim().startsWith("#")) return;
       const indentMatch = text.match(/^(\s+)/);
@@ -344,6 +345,17 @@ function lintPython(code: string): CodeLine[] {
         detectedIndentChar = charUsed;
       } else if (charUsed !== detectedIndentChar) {
         ann.add(idx, "warning", `Inconsistent indentation — file uses ${detectedIndentChar} but this line uses ${charUsed}`);
+        return;
+      }
+      // Indent size consistency check (spaces only)
+      if (charUsed === "spaces") {
+        const size = indent.length;
+        // Only record indent sizes that are a clean unit (2, 3, 4, 8)
+        if (detectedIndentSize === null) {
+          detectedIndentSize = size;
+        } else if (size % detectedIndentSize !== 0 && detectedIndentSize % size !== 0) {
+          ann.add(idx, "warning", `Inconsistent indentation size — expected multiples of ${detectedIndentSize} space${detectedIndentSize > 1 ? "s" : ""} but found ${size}`);
+        }
       }
     });
 
