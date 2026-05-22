@@ -85,6 +85,18 @@ export function detectLanguage(code: string): Language {
     return "html";
   }
 
+  // TypeScript detection — must sit above Python to avoid misdetection
+  if (
+    /\binterface\s+\w+[\s<{]/.test(trimmed) ||
+    /\btype\s+\w+\s*(<[^>]+>)?\s*=/.test(trimmed) ||
+    /\bimport\s+type\s/.test(trimmed) ||
+    /\benum\s+\w+\s*\{/.test(trimmed) ||
+    /\b(public|private|protected|readonly)\s+\w+[\s:(!]/.test(trimmed) ||
+    /:\s*(string|number|boolean|void|any|never|unknown|object)\b/.test(trimmed)
+  ) {
+    return "typescript";
+  }
+
   if (
     /^#!.*python/i.test(trimmed) ||
     /^(from\s+\w+\s+import\s|import\s+\w[\w.]*\s*$)/m.test(trimmed) ||
@@ -95,18 +107,6 @@ export function detectLanguage(code: string): Language {
     /\bprint\s*\(/.test(trimmed)
   ) {
     return "python";
-  }
-  
-  // TypeScript detection — must sit above the JS fallback
-  if (
-    /\binterface\s+\w+[\s<{]/.test(trimmed) ||
-    /\btype\s+\w+\s*(<[^>]+>)?\s*=/.test(trimmed) ||
-    /\bimport\s+type\s/.test(trimmed) ||
-    /\benum\s+\w+\s*\{/.test(trimmed) ||
-    /\b(public|private|protected|readonly)\s+\w+[\s:(!]/.test(trimmed) ||
-    /:\s*(string|number|boolean|void|any|never|unknown|object)\b/.test(trimmed)
-  ) {
-    return "typescript";
   }
 
   return "javascript";
