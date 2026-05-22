@@ -173,6 +173,27 @@ function lintJavaScript(code: string, useTypeScript = false): CodeLine[] {
     return buildLines(rawLines, ann);
   }
 
+// TS node stubs — prevent acorn-walk crashing on TS-specific AST nodes
+const tsStubs: Record<string, () => void> = {};
+[
+  "TSTypeAnnotation","TSTypeReference","TSAnyKeyword","TSStringKeyword",
+  "TSNumberKeyword","TSBooleanKeyword","TSVoidKeyword","TSNullKeyword",
+  "TSUndefinedKeyword","TSNeverKeyword","TSUnknownKeyword","TSObjectKeyword",
+  "TSPropertySignature","TSInterfaceDeclaration","TSInterfaceBody",
+  "TSTypeAliasDeclaration","TSTypeParameterDeclaration","TSTypeParameter",
+  "TSTypeParameterInstantiation","TSTypeLiteral","TSUnionType",
+  "TSIntersectionType","TSArrayType","TSTupleType","TSOptionalType",
+  "TSRestType","TSConditionalType","TSInferType","TSMappedType",
+  "TSIndexedAccessType","TSTypeQuery","TSTypePredicate","TSImportType",
+  "TSLiteralType","TSEnumDeclaration","TSEnumMember","TSModuleDeclaration",
+  "TSModuleBlock","TSNamespaceExportDeclaration","TSExportAssignment",
+  "TSParameterProperty","TSAbstractMethodDefinition","TSAbstractPropertyDefinition",
+  "TSAsExpression","TSTypeAssertion","TSNonNullExpression",
+  "TSIndexSignature","TSConstructSignatureDeclaration","TSCallSignatureDeclaration",
+  "TSMethodSignature","TSQualifiedName","TSExpressionWithTypeArguments",
+  "TSFunctionType","TSConstructorType",
+].forEach((t) => { tsStubs[t] = () => {}; });
+
 try {
   walk.simple(ast, {
     VariableDeclaration(node: acorn.Node) {
@@ -239,6 +260,7 @@ try {
         addAt(n.loc.start.line, "warning", "Avoid 'any' — use a specific type or 'unknown' for safer typing");
       }
     },
+    ...tsStubs,
   });
   } catch {
     // TS-specific AST nodes that acorn-walk can't traverse — skip semantic checks
