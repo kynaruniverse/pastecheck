@@ -87,7 +87,7 @@ export function detectLanguage(code: string): Language {
 
   if (
     /^#!.*python/i.test(trimmed) ||
-    /^(from\s+\w+\s+import\s|import\s+\w+\s*$)/m.test(trimmed) ||
+    /^(from\s+\w+\s+import\s|import\s+\w[\w.]*\s*$)/m.test(trimmed) ||
     /\bdef\s+\w+\s*\(/.test(trimmed) ||
     /\bclass\s+\w+\s*[:(]/.test(trimmed) ||
     /^\s*elif\b/m.test(trimmed) ||
