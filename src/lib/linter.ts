@@ -276,7 +276,7 @@ try {
       scopeStack.pop();
     }
 
-    const match = trimmed.match(/^(?:const|let)\s+([a-zA-Z_$][\w$]*)\s*[=;:,]/);
+    const match = trimmed.match(/^(?:const|let|var)\s+([a-zA-Z_$][\w$]*)\s*[=;:,]/);
     if (!match) return;
     const name = match[1];
     const currentScope = scopeStack[scopeStack.length - 1];
@@ -878,14 +878,17 @@ function lintHTML(code: string): CodeLine[] {
 
   const looksLikeFullDoc = /<!doctype\s+html/i.test(code) || /<html[\s>]/i.test(code);
   if (looksLikeFullDoc) {
+    // Use line index 1 (the <html> line) to avoid collision with doctype parse errors on line 0
+    const metaLine = rawLines.findIndex((l) => /<html[\s>]/i.test(l));
+    const langLine = metaLine >= 0 ? metaLine : 0;
     if (walked.missingLang) {
-      ann.add(0, "warning", '<html> is missing a ' + '"lang" attribute (e.g. lang="en") — required for accessibility');
+      ann.add(langLine, "warning", '<html> is missing a "lang" attribute (e.g. lang="en") — required for accessibility');
     }
     if (walked.missingCharset) {
-      ann.add(0, "warning", 'No character encoding declared — add <meta charset="UTF-8"> inside <head>');
+      ann.add(langLine, "warning", 'No character encoding declared — add <meta charset="UTF-8"> inside <head>');
     }
     if (walked.missingTitle) {
-      ann.add(0, "warning", "Document is missing a <title> element inside <head>");
+      ann.add(langLine, "warning", "Document is missing a <title> element inside <head>");
     }
   }
 
