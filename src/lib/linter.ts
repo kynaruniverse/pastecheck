@@ -253,17 +253,19 @@ try {
       const loc = getLoc(node);
       if (loc) addAt(loc.start.line, "error", "'with' statement is forbidden in strict mode and confuses scope");
     },
-    // TS-specific: flag 'any' type usage
-    TSTypeAnnotation(node: acorn.Node) {
-      const n = node as unknown as { typeAnnotation?: { type: string; loc?: NodeLoc }; loc?: NodeLoc };
-      if (useTypeScript && n.typeAnnotation?.type === "TSAnyKeyword" && n.loc) {
-        addAt(n.loc.start.line, "warning", "Avoid 'any' — use a specific type or 'unknown' for safer typing");
-      }
-    },
     ...tsStubs,
   });
   } catch {
     // TS-specific AST nodes that acorn-walk can't traverse — skip semantic checks
+  }
+
+  // TS-specific: flag 'any' type usage via regex (more reliable than AST walk for TS nodes)
+  if (useTypeScript) {
+    rawLines.forEach((text, idx) => {
+      if (/:\s*any\b/.test(text) && !text.trim().startsWith("//")) {
+        ann.add(idx, "warning", "Avoid 'any' — use a specific type or 'unknown' for safer typing");
+      }
+    });
   }
 
   return buildLines(rawLines, ann);
