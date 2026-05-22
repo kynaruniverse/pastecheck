@@ -914,6 +914,24 @@ function lintCSS(code: string): CodeLine[] {
       if (suggestion)
         ann.add(idx, "error", `Unknown CSS property '${prop}' — did you mean '${suggestion}'?`);
     }
+
+    // Missing units on non-zero numeric values
+    const UNIT_PROPS = new Set([
+      "margin","margin-top","margin-right","margin-bottom","margin-left",
+      "padding","padding-top","padding-right","padding-bottom","padding-left",
+      "width","height","min-width","max-width","min-height","max-height",
+      "top","right","bottom","left","font-size","letter-spacing",
+      "line-height","border-width","border-radius","gap","row-gap","column-gap",
+      "outline-width","text-indent","word-spacing",
+    ]);
+    const unitPropMatch = trimmed.match(/^([\w-]+)\s*:\s*(-?\d+\.?\d*)\s*;?$/);
+    if (unitPropMatch) {
+      const prop = unitPropMatch[1].toLowerCase();
+      const val = unitPropMatch[2];
+      if (UNIT_PROPS.has(prop) && val !== "0") {
+        ann.add(idx, "warning", `'${prop}: ${val}' is missing a unit — did you mean '${val}px'?`);
+      }
+    }
   });
 
   return buildLines(rawLines, ann);
