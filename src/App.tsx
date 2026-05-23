@@ -4,6 +4,7 @@ import Landing from "@/pages/landing";
 import Home from "@/pages/home";
 import About from "@/pages/about";
 import Success from "@/pages/success";
+import Shared from "@/pages/shared";
 
 const queryClient = new QueryClient();
 
@@ -14,6 +15,7 @@ function Router() {
       <Route path="/check" component={Home} />
       <Route path="/about" component={About} />
       <Route path="/success" component={Success} />
+      <Route path="/s/:id" component={Shared} />
     </Switch>
   );
 }
