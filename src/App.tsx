@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
 import About from "@/pages/about";
+import Success from "@/pages/success";
 
 const queryClient = new QueryClient();
 
@@ -12,6 +13,7 @@ function Router() {
       <Route path="/" component={Landing} />
       <Route path="/check" component={Home} />
       <Route path="/about" component={About} />
+      <Route path="/success" component={Success} />
     </Switch>
   );
 }

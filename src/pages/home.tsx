@@ -897,6 +897,35 @@ export default function Home() {
           </>
         )}
 
+        {/* ── Upgrade to Pro button (free users only) ── */}
+        {!isPro && (
+          <div className="mt-8">
+            <button
+              onClick={async () => {
+                try {
+                  const res = await fetch("/api/create-checkout", { method: "POST" });
+                  const data = await res.json();
+                  if (data.url) window.location.href = data.url;
+                } catch {
+                  alert("Something went wrong. Please try again.");
+                }
+              }}
+              className="w-full rounded-xl py-3.5 text-sm font-semibold tracking-wide transition-all duration-150 active:scale-[0.98]"
+              style={{
+                background: "hsl(210 80% 60%)",
+                color: "hsl(222 16% 6%)",
+                border: "none",
+                cursor: "pointer",
+              }}
+            >
+              Upgrade to Pro — £4/month
+            </button>
+            <p className="text-xs text-center mt-2" style={{ color: "hsl(215 14% 40%)" }}>
+              Multi-file mode · Shareable links · Saved collections
+            </p>
+          </div>
+        )}
+
         {/* ── Footer with tap-5 dev toggle ── */}
         <div className="mt-10 pt-4" style={{ borderTop: "1px solid hsl(220 13% 16%)" }}>
           <button
@@ -905,7 +934,7 @@ export default function Home() {
             style={{ background: "none", border: "none", cursor: "default", WebkitTapHighlightColor: "transparent" }}
           >
             <span className="text-xs" style={{ color: "hsl(215 14% 30%)" }}>
-              PasteCheck v1.8
+              PasteCheck v1.9
             </span>
           </button>
         </div>

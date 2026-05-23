@@ -73,6 +73,8 @@
   },
   "dependencies": {
     "react-helmet-async": "^3.0.0",
+    "stripe": "^16.0.0",
+    "@vercel/node": "^3.0.0",
     "@lezer/common": "^1.5.2",
     "@lezer/python": "^1.1.18",
     "acorn": "^8.16.0",
