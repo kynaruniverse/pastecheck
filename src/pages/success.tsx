@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import NavMenu from "@/components/NavMenu";
+import { supabase } from "@/lib/supabase";
 
 function generateLicenceKey(): string {
   return "pc_" + Math.random().toString(36).slice(2, 11) + Math.random().toString(36).slice(2, 11);
@@ -11,15 +12,27 @@ export default function Success() {
   const [status, setStatus] = useState<"loading" | "done">("loading");
 
   useEffect(() => {
-    try {
-      const existing = localStorage.getItem("pastecheck_licence");
-      if (!existing) {
-        const key = generateLicenceKey();
-        localStorage.setItem("pastecheck_licence", key);
-      }
-      localStorage.setItem("pastecheck_pro", "true");
-    } catch {}
-    setStatus("done");
+    async function activate() {
+      try {
+        const existing = localStorage.getItem("pastecheck_licence");
+        if (!existing) {
+          const key = generateLicenceKey();
+          localStorage.setItem("pastecheck_licence", key);
+        }
+        localStorage.setItem("pastecheck_pro", "true");
+
+        // Write is_pro to Supabase if user is logged in
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await supabase
+            .from("users")
+            .update({ is_pro: true })
+            .eq("id", user.id);
+        }
+      } catch {}
+      setStatus("done");
+    }
+    activate();
   }, []);
 
   return (
@@ -39,7 +52,7 @@ export default function Success() {
                 You're Pro
               </h1>
               <p className="text-sm" style={{ color: "hsl(215 14% 55%)" }}>
-                Multi-file mode is now unlocked. Welcome to PasteCheck Pro.
+                Multi-file mode, shareable links, and saved collections are now unlocked. Welcome to PasteCheck Pro.
               </p>
             </div>
             <button

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import NavMenu from "@/components/NavMenu";
 import { lint, detectLanguage, type LintResult, type Language } from "@/lib/linter";
 import FeedbackForm from "@/components/FeedbackForm";
@@ -501,6 +501,24 @@ export default function Home() {
   const [showSurvey, setShowSurvey] = useState(false);
   const [surveyDismissed, setSurveyDismissed] = useState(false);
 
+  // Sync Pro status from Supabase on mount
+  useEffect(() => {
+    async function syncPro() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from("users")
+          .select("is_pro")
+          .eq("id", user.id)
+          .single();
+        const proValue = data?.is_pro === true;
+        localStorage.setItem("pastecheck_pro", String(proValue));
+        setIsPro(proValue);
+      }
+    }
+    syncPro();
+  }, []);
+
   const errorCount = result?.lines.filter((l) => l.type === "error").length ?? 0;
   const warningCount = result?.lines.filter((l) => l.type === "warning").length ?? 0;
   const isLowConfidence = code.trim().split("\n").filter((l) => l.trim().length > 0).length < 5;
@@ -511,8 +529,9 @@ export default function Home() {
     setTapCount(next);
     if (next >= 5) {
       const newValue = !isPro;
-      setProMode(newValue);
       setIsPro(newValue);
+      setProMode("single");
+      localStorage.setItem("pastecheck_pro", String(newValue));
       setTapCount(0);
       const msg = newValue ? "Pro mode ON" : "Pro mode OFF";
       setProToast(msg);
@@ -1114,7 +1133,7 @@ export default function Home() {
             style={{ background: "none", border: "none", cursor: "default", WebkitTapHighlightColor: "transparent" }}
           >
             <span className="text-xs" style={{ color: "hsl(215 14% 30%)" }}>
-              PasteCheck v2.4
+              PasteCheck v
             </span>
           </button>
         </div>
