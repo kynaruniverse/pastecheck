@@ -85,14 +85,19 @@ export function detectLanguage(code: string): Language {
     return "html";
   }
 
-  // TypeScript detection — must sit above Python to avoid misdetection
+  // TypeScript/TSX detection — must sit above Python to avoid misdetection
   if (
     /\binterface\s+\w+[\s<{]/.test(trimmed) ||
     /\btype\s+\w+\s*(<[^>]+>)?\s*=/.test(trimmed) ||
     /\bimport\s+type\s/.test(trimmed) ||
     /\benum\s+\w+\s*\{/.test(trimmed) ||
     /\b(public|private|protected|readonly)\s+\w+[\s:(!]/.test(trimmed) ||
-    /:\s*(string|number|boolean|void|any|never|unknown|object)\b/.test(trimmed)
+    /:\s*(string|number|boolean|void|any|never|unknown|object)\b/.test(trimmed) ||
+    /import\s+[\w\s{},*]+\s+from\s+["']react["']/.test(trimmed) ||
+    /export\s+default\s+function\s+\w+\s*\(/.test(trimmed) ||
+    /useState|useEffect|useRef|useCallback|useMemo/.test(trimmed) ||
+    /className=/.test(trimmed) ||
+    /\.tsx?["']/.test(trimmed)
   ) {
     return "typescript";
   }

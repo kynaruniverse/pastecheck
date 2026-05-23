@@ -1100,7 +1100,7 @@ export default function Home() {
             >
               Upgrade to Pro — £4/month
             </button>
-            <p className="text-xs text-center mt-2" style={{ color: "hsl(215 14% 40%)" }}>
+            <p className="text-xs text-center mt-2" style={{ color: "hsl(215 14% 58%)" }}>
               Multi-file mode · Shareable links · Saved collections
             </p>
           </div>
@@ -1114,7 +1114,7 @@ export default function Home() {
             style={{ background: "none", border: "none", cursor: "default", WebkitTapHighlightColor: "transparent" }}
           >
             <span className="text-xs" style={{ color: "hsl(215 14% 30%)" }}>
-              PasteCheck v1.9
+              PasteCheck v2.4
             </span>
           </button>
         </div>

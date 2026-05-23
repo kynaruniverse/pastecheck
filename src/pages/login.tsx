@@ -24,6 +24,17 @@ export default function Login() {
       }
       return;
     }
+    // Sync Pro status from Supabase to localStorage
+    const { data: userData } = await supabase
+      .from("users")
+      .select("is_pro")
+      .eq("id", (await supabase.auth.getUser()).data.user?.id ?? "")
+      .single();
+    if (userData?.is_pro) {
+      localStorage.setItem("pastecheck_pro", "true");
+    } else {
+      localStorage.removeItem("pastecheck_pro");
+    }
     window.location.href = "/collections";
   }
 
