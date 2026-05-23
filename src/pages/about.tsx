@@ -1,5 +1,6 @@
 import { useLocation } from "wouter";
 import { Helmet } from "react-helmet-async";
+import NavMenu from "@/components/NavMenu";
 
 export default function About() {
   const [, navigate] = useLocation();
@@ -16,6 +17,7 @@ export default function About() {
         <meta property="og:description" content="Learn how PasteCheck checks JavaScript, TypeScript, Python, HTML and CSS for errors instantly. Free online linter that works on mobile with no sign-up required." />
       </Helmet>
       <div className="mx-auto w-full max-w-2xl px-5 flex flex-col flex-1">
+        <NavMenu />
 
         {/* Nav */}
         <div className="pt-8 flex items-center justify-between">

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import NavMenu from "@/components/NavMenu";
 
 interface Collection {
   id: string;
@@ -59,7 +60,8 @@ export default function Collections() {
   return (
     <div className="min-h-screen w-full" style={{ background: "hsl(222 16% 10%)" }}>
       <div className="mx-auto w-full max-w-2xl px-4 pb-10 pt-8">
-
+        
+  <NavMenu />
         <header className="mb-6">
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
