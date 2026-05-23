@@ -375,9 +375,10 @@ function FileResultPanel({ fileResult, defaultOpen }: { fileResult: FileResult; 
 export default function Home() {
   // Pro state
   const [isPro, setIsPro] = useState<boolean>(getIsPro);
+  const [proMode, setProMode] = useState<"single" | "multi">("single");
   const [tapCount, setTapCount] = useState(0);
   const [proToast, setProToast] = useState<string | null>(null);
-
+  
   // Single-file mode (free)
   const [code, setCode] = useState("");
   const [result, setResult] = useState<LintResult | null>(null);
@@ -565,13 +566,11 @@ export default function Home() {
             style={{ background: "hsl(222 16% 13%)", border: "1px solid hsl(220 13% 22%)" }}
           >
             <button
-              onClick={() => { handleReset(); }}
+              onClick={() => { setProMode("single"); handleReset(); }}
               className="flex-1 rounded-lg py-2 text-xs font-semibold transition-all"
               style={{
-                background: !multiChecked && checked === false && files.length === 1 && fileResults.length === 0
-                  ? "hsl(210 80% 60%)" : "transparent",
-                color: !multiChecked && checked === false && files.length === 1 && fileResults.length === 0
-                  ? "hsl(222 16% 6%)" : "hsl(215 14% 55%)",
+                background: proMode === "single" ? "hsl(210 80% 60%)" : "transparent",
+                color: proMode === "single" ? "hsl(222 16% 6%)" : "hsl(215 14% 55%)",
                 border: "none",
                 cursor: "pointer",
               }}
@@ -579,13 +578,11 @@ export default function Home() {
               Single File
             </button>
             <button
-              onClick={() => { handleMultiReset(); setChecked(false); setResult(null); setCode(""); }}
+              onClick={() => { setProMode("multi"); handleMultiReset(); setChecked(false); setResult(null); setCode(""); }}
               className="flex-1 rounded-lg py-2 text-xs font-semibold transition-all"
               style={{
-                background: multiChecked || files.length > 1 || fileResults.length > 0
-                  ? "hsl(210 80% 60%)" : "transparent",
-                color: multiChecked || files.length > 1 || fileResults.length > 0
-                  ? "hsl(222 16% 6%)" : "hsl(215 14% 55%)",
+                background: proMode === "multi" ? "hsl(210 80% 60%)" : "transparent",
+                color: proMode === "multi" ? "hsl(222 16% 6%)" : "hsl(215 14% 55%)",
                 border: "none",
                 cursor: "pointer",
               }}
@@ -598,7 +595,7 @@ export default function Home() {
         {/* ════════════════════════════════════════════════════════════════════
             SINGLE FILE MODE
         ════════════════════════════════════════════════════════════════════ */}
-        {(!isPro || (isPro && fileResults.length === 0 && files.length === 1)) && (
+        {(!isPro || proMode === "single") && (
           <>
             {!checked ? (
               <div className="flex flex-col gap-4">
@@ -783,7 +780,7 @@ export default function Home() {
         {/* ════════════════════════════════════════════════════════════════════
             MULTI-FILE MODE (Pro only)
         ════════════════════════════════════════════════════════════════════ */}
-        {isPro && (files.length > 1 || fileResults.length > 0) && (
+        {isPro && proMode === "multi" && (
           <>
             {!multiChecked ? (
               <div className="flex flex-col gap-4">
