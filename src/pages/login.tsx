@@ -35,7 +35,7 @@ export default function Login() {
     } else {
       localStorage.removeItem("pastecheck_pro");
     }
-    window.location.href = "/collections";
+    window.location.href = "/check";
   }
 
   return (
