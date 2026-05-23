@@ -662,6 +662,35 @@ export default function Home() {
     <div className="min-h-screen w-full" style={{ background: "hsl(222 16% 10%)" }}>
       <div className="mx-auto w-full max-w-2xl px-4 pb-10 pt-8">
 
+        {/* Nav */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-2">
+            <a href="/" style={{ textDecoration: "none" }}>
+              <span
+                className="inline-flex items-center justify-center rounded-lg w-8 h-8 text-sm font-bold shrink-0"
+                style={{ background: "hsl(210 80% 60%)", color: "hsl(222 16% 6%)" }}
+              >P</span>
+            </a>
+            <a href="/" style={{ textDecoration: "none" }}>
+              <span className="text-base font-bold tracking-tight" style={{ color: "hsl(210 20% 92%)" }}>PasteCheck</span>
+            </a>
+          </div>
+          <div className="flex items-center gap-3">
+            <a href="/collections" style={{ textDecoration: "none" }}>
+              <span className="text-xs font-medium" style={{ color: "hsl(215 14% 55%)" }}>Collections</span>
+            </a>
+            <a href="/about" style={{ textDecoration: "none" }}>
+              <span className="text-xs font-medium" style={{ color: "hsl(215 14% 55%)" }}>About</span>
+            </a>
+            <a href="/login" style={{ textDecoration: "none" }}>
+              <span
+                className="text-xs font-semibold px-3 py-1.5 rounded-lg"
+                style={{ background: "hsl(220 13% 18%)", color: "hsl(210 20% 80%)", border: "1px solid hsl(220 13% 26%)" }}
+              >Account</span>
+            </a>
+          </div>
+        </div>
+
         <header className="mb-6">
           <div className="flex items-center gap-2 mb-1">
             <span
