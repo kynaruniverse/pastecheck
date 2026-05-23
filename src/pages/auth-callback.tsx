@@ -3,25 +3,36 @@ import { supabase } from "@/lib/supabase";
 
 export default function AuthCallback() {
   useEffect(() => {
-    supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session) {
-        window.location.href = "/collections";
-      } else if (event === "USER_UPDATED" && session) {
-        // Email confirmed — send to login to sign in properly
-        window.location.href = "/login";
+    async function handleCallback() {
+      const params = new URLSearchParams(window.location.search);
+      const tokenHash = params.get("token_hash");
+      const type = params.get("type");
+
+      if (tokenHash && type) {
+        // Email confirmation link clicked
+        const { error } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: "email",
+        });
+
+        if (error) {
+          window.location.href = "/login";
+        } else {
+          // Confirmed — send to login to sign in with password
+          window.location.href = "/login";
+        }
       } else {
-        // Fallback — wait a moment then check
-        setTimeout(() => {
-          supabase.auth.getSession().then(({ data }) => {
-            if (data.session) {
-              window.location.href = "/collections";
-            } else {
-              window.location.href = "/login";
-            }
-          });
-        }, 2000);
+        // Normal sign in callback
+        const { data } = await supabase.auth.getSession();
+        if (data.session) {
+          window.location.href = "/collections";
+        } else {
+          window.location.href = "/login";
+        }
       }
-    });
+    }
+
+    handleCallback();
   }, []);
 
   return (
