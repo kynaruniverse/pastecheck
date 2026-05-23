@@ -10,7 +10,7 @@ export default function NavMenu() {
         onClick={() => setOpen(true)}
         style={{
           position: "fixed",
-          top: "16px",
+          bottom: "24px",
           right: "16px",
           zIndex: 100,
           width: "40px",

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { type LintResult } from "@/lib/linter";
+import NavMenu from "@/components/NavMenu";
 
 interface SavedCheck {
   id: string;
@@ -26,6 +27,15 @@ export default function CollectionDetail() {
   const [checks, setChecks] = useState<SavedCheck[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+
+  function toggleExpanded(id: string) {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) { next.delete(id); } else { next.add(id); }
+      return next;
+    });
+  }
   const collectionId = getCollectionId();
 
   useEffect(() => {
@@ -63,6 +73,7 @@ export default function CollectionDetail() {
 
   return (
     <div className="min-h-screen w-full" style={{ background: "hsl(222 16% 10%)" }}>
+      <NavMenu />
       <div className="mx-auto w-full max-w-2xl px-4 pb-10 pt-8">
 
         <header className="mb-6">
@@ -120,7 +131,11 @@ export default function CollectionDetail() {
                   className="rounded-xl px-4 py-3"
                   style={{ background: "hsl(222 16% 13%)", border: "1px solid hsl(220 13% 22%)" }}
                 >
-                  <div className="flex items-start justify-between gap-2">
+                  <div
+                    className="flex items-start justify-between gap-2"
+                    onClick={() => toggleExpanded(check.id)}
+                    style={{ cursor: "pointer", WebkitTapHighlightColor: "transparent" }}
+                  >
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium truncate" style={{ color: "hsl(210 20% 82%)" }}>
                         {check.name || check.code.trim().split("\n")[0].slice(0, 48) || "Untitled check"}
@@ -147,20 +162,33 @@ export default function CollectionDetail() {
                         </span>
                       </div>
                     </div>
-                    <button
-                      onClick={() => handleDeleteCheck(check.id)}
-                      className="shrink-0 text-xs px-2 py-1 rounded"
-                      style={{ background: "none", border: "none", color: "hsl(215 14% 40%)", cursor: "pointer" }}
-                    >✕</button>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <span
+                        className="text-xs"
+                        style={{
+                          color: "hsl(215 14% 45%)",
+                          display: "inline-block",
+                          transform: expanded.has(check.id) ? "rotate(90deg)" : "rotate(0deg)",
+                          transition: "transform 0.15s",
+                        }}
+                      >›</span>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleDeleteCheck(check.id); }}
+                        className="text-xs px-2 py-1 rounded ml-1"
+                        style={{ background: "none", border: "none", color: "hsl(215 14% 40%)", cursor: "pointer" }}
+                      >✕</button>
+                    </div>
                   </div>
-                  <div
-                    className="mt-2 rounded-lg px-3 py-2 overflow-x-auto"
-                    style={{ background: "hsl(222 16% 10%)", fontFamily: "var(--app-font-mono)", fontSize: "11.5px", lineHeight: "1.6" }}
-                  >
-                    <pre style={{ color: "hsl(210 20% 72%)", margin: 0, whiteSpace: "pre-wrap", wordBreak: "break-all" }}>
-                      {check.code.trim().slice(0, 300)}{check.code.trim().length > 300 ? "\n..." : ""}
-                    </pre>
-                  </div>
+                  {expanded.has(check.id) && (
+                    <div
+                      className="mt-2 rounded-lg px-3 py-2 overflow-x-auto"
+                      style={{ background: "hsl(222 16% 10%)", fontFamily: "var(--app-font-mono)", fontSize: "11.5px", lineHeight: "1.6" }}
+                    >
+                      <pre style={{ color: "hsl(210 20% 72%)", margin: 0, whiteSpace: "pre-wrap", wordBreak: "break-all" }}>
+                        {check.code.trim()}
+                      </pre>
+                    </div>
+                  )}
                 </div>
               );
             })}

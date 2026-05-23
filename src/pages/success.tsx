@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
+import NavMenu from "@/components/NavMenu";
 
 function generateLicenceKey(): string {
   return "pc_" + Math.random().toString(36).slice(2, 11) + Math.random().toString(36).slice(2, 11);
@@ -23,6 +24,7 @@ export default function Success() {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center px-4" style={{ background: "hsl(222 16% 10%)" }}>
+      <NavMenu />
       <div className="w-full max-w-sm flex flex-col items-center gap-6 text-center">
         {status === "loading" ? (
           <div className="text-sm" style={{ color: "hsl(215 14% 55%)" }}>Activating Pro...</div>

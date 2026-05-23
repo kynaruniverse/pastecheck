@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
+import NavMenu from "@/components/NavMenu";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -27,6 +28,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center px-4" style={{ background: "hsl(222 16% 10%)" }}>
+      <NavMenu />
       <div className="w-full max-w-sm flex flex-col gap-4">
 
         <div className="flex items-center gap-2 mb-2">

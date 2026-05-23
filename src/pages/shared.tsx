@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import type { LintResult, Language } from "@/lib/linter";
+import NavMenu from "@/components/NavMenu";
 
 const LANG_LABELS: Record<Exclude<Language, "unknown">, string> = {
   javascript: "JavaScript",
@@ -70,6 +71,7 @@ export default function Shared() {
 
   return (
     <div className="min-h-screen w-full" style={{ background: "hsl(222 16% 10%)" }}>
+      <NavMenu />
       <div className="mx-auto w-full max-w-2xl px-4 pb-10 pt-8">
         <header className="mb-6">
           <div className="flex items-center gap-2 mb-1">
