@@ -3,11 +3,23 @@ import { supabase } from "@/lib/supabase";
 
 export default function AuthCallback() {
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) {
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session) {
         window.location.href = "/collections";
-      } else {
+      } else if (event === "USER_UPDATED" && session) {
+        // Email confirmed — send to login to sign in properly
         window.location.href = "/login";
+      } else {
+        // Fallback — wait a moment then check
+        setTimeout(() => {
+          supabase.auth.getSession().then(({ data }) => {
+            if (data.session) {
+              window.location.href = "/collections";
+            } else {
+              window.location.href = "/login";
+            }
+          });
+        }, 2000);
       }
     });
   }, []);
