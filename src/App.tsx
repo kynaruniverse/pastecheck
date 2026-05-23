@@ -5,6 +5,10 @@ import Home from "@/pages/home";
 import About from "@/pages/about";
 import Success from "@/pages/success";
 import Shared from "@/pages/shared";
+import Login from "@/pages/login";
+import AuthCallback from "@/pages/auth-callback";
+import Collections from "@/pages/collections";
+import CollectionDetail from "@/pages/collection-detail";
 
 const queryClient = new QueryClient();
 
@@ -16,6 +20,10 @@ function Router() {
       <Route path="/about" component={About} />
       <Route path="/success" component={Success} />
       <Route path="/s/:id" component={Shared} />
+      <Route path="/login" component={Login} />
+      <Route path="/auth/callback" component={AuthCallback} />
+      <Route path="/collections" component={Collections} />
+      <Route path="/collections/:id" component={CollectionDetail} />
     </Switch>
   );
 }

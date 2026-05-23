@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { lint, detectLanguage, type LintResult, type Language } from "@/lib/linter";
 import FeedbackForm from "@/components/FeedbackForm";
+import { supabase } from "@/lib/supabase";
 
 const LANG_LABELS: Record<Exclude<Language, "unknown">, string> = {
   javascript: "JavaScript",
@@ -160,6 +161,101 @@ function DebugNudge({ errorCount, warningCount }: { errorCount: number; warningC
               <span className="text-xs" style={{ color: "hsl(210 20% 65%)", lineHeight: "1.6" }}>{b}</span>
             </div>
           ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SaveToCollectionButton({ code, language, lines }: { code: string; language: string; lines: any[] }) {
+  const [collections, setCollections] = useState<{ id: string; name: string }[]>([]);
+  const [open, setOpen] = useState(false);
+  const [saving, setSaving] = useState<string | null>(null);
+  const [saved, setSaved] = useState<string | null>(null);
+  const [loadingCols, setLoadingCols] = useState(false);
+
+  async function handleOpen() {
+    if (open) { setOpen(false); return; }
+    setOpen(true);
+    setLoadingCols(true);
+    const { data } = await supabase
+      .from("collections")
+      .select("id, name")
+      .order("created_at", { ascending: false });
+    setCollections(data ?? []);
+    setLoadingCols(false);
+  }
+
+  async function handleSave(collectionId: string) {
+    setSaving(collectionId);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { window.location.href = "/login"; return; }
+    await supabase.from("saved_checks").insert({
+      user_id: user.id,
+      collection_id: collectionId,
+      code,
+      language,
+      lines,
+    });
+    setSaving(null);
+    setSaved(collectionId);
+    setOpen(false);
+    setTimeout(() => setSaved(null), 2500);
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <button
+        onClick={handleOpen}
+        className="w-full rounded-xl py-3 text-sm font-semibold transition-all duration-150 active:scale-[0.98]"
+        style={{
+          background: "hsl(222 16% 16%)",
+          color: "hsl(210 20% 75%)",
+          border: "1px solid hsl(220 13% 26%)",
+          cursor: "pointer",
+        }}
+      >
+        {saved ? "✓ Saved" : "📁 Save to collection"}
+      </button>
+
+      {open && (
+        <div
+          className="rounded-xl overflow-hidden"
+          style={{ background: "hsl(222 16% 13%)", border: "1px solid hsl(220 13% 22%)" }}
+        >
+          {loadingCols ? (
+            <p className="text-xs px-4 py-3" style={{ color: "hsl(215 14% 45%)" }}>Loading collections...</p>
+          ) : collections.length === 0 ? (
+            <div className="px-4 py-3 flex flex-col gap-2">
+              <p className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>No collections yet.</p>
+              <a href="/collections">
+                <button
+                  className="text-xs font-semibold px-3 py-1.5 rounded-lg"
+                  style={{ background: "hsl(210 80% 60%)", color: "hsl(222 16% 6%)", border: "none", cursor: "pointer" }}
+                >
+                  Create one
+                </button>
+              </a>
+            </div>
+          ) : (
+            collections.map((col) => (
+              <button
+                key={col.id}
+                onClick={() => handleSave(col.id)}
+                disabled={saving === col.id}
+                className="w-full text-left px-4 py-2.5 text-xs transition-all"
+                style={{
+                  background: "none",
+                  border: "none",
+                  borderBottom: "1px solid hsl(220 13% 18%)",
+                  color: saving === col.id ? "hsl(215 14% 40%)" : "hsl(210 20% 78%)",
+                  cursor: saving === col.id ? "not-allowed" : "pointer",
+                }}
+              >
+                {saving === col.id ? "Saving..." : `📁 ${col.name}`}
+              </button>
+            ))
+          )}
         </div>
       )}
     </div>
@@ -818,6 +914,15 @@ export default function Home() {
                       </div>
                     )}
                   </div>
+                )}
+
+                {/* Save to collection — Pro only */}
+                {isPro && (
+                  <SaveToCollectionButton
+                    code={code}
+                    language={result?.language ?? "unknown"}
+                    lines={result?.lines ?? []}
+                  />
                 )}
 
                 {/* Share upsell — free users */}
