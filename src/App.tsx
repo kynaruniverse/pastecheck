@@ -6,6 +6,7 @@ import About from "@/pages/about";
 import Success from "@/pages/success";
 import Shared from "@/pages/shared";
 import Login from "@/pages/login";
+import Signup from "@/pages/signup";
 import AuthCallback from "@/pages/auth-callback";
 import Collections from "@/pages/collections";
 import CollectionDetail from "@/pages/collection-detail";
@@ -21,6 +22,7 @@ function Router() {
       <Route path="/success" component={Success} />
       <Route path="/s/:id" component={Shared} />
       <Route path="/login" component={Login} />
+      <Route path="/signup" component={Signup} />
       <Route path="/auth/callback" component={AuthCallback} />
       <Route path="/collections" component={Collections} />
       <Route path="/collections/:id" component={CollectionDetail} />
