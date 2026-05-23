@@ -1,7 +1,29 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function NavMenu() {
   const [open, setOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+    });
+  }, []);
+
+  async function handleSignOut() {
+    await supabase.auth.signOut();
+    localStorage.removeItem("pastecheck_pro");
+    localStorage.removeItem("pastecheck_licence");
+    window.location.href = "/";
+  }
+
+  const navItems = [
+    { label: "Home", href: "/" },
+    { label: "Check My Code", href: "/check" },
+    { label: "Collections", href: "/collections" },
+    { label: "About", href: "/about" },
+  ];
 
   return (
     <>
@@ -97,14 +119,8 @@ export default function NavMenu() {
         </div>
 
         {/* Nav links */}
-        <nav style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-          {[
-            { label: "Home", href: "/" },
-            { label: "Check My Code", href: "/check" },
-            { label: "Collections", href: "/collections" },
-            { label: "About", href: "/about" },
-            { label: "Account", href: "/login" },
-          ].map((item) => (
+        <nav style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1 }}>
+          {navItems.map((item) => (
             <a
               key={item.href}
               href={item.href}
@@ -128,6 +144,52 @@ export default function NavMenu() {
             </a>
           ))}
         </nav>
+
+        {/* Auth action — bottom of drawer */}
+        <div style={{ borderTop: "1px solid hsl(220 13% 20%)", paddingTop: "16px", marginTop: "8px" }}>
+          {isLoggedIn ? (
+            <button
+              onClick={handleSignOut}
+              style={{
+                width: "100%",
+                padding: "10px 12px",
+                borderRadius: "10px",
+                fontSize: "14px",
+                fontWeight: 500,
+                color: "hsl(0 70% 65%)",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                textAlign: "left",
+                transition: "background 0.1s",
+                WebkitTapHighlightColor: "transparent",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "hsl(220 13% 18%)")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
+            >
+              Sign out
+            </button>
+          ) : (
+            <a href="/login" style={{ textDecoration: "none" }}>
+              <div
+                style={{
+                  padding: "10px 12px",
+                  borderRadius: "10px",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  color: "hsl(210 80% 65%)",
+                  cursor: "pointer",
+                  transition: "background 0.1s",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "hsl(220 13% 18%)")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+              >
+                Sign in
+              </div>
+            </a>
+          )}
+        </div>
+
       </div>
     </>
   );
