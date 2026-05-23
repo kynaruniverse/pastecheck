@@ -458,6 +458,7 @@ export default function Home() {
     setChecked(false);
     setExpanded(new Set());
     setInputError(null);
+    setShareUrl(null);
     setTimeout(() => textareaRef.current?.focus(), 0);
   }
 
@@ -472,6 +473,33 @@ export default function Home() {
       }
       return next;
     });
+  }
+
+  // ── Share handler ──────────────────────────────────────────────────────────
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [sharing, setSharing] = useState(false);
+
+  async function handleShare() {
+    if (!result) return;
+    setSharing(true);
+    try {
+      const res = await fetch("/api/share", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code,
+          language: result.language,
+          lines: result.lines,
+        }),
+      });
+      const data = await res.json();
+      if (data.id) {
+        const url = `https://www.pastecheck.co.uk/s/${data.id}`;
+        setShareUrl(url);
+        try { await navigator.clipboard.writeText(url); } catch {}
+      }
+    } catch {}
+    setSharing(false);
   }
 
   // ── Multi-file handlers ────────────────────────────────────────────────────
@@ -766,6 +794,49 @@ export default function Home() {
                 {showSurvey && <InAppSurvey onDismiss={() => { setShowSurvey(false); setSurveyDismissed(true); }} />}
                 {(errorCount > 0 || warningCount > 0) && <DebugNudge errorCount={errorCount} warningCount={warningCount} />}
                 <ResultRating language={result?.language ?? "unknown"} errorCount={errorCount} warningCount={warningCount} />
+
+                {/* Share button — Pro only */}
+                {isPro && (
+                  <div className="flex flex-col gap-2">
+                    <button
+                      onClick={handleShare}
+                      disabled={sharing}
+                      className="w-full rounded-xl py-3 text-sm font-semibold transition-all duration-150 active:scale-[0.98]"
+                      style={{
+                        background: sharing ? "hsl(220 13% 20%)" : "hsl(222 16% 16%)",
+                        color: sharing ? "hsl(215 14% 40%)" : "hsl(210 20% 75%)",
+                        border: "1px solid hsl(220 13% 26%)",
+                        cursor: sharing ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      {sharing ? "Generating link..." : "🔗 Share this check"}
+                    </button>
+                    {shareUrl && (
+                      <div className="rounded-xl px-4 py-3 flex flex-col gap-2" style={{ background: "hsl(222 16% 13%)", border: "1px solid hsl(220 13% 22%)" }}>
+                        <p className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>Link copied to clipboard:</p>
+                        <p className="text-xs font-mono break-all" style={{ color: "hsl(210 80% 60%)" }}>{shareUrl}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Share upsell — free users */}
+                {!isPro && (
+                  <div className="rounded-xl px-4 py-3 flex items-center justify-between gap-3" style={{ background: "hsl(222 16% 13%)", border: "1px solid hsl(220 13% 22%)" }}>
+                    <span className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>🔗 Share this check — Pro feature</span>
+                    <button
+                      onClick={async () => {
+                        try {
+                          const res = await fetch("/api/create-checkout", { method: "POST" });
+                          const data = await res.json();
+                          if (data.url) window.location.href = data.url;
+                        } catch {}
+                      }}
+                      className="text-xs font-semibold shrink-0 px-3 py-1.5 rounded-lg"
+                      style={{ background: "hsl(210 80% 60%)", color: "hsl(222 16% 6%)", border: "none", cursor: "pointer" }}
+                    >Upgrade</button>
+                  </div>
+                )}
                 <button
                   onClick={handleReset}
                   className="w-full rounded-xl py-3.5 text-sm font-semibold tracking-wide transition-all duration-150 active:scale-[0.98]"
