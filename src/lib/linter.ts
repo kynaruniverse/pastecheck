@@ -170,12 +170,21 @@ function lintJavaScript(code: string, useTypeScript = false): CodeLine[] {
     );
 
     if (!containsJSX) {
-      // Non-JSX file — run full line-by-line recovery to surface real errors
+      // Non-JSX file — run line-by-line recovery to surface real errors
+      // Stop collecting once we have a genuine error — subsequent errors on different
+      // lines with the same generic message are almost always cascades from the first
       const lines = code.split("\n");
+      let lastErrorLine = -1;
+      let consecutiveGenericErrors = 0;
+      const CASCADE_MSGS = ["Unexpected token", "Unexpected keyword", "Unexpected identifier", "Unexpected reserved word"];
+      const isGeneric = (m: string) => CASCADE_MSGS.some(c => m.includes(c));
+
       for (let i = 0; i < lines.length; i++) {
         const partial = lines.slice(0, i + 1).join("\n");
         try {
           acorn.parse(partial, { ecmaVersion: "latest", sourceType: "module", locations: true });
+          // Line parsed cleanly — reset consecutive counter
+          consecutiveGenericErrors = 0;
         } catch (e2: unknown) {
           if (e2 && typeof e2 === "object") {
             const err2 = e2 as { loc?: { line: number }; message?: string };
@@ -183,7 +192,20 @@ function lintJavaScript(code: string, useTypeScript = false): CodeLine[] {
               const msg2 = (err2.message ?? "Syntax error").replace(/\s*\(\d+:\d+\)\s*$/, "");
               const entry = `Syntax error: ${msg2}`;
               if (!syntaxErrors.find((e) => e.line === err2.loc!.line)) {
-                syntaxErrors.push({ line: err2.loc.line, msg: entry });
+                if (isGeneric(msg2)) {
+                  consecutiveGenericErrors++;
+                  // Only add if this looks like an independent error:
+                  // first generic error, or there was a clean line between errors
+                  if (consecutiveGenericErrors <= 1) {
+                    syntaxErrors.push({ line: err2.loc.line, msg: entry });
+                    lastErrorLine = err2.loc.line;
+                  }
+                } else {
+                  // Non-generic error — always add, reset counter
+                  consecutiveGenericErrors = 0;
+                  syntaxErrors.push({ line: err2.loc.line, msg: entry });
+                  lastErrorLine = err2.loc.line;
+                }
               }
             }
           }
@@ -234,7 +256,7 @@ function lintJavaScript(code: string, useTypeScript = false): CodeLine[] {
       return !isLineValidInIsolation(lineText);
     });
 
-    filteredErrors.forEach(({ line, msg }) => addAt(line, "error", msg));
+    syntaxErrors.forEach(({ line, msg }) => addAt(line, "error", msg));
     return buildLines(rawLines, ann);
   }
 
