@@ -703,6 +703,13 @@ function walkTree(doc: Document, source: string, tagLineMap: Map<string, number[
       result.blockInInline.push({ block: tag, inline: parentInlineTag, line });
     }
 
+    // Invalid direct children of <table>
+    const VALID_TABLE_CHILDREN = new Set(["thead", "tbody", "tfoot", "tr", "caption", "colgroup", "col"]);
+    const parentTag = (el as unknown as { parentNode?: { tagName?: string } }).parentNode?.tagName?.toLowerCase();
+    if (parentTag === "table" && !VALID_TABLE_CHILDREN.has(tag) && tag !== "#text") {
+      result.blockInInline.push({ block: tag, inline: "table", line });
+    }
+
     const nextInlineParent = INLINE_ELEMENTS.has(tag) ? tag : parentInlineTag;
     el.childNodes?.forEach((child) => visit(child, nextInlineParent));
   }
@@ -926,9 +933,13 @@ function lintHTML(code: string): CodeLine[] {
   const ann = new AnnotationMap();
   const tagLineMap = buildTagLineMap(code);
 
+  const looksLikeFullDoc = /<!doctype\s+html/i.test(code) || /<html[\s>]/i.test(code);
+
   const doc = parseHTML(code, {
     sourceCodeLocationInfo: true,
     onParseError(err) {
+      // Suppress missing-doctype on fragments — only relevant for full documents
+      if (err.code === "missing-doctype" && !looksLikeFullDoc) return;
       const lineIdx = (err.startLine ?? 1) - 1;
       const msg = HTML_ERROR_MESSAGES[err.code] ?? `Parse error: ${err.code.replace(/-/g, " ")}`;
       ann.add(lineIdx, "error", msg);
@@ -950,7 +961,11 @@ function lintHTML(code: string): CodeLine[] {
   });
 
   walked.blockInInline.forEach(({ block, inline, line }) => {
-    ann.add(line - 1, "warning", `Block element <${block}> nested inside inline element <${inline}> — invalid HTML structure`);
+    if (inline === "table") {
+      ann.add(line - 1, "error", `<${block}> is not a valid direct child of <table> — only <thead>, <tbody>, <tfoot>, <tr>, <caption>, and <colgroup> are allowed inside <table>`);
+    } else {
+      ann.add(line - 1, "warning", `Block element <${block}> nested inside inline element <${inline}> — invalid HTML structure`);
+    }
   });
 
   walked.missingAlt.forEach(({ line }) => {
@@ -965,7 +980,6 @@ function lintHTML(code: string): CodeLine[] {
     ann.add(line - 1, "warning", "<input> has no associated <label> — add <label for=\"inputId\"> above it, or add aria-label=\"description\" directly on the input");
   });
 
-  const looksLikeFullDoc = /<!doctype\s+html/i.test(code) || /<html[\s>]/i.test(code);
   if (looksLikeFullDoc) {
     // Use line index 1 (the <html> line) to avoid collision with doctype parse errors on line 0
     const metaLine = rawLines.findIndex((l) => /<html[\s>]/i.test(l));
