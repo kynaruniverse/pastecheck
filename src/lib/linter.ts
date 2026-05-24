@@ -154,25 +154,43 @@ function lintJavaScript(code: string, useTypeScript = false): CodeLine[] {
       }
     }
 
-    // Attempt line-by-line recovery to surface more errors
-    const lines = code.split("\n");
-    for (let i = 0; i < lines.length; i++) {
-      const partial = lines.slice(0, i + 1).join("\n");
-      try {
-        acorn.parse(partial, { ecmaVersion: "latest", sourceType: "module", locations: true });
-      } catch (e2: unknown) {
-        if (e2 && typeof e2 === "object") {
-          const err2 = e2 as { loc?: { line: number }; message?: string };
-          if (err2.loc && err2.loc.line === i + 1) {
-            const msg2 = (err2.message ?? "Syntax error").replace(/\s*\(\d+:\d+\)\s*$/, "");
-            const entry = `Syntax error: ${msg2}`;
-            if (!syntaxErrors.find((e) => e.line === err2.loc!.line)) {
-              syntaxErrors.push({ line: err2.loc.line, msg: entry });
+    // JSX/TSX detection — if file contains JSX patterns, skip line-by-line recovery
+    // entirely to prevent cascade false positives from JSX syntax acorn can't parse
+    const containsJSX = (
+      /\/\*[\s\S]*?\*\/|\/\/.*$/gm.test("") || // placeholder to structure the check
+      /<[A-Z][a-zA-Z]*[\s/>]/.test(code) ||     // <Component or <Component/>
+      /<\/[A-Z][a-zA-Z]*>/.test(code) ||         // </Component>
+      /return\s*\([\s\S]*?</.test(code) ||        // return ( ... <
+      /jsx|tsx/.test(useTypeScript ? "tsx" : "") ||
+      (useTypeScript && (
+        /className=/.test(code) ||
+        /<[a-z]+[\s\S]*?\/>/.test(code) ||        // self-closing lowercase: <div />
+        /useState|useEffect|useRef|useCallback|useMemo/.test(code)
+      ))
+    );
+
+    if (!containsJSX) {
+      // Non-JSX file — run full line-by-line recovery to surface real errors
+      const lines = code.split("\n");
+      for (let i = 0; i < lines.length; i++) {
+        const partial = lines.slice(0, i + 1).join("\n");
+        try {
+          acorn.parse(partial, { ecmaVersion: "latest", sourceType: "module", locations: true });
+        } catch (e2: unknown) {
+          if (e2 && typeof e2 === "object") {
+            const err2 = e2 as { loc?: { line: number }; message?: string };
+            if (err2.loc && err2.loc.line === i + 1) {
+              const msg2 = (err2.message ?? "Syntax error").replace(/\s*\(\d+:\d+\)\s*$/, "");
+              const entry = `Syntax error: ${msg2}`;
+              if (!syntaxErrors.find((e) => e.line === err2.loc!.line)) {
+                syntaxErrors.push({ line: err2.loc.line, msg: entry });
+              }
             }
           }
         }
       }
     }
+    // JSX file — only report the first parse error to avoid cascade false positives
 
     syntaxErrors.forEach(({ line, msg }) => addAt(line, "error", msg));
     return buildLines(rawLines, ann);
