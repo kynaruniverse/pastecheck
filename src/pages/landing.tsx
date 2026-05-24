@@ -41,15 +41,77 @@ export default function Landing() {
   return (
     <div
       className="min-h-screen w-full flex flex-col"
-      style={{ background: "hsl(222 16% 10%)" }}
+      style={{ background: "hsl(222 16% 10%)", position: "relative", overflow: "hidden" }}
     >
       <Helmet>
         <title>PasteCheck — Free Online Code Error Checker</title>
         <meta name="description" content="Paste your JavaScript, TypeScript, Python, HTML or CSS and instantly see every error highlighted. Free, no sign-up, works on mobile." />
         <meta property="og:title" content="PasteCheck — Free Online Code Error Checker" />
         <meta property="og:description" content="Paste your JavaScript, TypeScript, Python, HTML or CSS and instantly see every error highlighted. Free, no sign-up, works on mobile." />
+        <style>{`
+          @keyframes aurora1 {
+            0%, 100% { transform: translate(0%, 0%) scale(1); opacity: 0.5; }
+            33% { transform: translate(8%, -12%) scale(1.08); opacity: 0.7; }
+            66% { transform: translate(-6%, 8%) scale(0.95); opacity: 0.4; }
+          }
+          @keyframes aurora2 {
+            0%, 100% { transform: translate(0%, 0%) scale(1); opacity: 0.4; }
+            33% { transform: translate(-10%, 10%) scale(1.1); opacity: 0.6; }
+            66% { transform: translate(8%, -6%) scale(0.92); opacity: 0.35; }
+          }
+          @keyframes aurora3 {
+            0%, 100% { transform: translate(0%, 0%) scale(1); opacity: 0.3; }
+            50% { transform: translate(6%, 8%) scale(1.05); opacity: 0.5; }
+          }
+          @keyframes probadgepulse {
+            0%, 100% { box-shadow: 0 0 0 0 hsla(210,80%,60%,0.4); }
+            50% { box-shadow: 0 0 0 6px hsla(210,80%,60%,0); }
+          }
+          @keyframes btnpress {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(0.97); }
+          }
+        `}</style>
       </Helmet>
-      <div className="mx-auto w-full max-w-2xl px-5 flex flex-col flex-1">
+
+      {/* Aurora background layers */}
+      <div aria-hidden="true" style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0 }}>
+        <div style={{
+          position: "absolute",
+          top: "-10%",
+          left: "-20%",
+          width: "70%",
+          height: "60%",
+          borderRadius: "50%",
+          background: "radial-gradient(ellipse, hsla(210,80%,55%,0.18) 0%, transparent 70%)",
+          animation: "aurora1 12s ease-in-out infinite",
+          filter: "blur(40px)",
+        }} />
+        <div style={{
+          position: "absolute",
+          top: "5%",
+          right: "-15%",
+          width: "55%",
+          height: "50%",
+          borderRadius: "50%",
+          background: "radial-gradient(ellipse, hsla(250,70%,60%,0.14) 0%, transparent 70%)",
+          animation: "aurora2 15s ease-in-out infinite",
+          filter: "blur(50px)",
+        }} />
+        <div style={{
+          position: "absolute",
+          top: "20%",
+          left: "30%",
+          width: "45%",
+          height: "40%",
+          borderRadius: "50%",
+          background: "radial-gradient(ellipse, hsla(190,70%,50%,0.10) 0%, transparent 70%)",
+          animation: "aurora3 18s ease-in-out infinite",
+          filter: "blur(60px)",
+        }} />
+      </div>
+
+      <div className="mx-auto w-full max-w-2xl px-5 flex flex-col flex-1" style={{ position: "relative", zIndex: 1 }}>
 
         {/* Nav */}
         <div className="pt-8 flex items-center gap-2">
@@ -77,6 +139,7 @@ export default function Landing() {
                 background: "rgba(96,165,250,0.12)",
                 color: "rgb(96,165,250)",
                 border: "1px solid rgba(96,165,250,0.2)",
+                backdropFilter: "blur(8px)",
               }}
             >
               Free · Pro available
@@ -89,7 +152,10 @@ export default function Landing() {
           >
             Catch Code Errors
             <br />
-            <span style={{ color: "hsl(210 80% 65%)" }}>Instantly.</span>
+            <span style={{
+              color: "hsl(210 80% 65%)",
+              textShadow: "0 0 40px hsla(210,80%,65%,0.35)",
+            }}>Instantly.</span>
           </h1>
 
           <p
@@ -107,7 +173,8 @@ export default function Landing() {
               color: "hsl(222 16% 6%)",
               border: "none",
               cursor: "pointer",
-              boxShadow: "0 0 32px hsla(210,80%,60%,0.25)",
+              boxShadow: "0 0 40px hsla(210,80%,60%,0.35), 0 2px 12px hsla(210,80%,60%,0.2)",
+              transition: "box-shadow 0.2s ease, transform 0.15s ease",
             }}
           >
             Check My Code
@@ -121,22 +188,31 @@ export default function Landing() {
           </p>
         </div>
 
-        {/* Pro section */}
+        {/* Pro section — glassmorphism */}
         <div className="pb-6 flex flex-col gap-3">
           <div
             className="rounded-2xl px-5 py-5 flex flex-col gap-4"
-            style={{ background: "hsl(222 16% 14%)", border: "1px solid hsl(210 80% 60% / 0.2)" }}
+            style={{
+              background: "rgba(30,38,58,0.6)",
+              border: "1px solid hsla(210,80%,60%,0.25)",
+              backdropFilter: "blur(16px)",
+              boxShadow: "0 0 32px hsla(210,80%,60%,0.08), inset 0 1px 0 hsla(210,80%,80%,0.06)",
+            }}
           >
             <div className="flex items-center gap-2">
               <span
                 className="text-xs font-bold px-2 py-0.5 rounded-full"
-                style={{ background: "hsl(210 80% 60%)", color: "hsl(222 16% 6%)" }}
+                style={{
+                  background: "hsl(210 80% 60%)",
+                  color: "hsl(222 16% 6%)",
+                  animation: "probadgepulse 2.5s ease-in-out infinite",
+                }}
               >PRO</span>
               <span className="text-sm font-semibold" style={{ color: "hsl(210 20% 90%)" }}>
                 £4/month — everything unlocked
               </span>
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2.5">
               {[
                 { icon: "📂", label: "Multi-file mode", desc: "Check up to 5 files at once with per-file results." },
                 { icon: "🔗", label: "Shareable links", desc: "Generate a permanent URL for any check result." },
@@ -145,8 +221,8 @@ export default function Landing() {
                 <div key={item.label} className="flex items-start gap-3">
                   <span className="text-base shrink-0 mt-0.5">{item.icon}</span>
                   <div>
-                    <span className="text-xs font-semibold" style={{ color: "hsl(210 20% 85%)" }}>{item.label}</span>
-                    <span className="text-xs" style={{ color: "hsl(215 14% 50%)" }}> — {item.desc}</span>
+                    <span className="text-xs font-semibold" style={{ color: "hsl(210 20% 88%)" }}>{item.label}</span>
+                    <span className="text-xs" style={{ color: "hsl(215 14% 52%)" }}> — {item.desc}</span>
                   </div>
                 </div>
               ))}
@@ -154,7 +230,13 @@ export default function Landing() {
             <button
               onClick={() => navigate("/check")}
               className="w-full rounded-xl py-3 text-sm font-semibold transition-all duration-150 active:scale-[0.98]"
-              style={{ background: "hsl(210 80% 60%)", color: "hsl(222 16% 6%)", border: "none", cursor: "pointer" }}
+              style={{
+                background: "hsl(210 80% 60%)",
+                color: "hsl(222 16% 6%)",
+                border: "none",
+                cursor: "pointer",
+                boxShadow: "0 0 20px hsla(210,80%,60%,0.25)",
+              }}
             >
               Start Free — Upgrade Anytime
             </button>
@@ -168,8 +250,9 @@ export default function Landing() {
               key={f.title}
               className="flex items-start gap-4 rounded-2xl px-5 py-4"
               style={{
-                background: "hsl(222 16% 14%)",
+                background: "rgba(30,38,58,0.5)",
                 border: "1px solid hsl(220 13% 21%)",
+                backdropFilter: "blur(8px)",
               }}
             >
               <span
