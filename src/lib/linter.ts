@@ -162,9 +162,9 @@ function lintJavaScript(code: string, useTypeScript = false): CodeLine[] {
       /<[A-Z][a-zA-Z]*[\s/>]/.test(code) ||     // <Component or <Component/>
       /<\/[A-Z][a-zA-Z]*>/.test(code) ||         // </Component>
       /return\s*\([\s\S]*?</.test(code) ||        // return ( ... <
-      /jsx|tsx/.test(useTypeScript ? "tsx" : "") ||
       (useTypeScript && (
         /className=/.test(code) ||
+
         /<[a-z]+[\s\S]*?\/>/.test(code) ||        // self-closing lowercase: <div />
         /useState|useEffect|useRef|useCallback|useMemo/.test(code)
       ))
@@ -182,8 +182,8 @@ function lintJavaScript(code: string, useTypeScript = false): CodeLine[] {
         "Unexpected reserved word", "The keyword", "Identifier directly after number",
       ];
       const isGeneric = (m: string) => CASCADE_MSGS.some(c => m.includes(c));
-      const lines = code.split("\n");
       let lastErrorLine = -1;
+
 
       for (let i = 0; i < lines.length; i++) {
         const partial = lines
@@ -629,8 +629,17 @@ function lintPython(code: string): CodeLine[] {
     const indentMatch = text.match(/^(\s*)/);
     const currentIndent = indentMatch ? indentMatch[1].replace(/\t/g, "    ").length : 0;
     const expectedIndent = indentStack[indentStack.length - 1];
-    const prevLine = rawLines.slice(0, idx).reverse().find(l => l.trim() && !l.trim().startsWith("#"));
+    
+    let prevLine: string | undefined;
+    for (let i = idx - 1; i >= 0; i--) {
+      if (rawLines[i].trim() && !rawLines[i].trim().startsWith("#")) {
+        prevLine = rawLines[i];
+        break;
+      }
+    }
+    
     const prevIsScopeOpener = prevLine ? /:\s*(#.*)?$/.test(prevLine.trim()) : false;
+
 
     if (prevIsScopeOpener && currentIndent <= (indentStack[indentStack.length - 1])) {
       // Line after a colon should always indent deeper
