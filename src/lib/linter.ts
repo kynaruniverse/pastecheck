@@ -319,6 +319,22 @@ try {
       if (callee.type === "Identifier" && callee.name === "alert") {
         addAt(n.loc.start.line, "warning", "'alert()' blocks the browser — avoid in production — use a custom modal or console.log() for debugging instead");
       }
+      if (callee.type === "Identifier" && (callee.name === "setTimeout" || callee.name === "setInterval")) {
+        const args = (n as unknown as { arguments: unknown[] }).arguments;
+        if (args && args.length > 0) {
+          const firstArg = args[0] as { type: string };
+          if (firstArg.type === "Literal") {
+            addAt(n.loc.start.line, "warning", `'${callee.name}()' called with a string argument — pass a function instead: ${callee.name}(() => { ... }, delay) — string arguments are evaluated like eval() and are a security risk`);
+          }
+        }
+      }
+      if (
+        callee.type === "MemberExpression" &&
+        (callee.object as unknown as { name?: string })?.name === "document" &&
+        callee.property?.name === "write"
+      ) {
+        addAt(n.loc.start.line, "error", "'document.write()' is deprecated and dangerous — it overwrites the entire page when called after load and blocks rendering — use DOM manipulation methods like appendChild() or innerHTML instead");
+      }
     },
     ThrowStatement(node: acorn.Node) {
       const n = node as unknown as { argument: { type: string }; loc?: NodeLoc };
