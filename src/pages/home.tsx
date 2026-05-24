@@ -4,6 +4,27 @@ import { lint, detectLanguage, type LintResult, type Language } from "@/lib/lint
 import FeedbackForm from "@/components/FeedbackForm";
 import { supabase } from "@/lib/supabase";
 
+// Inject keyframes once
+if (typeof document !== "undefined" && !document.getElementById("pc-keyframes")) {
+  const style = document.createElement("style");
+  style.id = "pc-keyframes";
+  style.textContent = `
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    @keyframes upgradeGlow {
+      0%, 100% { box-shadow: 0 0 12px hsla(210,80%,60%,0.3); }
+      50% { box-shadow: 0 0 24px hsla(210,80%,60%,0.6); }
+    }
+    @keyframes probadgepulse {
+      0%, 100% { box-shadow: 0 0 0 0 hsla(210,80%,60%,0.4); }
+      50% { box-shadow: 0 0 0 5px hsla(210,80%,60%,0); }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
 const LANG_LABELS: Record<Exclude<Language, "unknown">, string> = {
   javascript: "JavaScript",
   typescript: "TypeScript",
@@ -697,7 +718,11 @@ export default function Home() {
             {isPro && (
               <span
                 className="text-xs font-bold px-2 py-0.5 rounded-full"
-                style={{ background: "hsl(210 80% 60%)", color: "hsl(222 16% 6%)" }}
+                style={{
+                  background: "hsl(210 80% 60%)",
+                  color: "hsl(222 16% 6%)",
+                  animation: "probadgepulse 2.5s ease-in-out infinite",
+                }}
               >PRO</span>
             )}
           </div>
@@ -922,7 +947,11 @@ export default function Home() {
                       disabled={sharing}
                       className="w-full rounded-xl py-3 text-sm font-semibold transition-all duration-150 active:scale-[0.98]"
                       style={{
-                        background: sharing ? "hsl(220 13% 20%)" : "hsl(222 16% 16%)",
+                        background: sharing
+                          ? "linear-gradient(90deg, hsl(220 13% 18%) 25%, hsl(220 13% 24%) 50%, hsl(220 13% 18%) 75%)"
+                          : "hsl(222 16% 16%)",
+                        backgroundSize: sharing ? "200% 100%" : "auto",
+                        animation: sharing ? "shimmer 1.2s ease-in-out infinite" : "none",
                         color: sharing ? "hsl(215 14% 40%)" : "hsl(210 20% 75%)",
                         border: "1px solid hsl(220 13% 26%)",
                         cursor: sharing ? "not-allowed" : "pointer",
@@ -1109,12 +1138,13 @@ export default function Home() {
                   alert("Something went wrong. Please try again.");
                 }
               }}
-              className="w-full rounded-xl py-3.5 text-sm font-semibold tracking-wide transition-all duration-150 active:scale-[0.98]"
+              className="w-full rounded-xl py-3.5 text-sm font-semibold tracking-wide transition-all duration-150 active:scale-[0.97]"
               style={{
                 background: "hsl(210 80% 60%)",
                 color: "hsl(222 16% 6%)",
                 border: "none",
                 cursor: "pointer",
+                animation: "upgradeGlow 2.5s ease-in-out infinite",
               }}
             >
               Upgrade to Pro — £4/month
@@ -1133,7 +1163,7 @@ export default function Home() {
             style={{ background: "none", border: "none", cursor: "default", WebkitTapHighlightColor: "transparent" }}
           >
             <span className="text-xs" style={{ color: "hsl(215 14% 30%)" }}>
-              PasteCheck v2.4
+              PasteCheck v2.5
             </span>
           </button>
         </div>

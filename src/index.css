@@ -70,6 +70,12 @@
 
   html {
     -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  ::selection {
+    background: hsla(210, 80%, 60%, 0.3);
+    color: hsl(210, 20%, 95%);
   }
 
   body {
@@ -80,12 +86,47 @@
     -moz-osx-font-smoothing: grayscale;
     margin: 0;
     padding: 0;
+    overscroll-behavior: none;
+  }
+
+  button, a {
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+  }
+
+  button:focus-visible, a:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: 6px;
   }
 }
 
 @layer utilities {
   .font-mono {
     font-family: var(--app-font-mono);
+  }
+
+  /* Thin styled scrollbar for code panels */
+  .overflow-x-auto::-webkit-scrollbar,
+  .overflow-y-auto::-webkit-scrollbar {
+    height: 4px;
+    width: 4px;
+  }
+
+  .overflow-x-auto::-webkit-scrollbar-track,
+  .overflow-y-auto::-webkit-scrollbar-track {
+    background: hsl(222 16% 12%);
+  }
+
+  .overflow-x-auto::-webkit-scrollbar-thumb,
+  .overflow-y-auto::-webkit-scrollbar-thumb {
+    background: hsl(220 13% 28%);
+    border-radius: 4px;
+  }
+
+  .overflow-x-auto::-webkit-scrollbar-thumb:hover,
+  .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background: hsl(215 14% 40%);
   }
 
   .line-error {
