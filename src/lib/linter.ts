@@ -206,29 +206,32 @@ function lintJavaScript(code: string, useTypeScript = false): CodeLine[] {
     const isCascadeMessage = (msg: string) =>
       CASCADE_MESSAGES.some(c => msg.includes(c));
 
-    // Detect if the first error is a bracket/paren mismatch — primary cascade trigger
-    const firstError = syntaxErrors[0];
-    const firstErrorIsBracketMismatch = firstError && (
-      isCascadeMessage(firstError.msg) &&
-      (() => {
-        const firstLine = rawLines[firstError.line - 1] ?? "";
-        // Count unmatched open brackets/parens on the first error line
-        const opens = (firstLine.match(/\(|\[|\{/g) ?? []).length;
-        const closes = (firstLine.match(/\)|\]|\}/g) ?? []).length;
-        return opens !== closes;
-      })()
-    );
+    // Cascade suppression — a line is a cascade error if:
+    // 1. Its message is a generic symptom message, AND
+    // 2. The line itself is syntactically valid in isolation
+    const isLineValidInIsolation = (lineText: string): boolean => {
+      const trimmed = lineText.trim();
+      if (!trimmed) return true;
+      try {
+        // Wrap in a function to allow return statements and declarations
+        acorn.parse(`function __check__(){${trimmed}}`, {
+          ecmaVersion: "latest",
+          sourceType: "module",
+          locations: false,
+        });
+        return true;
+      } catch {
+        return false;
+      }
+    };
 
     const filteredErrors = syntaxErrors.filter((err, idx) => {
       if (idx === 0) return true; // always keep the first error
-      // If first error was a bracket mismatch, suppress all subsequent generic cascade errors
-      if (firstErrorIsBracketMismatch && isCascadeMessage(err.msg)) return false;
-      if (!isCascadeMessage(err.msg)) return true; // keep non-generic errors always
-      // For non-bracket-mismatch first errors, suppress generic errors within 5 lines
-      const hasPriorNearbyError = syntaxErrors
-        .slice(0, idx)
-        .some(prev => prev.line < err.line && err.line - prev.line <= 5);
-      return !hasPriorNearbyError;
+      if (!isCascadeMessage(err.msg)) return true; // always keep specific errors
+      // Suppress generic errors on lines that are valid in isolation —
+      // these are cascade victims, not real errors
+      const lineText = rawLines[err.line - 1] ?? "";
+      return !isLineValidInIsolation(lineText);
     });
 
     filteredErrors.forEach(({ line, msg }) => addAt(line, "error", msg));
