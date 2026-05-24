@@ -157,7 +157,7 @@ function lintJavaScript(code: string, useTypeScript = false): CodeLine[] {
     // JSX/TSX detection — if file contains JSX patterns, skip line-by-line recovery
     // entirely to prevent cascade false positives from JSX syntax acorn can't parse
     const containsJSX = (
-      /\/\*[\s\S]*?\*\/|\/\/.*$/gm.test("") || // placeholder to structure the check
+      false || // placeholder to structure the check
       /<[A-Z][a-zA-Z]*[\s/>]/.test(code) ||     // <Component or <Component/>
       /<\/[A-Z][a-zA-Z]*>/.test(code) ||         // </Component>
       /return\s*\([\s\S]*?</.test(code) ||        // return ( ... <
@@ -169,7 +169,7 @@ function lintJavaScript(code: string, useTypeScript = false): CodeLine[] {
       ))
     );
 
-    if (!containsJSX) {
+    if (!containsJSX && lines.length < 300) {
       // Non-JSX: line-by-line recovery with simple cascade suppression.
       // Rule: always keep the first error. Only add subsequent errors if:
       // 1. message is non-generic (specific errors are always real), OR
@@ -183,7 +183,10 @@ function lintJavaScript(code: string, useTypeScript = false): CodeLine[] {
       let lastErrorLine = -1;
 
       for (let i = 0; i < lines.length; i++) {
-        const partial = lines.slice(0, i + 1).join("\n");
+        const partial = lines
+          .slice(0, i + 1)
+          .join("\n")
+          .replace(/([{(\[])\s*$/gm, "");
         try {
           acorn.parse(partial, { ecmaVersion: "latest", sourceType: "module", locations: true });
         } catch (e2: unknown) {
@@ -206,27 +209,23 @@ function lintJavaScript(code: string, useTypeScript = false): CodeLine[] {
       }
     }
 
-    const CASCADE_MESSAGES = [
-      "Unexpected token", "Unexpected keyword", "Unexpected identifier",
-      "Unexpected reserved word", "The keyword", "Identifier directly after number",
-    ];
-    const isGenericError = (msg: string) => CASCADE_MESSAGES.some((m) => msg.includes(m));
     const filteredErrors: typeof syntaxErrors = [];
+    const seen = new Set<string>();
 
     for (const err of syntaxErrors) {
-      const previous = filteredErrors[filteredErrors.length - 1];
-      if (!previous) {
-        filteredErrors.push(err);
-        continue;
-      }
-      const lineDistance = err.line - previous.line;
-      if (lineDistance <= 2 && isGenericError(err.msg)) {
-        continue;
-      }
+      const key = `${err.line}:${err.msg}`;
+
+      // Only suppress exact duplicates
+      if (seen.has(key)) continue;
+  
+      seen.add(key);
       filteredErrors.push(err);
     }
 
-    filteredErrors.forEach(({ line, msg }) => addAt(line, "error", msg));
+    filteredErrors.forEach(({ line, msg }) => {
+      addAt(line, "error", msg);
+    });
+
     return buildLines(rawLines, ann);
   }
 
@@ -367,7 +366,12 @@ try {
     if (trimmed.startsWith("//")) return;
 
     // Push a new scope on function/arrow/class/block open
-    if (/(\bfunction\b|\bclass\b|=>|\b(if|else|for|while|try|catch)\b)[^{]*\{/.test(trimmed) || /^\{/.test(trimmed)) {
+    if (
+      /\bfunction\b/.test(trimmed) ||
+      /\bclass\b/.test(trimmed) ||
+      /=>\s*\{/.test(trimmed) ||
+      /^\{/.test(trimmed)
+    ) {
       scopeStack.push(new Map());
     }
 
@@ -409,7 +413,10 @@ try {
       }
       // Check for bare assignment: = not preceded or followed by = or ! or + or - or * or / or < or >
       // Also exclude compound assignments like +=, -=, *=, /=, %=, **=
-      if (/[^=!<>+\-*\/%&|^]=(?!=)/.test(condContent) && !/[+\-*\/%&|^]\s*=/.test(condContent)) {
+      if (
+        /(?:^|[^=!<>])=(?!=)/.test(condContent) &&
+        !/[+\-*\/%&|^]=/.test(condContent)
+      ) {
         ann.add(idx, "warning", "Possible assignment inside a condition — did you mean '===' instead of '='? Assignment in a condition always evaluates to the assigned value, which is rarely what you intend.");
       }
     }
@@ -439,7 +446,7 @@ try {
         if (ch === "{") braceDepth++;
         else if (ch === "}") braceDepth--;
       }
-      if (braceDepth <= asyncBraceStart && asyncBraceStart > 0) {
+      if (braceDepth <= asyncBraceStart) {
         insideAsyncFn = false;
       }
       asyncAwaitPattern.lastIndex = 0;
@@ -1143,7 +1150,7 @@ function lintHTML(code: string): CodeLine[] {
   // Table child validation — regex-based because parse5 silently moves invalid children out of <table> in the AST
   // Strip nested valid container blocks first so we only see direct children of <table>
   const VALID_TABLE_CHILDREN = new Set(["thead", "tbody", "tfoot", "tr", "caption", "colgroup", "col", "table"]);
-  const tableRegex = /<table[\s>][\s\S]*?<\/table>/gi;
+  const tableRegex = /<table\b[^>]*>(?![\s\S]*<table\b)[\s\S]*?<\/table>/gi;
   let tableMatch;
   while ((tableMatch = tableRegex.exec(code)) !== null) {
     const tableStartLine = code.slice(0, tableMatch.index).split("\n").length;
