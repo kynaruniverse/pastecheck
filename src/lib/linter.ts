@@ -75,12 +75,13 @@ export function detectLanguage(code: string): Language {
     return "css";
   }
 
+  // HTML detection — avoid matching React/JSX files
   if (
-    /^<!doctype\s+html/i.test(trimmed) ||
-    /^<html[\s>]/i.test(trimmed) ||
-    /<(div|span|p|h[1-6]|body|head|script|style|link|meta|img|a\b|ul|ol|li|table|form|input|br|hr|button|select|textarea|section|article|aside|header|footer|main|nav|figure|center|marquee|font|frame|frameset|iframe|canvas|video|audio|source|track|picture|details|summary|dialog|template)\b/i.test(
-      trimmed.slice(0, 600)
-    )
+    (
+      /^<!doctype\s+html/i.test(trimmed) ||
+      /^<html[\s>]/i.test(trimmed)
+    ) &&
+    !/\b(export|import)\b/.test(trimmed)
   ) {
     return "html";
   }
@@ -195,7 +196,15 @@ function lintJavaScript(code: string, useTypeScript = false): CodeLine[] {
           if (e2 && typeof e2 === "object") {
             const err2 = e2 as { loc?: { line: number }; message?: string };
             if (err2.loc && err2.loc.line === i + 1) {
-              const msg2 = (err2.message ?? "Syntax error").replace(/\s*\(\d+:\d+\)\s*$/, "");
+              const msg2 = (err2.message ?? "Syntax error")
+                .replace(/\s*\(\d+:\d+\)\s*$/, "");
+
+              const incompleteStructure =
+                /Unexpected token/.test(msg2) &&
+                /[{[(]\s*$/.test(partial.trim());
+
+              if (incompleteStructure) continue;
+
               const entry = `Syntax error: ${msg2}`;
               if (syntaxErrors.find((e) => e.line === err2.loc!.line)) continue;
               const isFirstError = lastErrorLine === -1;
