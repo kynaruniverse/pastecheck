@@ -206,14 +206,28 @@ function lintJavaScript(code: string, useTypeScript = false): CodeLine[] {
     const isCascadeMessage = (msg: string) =>
       CASCADE_MESSAGES.some(c => msg.includes(c));
 
-    const errorLineSet = new Set(syntaxErrors.map(e => e.line));
+    // Detect if the first error is a bracket/paren mismatch — primary cascade trigger
+    const firstError = syntaxErrors[0];
+    const firstErrorIsBracketMismatch = firstError && (
+      isCascadeMessage(firstError.msg) &&
+      (() => {
+        const firstLine = rawLines[firstError.line - 1] ?? "";
+        // Count unmatched open brackets/parens on the first error line
+        const opens = (firstLine.match(/\(|\[|\{/g) ?? []).length;
+        const closes = (firstLine.match(/\)|\]|\}/g) ?? []).length;
+        return opens !== closes;
+      })()
+    );
+
     const filteredErrors = syntaxErrors.filter((err, idx) => {
       if (idx === 0) return true; // always keep the first error
+      // If first error was a bracket mismatch, suppress all subsequent generic cascade errors
+      if (firstErrorIsBracketMismatch && isCascadeMessage(err.msg)) return false;
       if (!isCascadeMessage(err.msg)) return true; // keep non-generic errors always
-      // Suppress if any prior error exists within 3 lines above this one
+      // For non-bracket-mismatch first errors, suppress generic errors within 5 lines
       const hasPriorNearbyError = syntaxErrors
         .slice(0, idx)
-        .some(prev => prev.line < err.line && err.line - prev.line <= 3);
+        .some(prev => prev.line < err.line && err.line - prev.line <= 5);
       return !hasPriorNearbyError;
     });
 
