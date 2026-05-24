@@ -145,9 +145,15 @@ function lintJavaScript(code: string, useTypeScript = false): CodeLine[] {
     ast = useTypeScript
       ? TSParser.parse(code, parseOptions)
       : acorn.parse(code, parseOptions);
-  } catch {
-    // Initial parse failed — line-by-line recovery below will surface the real errors
-
+  } catch (e: unknown) {
+    if (e && typeof e === "object") {
+      const err = e as { loc?: { line: number }; message?: string };
+      if (err.loc) {
+        const msg = (err.message ?? "Syntax error").replace(/\s*\(\d+:\d+\)\s*$/, "");
+        syntaxErrors.push({ line: err.loc.line, msg: `Syntax error: ${msg}` });
+      }
+    }
+    
     // JSX/TSX detection — if file contains JSX patterns, skip line-by-line recovery
     // entirely to prevent cascade false positives from JSX syntax acorn can't parse
     const containsJSX = (
@@ -200,7 +206,27 @@ function lintJavaScript(code: string, useTypeScript = false): CodeLine[] {
       }
     }
 
-    syntaxErrors.forEach(({ line, msg }) => addAt(line, "error", msg));
+    const CASCADE_MESSAGES = [
+      "Unexpected token", "Unexpected keyword", "Unexpected identifier",
+      "Unexpected reserved word", "The keyword", "Identifier directly after number",
+    ];
+    const isGenericError = (msg: string) => CASCADE_MESSAGES.some((m) => msg.includes(m));
+    const filteredErrors: typeof syntaxErrors = [];
+
+    for (const err of syntaxErrors) {
+      const previous = filteredErrors[filteredErrors.length - 1];
+      if (!previous) {
+        filteredErrors.push(err);
+        continue;
+      }
+      const lineDistance = err.line - previous.line;
+      if (lineDistance <= 2 && isGenericError(err.msg)) {
+        continue;
+      }
+      filteredErrors.push(err);
+    }
+
+    filteredErrors.forEach(({ line, msg }) => addAt(line, "error", msg));
     return buildLines(rawLines, ann);
   }
 
