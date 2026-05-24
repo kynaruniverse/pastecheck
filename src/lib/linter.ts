@@ -514,7 +514,48 @@ try {
     }
   }
 
-  // TS-specific regex fallbacks — skip for large files to avoid false positives
+  // No error handling — warn on functions that do risky operations with no try/catch
+  const RISKY_PATTERNS = [
+    /\bfetch\s*\(/,
+    /\baxios\s*[\.\(]/,
+    /\bJSON\.parse\s*\(/,
+    /\bJSON\.stringify\s*\(/,
+    /\blocalStorage\s*\./,
+    /\bsessionStorage\s*\./,
+    /\bdocument\s*\./,
+    /\bwindow\s*\./,
+    /\bfs\s*\./,
+    /\brequire\s*\(/,
+    /\bPromise\s*\./,
+  ];
+
+  const fnStartRegex = /(?:^|\s)(?:async\s+)?function\s+(\w+)\s*\(|(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s*)?\(/gm;
+  let fnStartMatch;
+  while ((fnStartMatch = fnStartRegex.exec(code)) !== null) {
+    const fnName = fnStartMatch[1] || fnStartMatch[2];
+    if (!fnName) continue;
+    const braceOpen = code.indexOf("{", fnStartMatch.index + fnStartMatch[0].length - 1);
+    if (braceOpen === -1) continue;
+    let depth = 0;
+    let fnEnd = -1;
+    for (let ci = braceOpen; ci < code.length; ci++) {
+      if (code[ci] === "{") depth++;
+      else if (code[ci] === "}") {
+        depth--;
+        if (depth === 0) { fnEnd = ci; break; }
+      }
+    }
+    if (fnEnd === -1) continue;
+    const fnBody = code.slice(braceOpen, fnEnd);
+    const hasRiskyOp = RISKY_PATTERNS.some(p => p.test(fnBody));
+    const hasTryCatch = /\btry\s*\{/.test(fnBody);
+    if (hasRiskyOp && !hasTryCatch) {
+      const fnLine = code.slice(0, fnStartMatch.index).split("\n").length;
+      ann.add(fnLine - 1, "warning", `'${fnName}' performs a risky operation but has no try/catch — wrap the risky call in try/catch to handle failures gracefully`);
+    }
+  }
+
+  // TS-specific regex fallbacks — string/regex aware to avoid false positives
   if (useTypeScript && rawLines.length < 200) {
     rawLines.forEach((text, idx) => {
       const trimmed = text.trim();
