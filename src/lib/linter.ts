@@ -425,6 +425,36 @@ function lintPython(code: string): CodeLine[] {
     }
   });
 
+  // Indent-level stack tracking — detects unexpected indents and dedents
+  const indentStack: number[] = [0];
+  rawLines.forEach((text, idx) => {
+    if (!text.trim() || text.trim().startsWith("#")) return;
+    const indentMatch = text.match(/^(\s*)/);
+    const currentIndent = indentMatch ? indentMatch[1].replace(/\t/g, "    ").length : 0;
+    const expectedIndent = indentStack[indentStack.length - 1];
+    const prevLine = rawLines.slice(0, idx).reverse().find(l => l.trim() && !l.trim().startsWith("#"));
+    const prevIsScopeOpener = prevLine ? /:\s*(#.*)?$/.test(prevLine.trim()) : false;
+
+    if (prevIsScopeOpener && currentIndent <= (indentStack[indentStack.length - 1])) {
+      // Line after a colon should always indent deeper
+      ann.add(idx, "error", `Expected an indented block after the colon on the previous line — indent this line further`);
+    } else if (prevIsScopeOpener && currentIndent > expectedIndent) {
+      // Valid indent after scope opener — push new level
+      indentStack.push(currentIndent);
+    } else if (currentIndent > expectedIndent && !prevIsScopeOpener) {
+      // Indented further than expected without a colon opening a block
+      ann.add(idx, "warning", `Unexpected indent — this line is indented deeper than the current block allows — check the indentation of surrounding lines`);
+    } else if (currentIndent < expectedIndent) {
+      // Dedent — pop stack until we find a matching level
+      while (indentStack.length > 1 && indentStack[indentStack.length - 1] > currentIndent) {
+        indentStack.pop();
+      }
+      if (indentStack[indentStack.length - 1] !== currentIndent) {
+        ann.add(idx, "warning", `Unexpected dedent — this line's indentation (${currentIndent} spaces) doesn't match any outer block level — check the indentation of surrounding lines`);
+      }
+    }
+  });
+
   rawLines.forEach((text, idx) => {
     const trimmed = text.trim();
     if (trimmed.startsWith("#")) return;
