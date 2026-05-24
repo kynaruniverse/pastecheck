@@ -14,7 +14,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       payment_method_types: ["card"],
       line_items: [
         {
-          price: "price_1TaGcNV05Wu6YNmA3qnCbFNg",
+          price: "price_1TaZUoV05VoRnWpnKDfIJL5m",
           quantity: 1,
         },
       ],
