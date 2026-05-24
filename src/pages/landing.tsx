@@ -41,7 +41,14 @@ export default function Landing() {
   return (
     <div
       className="min-h-screen w-full flex flex-col"
-      style={{ background: "hsl(222 16% 10%)", position: "relative", overflow: "hidden" }}
+      style={{
+        background: `
+          radial-gradient(ellipse 80% 50% at 20% 10%, hsla(210,80%,55%,0.22) 0%, transparent 60%),
+          radial-gradient(ellipse 60% 40% at 85% 20%, hsla(250,70%,60%,0.16) 0%, transparent 55%),
+          radial-gradient(ellipse 50% 35% at 50% 60%, hsla(190,70%,50%,0.10) 0%, transparent 55%),
+          hsl(222 16% 10%)
+        `,
+      }}
     >
       <Helmet>
         <title>PasteCheck — Free Online Code Error Checker</title>
@@ -49,69 +56,14 @@ export default function Landing() {
         <meta property="og:title" content="PasteCheck — Free Online Code Error Checker" />
         <meta property="og:description" content="Paste your JavaScript, TypeScript, Python, HTML or CSS and instantly see every error highlighted. Free, no sign-up, works on mobile." />
         <style>{`
-          @keyframes aurora1 {
-            0%, 100% { transform: translate(0%, 0%) scale(1); opacity: 0.5; }
-            33% { transform: translate(8%, -12%) scale(1.08); opacity: 0.7; }
-            66% { transform: translate(-6%, 8%) scale(0.95); opacity: 0.4; }
-          }
-          @keyframes aurora2 {
-            0%, 100% { transform: translate(0%, 0%) scale(1); opacity: 0.4; }
-            33% { transform: translate(-10%, 10%) scale(1.1); opacity: 0.6; }
-            66% { transform: translate(8%, -6%) scale(0.92); opacity: 0.35; }
-          }
-          @keyframes aurora3 {
-            0%, 100% { transform: translate(0%, 0%) scale(1); opacity: 0.3; }
-            50% { transform: translate(6%, 8%) scale(1.05); opacity: 0.5; }
-          }
           @keyframes probadgepulse {
-            0%, 100% { box-shadow: 0 0 0 0 hsla(210,80%,60%,0.4); }
-            50% { box-shadow: 0 0 0 6px hsla(210,80%,60%,0); }
-          }
-          @keyframes btnpress {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(0.97); }
+            0%, 100% { box-shadow: 0 0 0 0 hsla(210,80%,60%,0.5); }
+            50% { box-shadow: 0 0 0 5px hsla(210,80%,60%,0); }
           }
         `}</style>
       </Helmet>
 
-      {/* Aurora background layers */}
-      <div aria-hidden="true" style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0 }}>
-        <div style={{
-          position: "absolute",
-          top: "-10%",
-          left: "-20%",
-          width: "70%",
-          height: "60%",
-          borderRadius: "50%",
-          background: "radial-gradient(ellipse, hsla(210,80%,55%,0.18) 0%, transparent 70%)",
-          animation: "aurora1 12s ease-in-out infinite",
-          filter: "blur(40px)",
-        }} />
-        <div style={{
-          position: "absolute",
-          top: "5%",
-          right: "-15%",
-          width: "55%",
-          height: "50%",
-          borderRadius: "50%",
-          background: "radial-gradient(ellipse, hsla(250,70%,60%,0.14) 0%, transparent 70%)",
-          animation: "aurora2 15s ease-in-out infinite",
-          filter: "blur(50px)",
-        }} />
-        <div style={{
-          position: "absolute",
-          top: "20%",
-          left: "30%",
-          width: "45%",
-          height: "40%",
-          borderRadius: "50%",
-          background: "radial-gradient(ellipse, hsla(190,70%,50%,0.10) 0%, transparent 70%)",
-          animation: "aurora3 18s ease-in-out infinite",
-          filter: "blur(60px)",
-        }} />
-      </div>
-
-      <div className="mx-auto w-full max-w-2xl px-5 flex flex-col flex-1" style={{ position: "relative", zIndex: 1 }}>
+      <div className="mx-auto w-full max-w-2xl px-5 flex flex-col flex-1">
 
         {/* Nav */}
         <div className="pt-8 flex items-center gap-2">
@@ -136,10 +88,9 @@ export default function Landing() {
             <span
               className="inline-block text-xs font-semibold uppercase tracking-widest px-3 py-1 rounded-full"
               style={{
-                background: "rgba(96,165,250,0.12)",
+                background: "rgba(96,165,250,0.15)",
                 color: "rgb(96,165,250)",
-                border: "1px solid rgba(96,165,250,0.2)",
-                backdropFilter: "blur(8px)",
+                border: "1px solid rgba(96,165,250,0.3)",
               }}
             >
               Free · Pro available
@@ -154,7 +105,7 @@ export default function Landing() {
             <br />
             <span style={{
               color: "hsl(210 80% 65%)",
-              textShadow: "0 0 40px hsla(210,80%,65%,0.35)",
+              textShadow: "0 0 30px hsla(210,80%,65%,0.5)",
             }}>Instantly.</span>
           </h1>
 
@@ -173,8 +124,7 @@ export default function Landing() {
               color: "hsl(222 16% 6%)",
               border: "none",
               cursor: "pointer",
-              boxShadow: "0 0 40px hsla(210,80%,60%,0.35), 0 2px 12px hsla(210,80%,60%,0.2)",
-              transition: "box-shadow 0.2s ease, transform 0.15s ease",
+              boxShadow: "0 0 40px hsla(210,80%,60%,0.45), 0 4px 16px hsla(210,80%,60%,0.3)",
             }}
           >
             Check My Code
@@ -188,15 +138,14 @@ export default function Landing() {
           </p>
         </div>
 
-        {/* Pro section — glassmorphism */}
+        {/* Pro section */}
         <div className="pb-6 flex flex-col gap-3">
           <div
             className="rounded-2xl px-5 py-5 flex flex-col gap-4"
             style={{
-              background: "rgba(30,38,58,0.6)",
-              border: "1px solid hsla(210,80%,60%,0.25)",
-              backdropFilter: "blur(16px)",
-              boxShadow: "0 0 32px hsla(210,80%,60%,0.08), inset 0 1px 0 hsla(210,80%,80%,0.06)",
+              background: "linear-gradient(135deg, hsl(222 16% 16%) 0%, hsl(224 20% 14%) 100%)",
+              border: "1px solid hsla(210,80%,60%,0.35)",
+              boxShadow: "0 0 24px hsla(210,80%,60%,0.12), inset 0 1px 0 hsla(210,80%,80%,0.08)",
             }}
           >
             <div className="flex items-center gap-2">
@@ -208,7 +157,7 @@ export default function Landing() {
                   animation: "probadgepulse 2.5s ease-in-out infinite",
                 }}
               >PRO</span>
-              <span className="text-sm font-semibold" style={{ color: "hsl(210 20% 90%)" }}>
+              <span className="text-sm font-semibold" style={{ color: "hsl(210 20% 92%)" }}>
                 £4/month — everything unlocked
               </span>
             </div>
@@ -235,7 +184,7 @@ export default function Landing() {
                 color: "hsl(222 16% 6%)",
                 border: "none",
                 cursor: "pointer",
-                boxShadow: "0 0 20px hsla(210,80%,60%,0.25)",
+                boxShadow: "0 0 16px hsla(210,80%,60%,0.3)",
               }}
             >
               Start Free — Upgrade Anytime
@@ -250,9 +199,8 @@ export default function Landing() {
               key={f.title}
               className="flex items-start gap-4 rounded-2xl px-5 py-4"
               style={{
-                background: "rgba(30,38,58,0.5)",
-                border: "1px solid hsl(220 13% 21%)",
-                backdropFilter: "blur(8px)",
+                background: "hsl(222 16% 14%)",
+                border: "1px solid hsl(220 13% 22%)",
               }}
             >
               <span
