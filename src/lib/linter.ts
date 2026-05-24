@@ -210,7 +210,8 @@ function lintJavaScript(code: string, useTypeScript = false): CodeLine[] {
               const isFirstError = lastErrorLine === -1;
               const isFarFromLast = (err2.loc.line - lastErrorLine) > 2;
               const isSpecific = !isGeneric(msg2);
-              if (isFirstError || isSpecific || isFarFromLast) {
+              const isImmediatelyAfterFirst = lastErrorLine !== -1 && (err2.loc.line - lastErrorLine) === 1;
+              if ((isFirstError || isSpecific || isFarFromLast) && !isImmediatelyAfterFirst) {
                 syntaxErrors.push({ line: err2.loc.line, msg: entry });
                 lastErrorLine = err2.loc.line;
               }
