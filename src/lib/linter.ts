@@ -422,7 +422,8 @@ try {
         condContent += text[ci];
       }
       // Check for bare assignment: = not preceded or followed by = or ! or + or - or * or / or < or >
-      if (/[^=!<>+\-*\/]=(?!=)/.test(condContent)) {
+      // Also exclude compound assignments like +=, -=, *=, /=, %=, **=
+      if (/[^=!<>+\-*\/%&|^]=(?!=)/.test(condContent) && !/[+\-*\/%&|^]\s*=/.test(condContent)) {
         ann.add(idx, "warning", "Possible assignment inside a condition — did you mean '===' instead of '='? Assignment in a condition always evaluates to the assigned value, which is rarely what you intend.");
       }
     }
