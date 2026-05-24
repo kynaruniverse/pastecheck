@@ -959,20 +959,33 @@ function lintHTML(code: string): CodeLine[] {
   });
 
   // Table child validation — regex-based because parse5 silently moves invalid children out of <table> in the AST
+  // Strip nested valid container blocks first so we only see direct children of <table>
   const VALID_TABLE_CHILDREN = new Set(["thead", "tbody", "tfoot", "tr", "caption", "colgroup", "col", "table"]);
-  const tableRegex = /<table[\s\S]*?<\/table>/gi;
+  const tableRegex = /<table[\s>][\s\S]*?<\/table>/gi;
   let tableMatch;
   while ((tableMatch = tableRegex.exec(code)) !== null) {
-    const tableContent = tableMatch[0];
     const tableStartLine = code.slice(0, tableMatch.index).split("\n").length;
+    // Strip out valid container blocks and their contents so only direct children remain
+    const stripped = tableMatch[0]
+      .replace(/<thead[\s\S]*?<\/thead>/gi, "")
+      .replace(/<tbody[\s\S]*?<\/tbody>/gi, "")
+      .replace(/<tfoot[\s\S]*?<\/tfoot>/gi, "")
+      .replace(/<tr[\s\S]*?<\/tr>/gi, "")
+      .replace(/<caption[\s\S]*?<\/caption>/gi, "")
+      .replace(/<colgroup[\s\S]*?<\/colgroup>/gi, "");
     const innerTagRegex = /<([a-zA-Z][a-zA-Z0-9-]*)[\s>]/g;
     let innerMatch;
-    while ((innerMatch = innerTagRegex.exec(tableContent)) !== null) {
+    while ((innerMatch = innerTagRegex.exec(stripped)) !== null) {
       const innerTag = innerMatch[1].toLowerCase();
       if (!VALID_TABLE_CHILDREN.has(innerTag)) {
-        const lineNum = tableStartLine + tableContent.slice(0, innerMatch.index).split("\n").length - 1;
+        // Find the actual line number by searching for this tag in the original source
+        const tagSearch = new RegExp(`<${innerTag}[\\s>]`,"i");
+        const originalIndex = tableMatch[0].search(tagSearch);
+        const lineNum = originalIndex >= 0
+          ? tableStartLine + tableMatch[0].slice(0, originalIndex).split("\n").length - 1
+          : tableStartLine;
         ann.add(lineNum - 1, "error", `<${innerTag}> is not a valid direct child of <table> — only <thead>, <tbody>, <tfoot>, <tr>, <caption>, and <colgroup> are allowed inside <table>`);
-        break; // one error per table block
+        break;
       }
     }
   }
