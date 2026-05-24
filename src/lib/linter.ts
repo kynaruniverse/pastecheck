@@ -1050,11 +1050,11 @@ export function lint(code: string): LintResult {
         message: "Possible hardcoded secret detected — long base64-like string found. Never commit API keys or tokens — use environment variables instead.",
       },
       {
-        pattern: /sk[-_][a-zA-Z0-9]{20,}/,
-        message: "Possible Stripe secret key detected — starts with 'sk_'. Move this to an environment variable immediately — never expose secret keys in code.",
+        pattern: /sk_(live|test)_[a-zA-Z0-9]{20,}/,
+        message: "Possible Stripe secret key detected — starts with 'sk_live_' or 'sk_test_'. Move this to an environment variable immediately — never expose secret keys in code.",
       },
       {
-        pattern: /pk[-_](live|test)[-_][a-zA-Z0-9]{20,}/i,
+        pattern: /pk_(live|test)_[a-zA-Z0-9]{20,}/i,
         message: "Possible Stripe publishable key detected — move API keys to environment variables even if publishable keys are less sensitive.",
       },
       {
