@@ -79,7 +79,7 @@ export default function Landing() {
                 border: "1px solid rgba(96,165,250,0.2)",
               }}
             >
-              Free &amp; instant
+              Free · Pro available
             </span>
           </div>
 
@@ -119,6 +119,46 @@ export default function Landing() {
           >
             No sign-up. No installs. Works in your browser.
           </p>
+        </div>
+
+        {/* Pro section */}
+        <div className="pb-6 flex flex-col gap-3">
+          <div
+            className="rounded-2xl px-5 py-5 flex flex-col gap-4"
+            style={{ background: "hsl(222 16% 14%)", border: "1px solid hsl(210 80% 60% / 0.2)" }}
+          >
+            <div className="flex items-center gap-2">
+              <span
+                className="text-xs font-bold px-2 py-0.5 rounded-full"
+                style={{ background: "hsl(210 80% 60%)", color: "hsl(222 16% 6%)" }}
+              >PRO</span>
+              <span className="text-sm font-semibold" style={{ color: "hsl(210 20% 90%)" }}>
+                £4/month — everything unlocked
+              </span>
+            </div>
+            <div className="flex flex-col gap-2">
+              {[
+                { icon: "📂", label: "Multi-file mode", desc: "Check up to 5 files at once with per-file results." },
+                { icon: "🔗", label: "Shareable links", desc: "Generate a permanent URL for any check result." },
+                { icon: "📁", label: "Saved collections", desc: "Save checks to named collections, synced across devices." },
+              ].map((item) => (
+                <div key={item.label} className="flex items-start gap-3">
+                  <span className="text-base shrink-0 mt-0.5">{item.icon}</span>
+                  <div>
+                    <span className="text-xs font-semibold" style={{ color: "hsl(210 20% 85%)" }}>{item.label}</span>
+                    <span className="text-xs" style={{ color: "hsl(215 14% 50%)" }}> — {item.desc}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={() => navigate("/check")}
+              className="w-full rounded-xl py-3 text-sm font-semibold transition-all duration-150 active:scale-[0.98]"
+              style={{ background: "hsl(210 80% 60%)", color: "hsl(222 16% 6%)", border: "none", cursor: "pointer" }}
+            >
+              Start Free — Upgrade Anytime
+            </button>
+          </div>
         </div>
 
         {/* Feature cards */}

@@ -55,13 +55,34 @@ export default function Success() {
                 Multi-file mode, shareable links, and saved collections are now unlocked. Welcome to PasteCheck Pro.
               </p>
             </div>
-            <button
-              onClick={() => navigate("/check")}
-              className="w-full rounded-xl py-3.5 text-sm font-semibold"
-              style={{ background: "hsl(210 80% 60%)", color: "hsl(222 16% 6%)", border: "none", cursor: "pointer" }}
-            >
-              Start Checking
-            </button>
+            <div className="w-full flex flex-col gap-3">
+              <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "hsl(215 14% 45%)" }}>
+                What to do first
+              </p>
+              {[
+                { icon: "📂", label: "Try Multi-File Mode", desc: "Check up to 5 files at once", href: "/check" },
+                { icon: "🔗", label: "Share a Check", desc: "Generate a permanent link to any result", href: "/check" },
+                { icon: "📁", label: "Create a Collection", desc: "Save and organise your checks", href: "/collections" },
+              ].map((item) => (
+                <button
+                  key={item.label}
+                  onClick={() => navigate(item.href)}
+                  className="w-full rounded-xl px-4 py-3 flex items-center gap-3 text-left transition-all duration-150 active:scale-[0.98]"
+                  style={{
+                    background: "hsl(222 16% 16%)",
+                    border: "1px solid hsl(220 13% 24%)",
+                    cursor: "pointer",
+                  }}
+                >
+                  <span className="text-xl shrink-0">{item.icon}</span>
+                  <div>
+                    <p className="text-sm font-semibold" style={{ color: "hsl(210 20% 88%)" }}>{item.label}</p>
+                    <p className="text-xs" style={{ color: "hsl(215 14% 48%)" }}>{item.desc}</p>
+                  </div>
+                  <span className="ml-auto text-sm shrink-0" style={{ color: "hsl(215 14% 40%)" }}>›</span>
+                </button>
+              ))}
+            </div>
           </>
         )}
       </div>

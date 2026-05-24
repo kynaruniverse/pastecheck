@@ -146,7 +146,7 @@ export default function About() {
             </h2>
             <div className="flex flex-col gap-3">
               {[
-                { q: "Is PasteCheck free?", a: "Yes, completely free. No sign-up, no payment, no limits." },
+                { q: "Is PasteCheck free?", a: "The core tool is completely free — no sign-up, no installs, no limits on checks. A Pro tier is available at £4/month which unlocks multi-file mode, shareable check links, and saved collections across devices." },
                 { q: "Does it work on mobile?", a: "Yes. PasteCheck is built mobile-first and works on any Android or iOS browser." },
                 { q: "Is my code stored or sent anywhere?", a: "No. All checking happens locally in your browser. Your code never leaves your device." },
                 { q: "Which languages are supported?", a: "JavaScript, TypeScript, Python, HTML, and CSS — including embedded scripts and style blocks inside HTML." },
@@ -163,6 +163,36 @@ export default function About() {
                 </div>
               ))}
             </div>
+          </div>
+
+          <div>
+            <h2 className="text-xl font-bold mb-3" style={{ color: "hsl(210 20% 92%)" }}>
+              PasteCheck Pro
+            </h2>
+            <p className="text-base leading-relaxed mb-4" style={{ color: "hsl(215 14% 58%)" }}>
+              The free tier gives you instant single-file checking with no account needed. Pro unlocks the full suite for developers who check code regularly across multiple files and projects.
+            </p>
+            <div className="flex flex-col gap-3 mb-4">
+              {[
+                { icon: "📂", title: "Multi-file mode", detail: "Paste up to 5 named files and check them all at once. Results shown per-file with individual error and warning counts." },
+                { icon: "🔗", title: "Shareable check links", detail: "Generate a permanent URL for any result. Share it with a teammate, a tutor, or a Stack Overflow thread. Recipients see the full result read-only." },
+                { icon: "📁", title: "Saved collections", detail: "Save any check to a named collection — 'Project Alpha', 'cs50 homework', anything. Access your saved checks from any device." },
+              ].map((item) => (
+                <div
+                  key={item.title}
+                  className="rounded-2xl px-5 py-4"
+                  style={{ background: "hsl(222 16% 14%)", border: "1px solid hsl(210 80% 60% / 0.2)" }}
+                >
+                  <p className="text-sm font-semibold mb-1" style={{ color: "hsl(210 80% 65%)" }}>
+                    {item.icon} {item.title}
+                  </p>
+                  <p className="text-xs leading-relaxed" style={{ color: "hsl(215 14% 52%)" }}>{item.detail}</p>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-center mb-6" style={{ color: "hsl(215 14% 42%)" }}>
+              £4/month · Cancel anytime · No price increases
+            </p>
           </div>
 
           <button
