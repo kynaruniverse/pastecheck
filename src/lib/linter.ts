@@ -145,14 +145,8 @@ function lintJavaScript(code: string, useTypeScript = false): CodeLine[] {
     ast = useTypeScript
       ? TSParser.parse(code, parseOptions)
       : acorn.parse(code, parseOptions);
-  } catch (e: unknown) {
-    if (e && typeof e === "object") {
-      const err = e as { loc?: { line: number }; message?: string };
-      if (err.loc) {
-        const msg = (err.message ?? "Syntax error").replace(/\s*\(\d+:\d+\)\s*$/, "");
-        syntaxErrors.push({ line: err.loc.line, msg: `Syntax error: ${msg}` });
-      }
-    }
+  } catch {
+    // Initial parse failed — line-by-line recovery below will surface the real errors
 
     // JSX/TSX detection — if file contains JSX patterns, skip line-by-line recovery
     // entirely to prevent cascade false positives from JSX syntax acorn can't parse
