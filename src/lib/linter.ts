@@ -192,7 +192,32 @@ function lintJavaScript(code: string, useTypeScript = false): CodeLine[] {
     }
     // JSX file — only report the first parse error to avoid cascade false positives
 
-    syntaxErrors.forEach(({ line, msg }) => addAt(line, "error", msg));
+    // Cascade suppression — filter out errors that are likely symptoms of an earlier error
+    // rather than independent problems. Cascade errors typically have generic messages and
+    // appear on lines immediately following a line that already has an error.
+    const CASCADE_MESSAGES = [
+      "Unexpected token",
+      "Unexpected keyword",
+      "Unexpected identifier",
+      "Unexpected reserved word",
+      "The keyword",
+      "Identifier directly after number",
+    ];
+    const isCascadeMessage = (msg: string) =>
+      CASCADE_MESSAGES.some(c => msg.includes(c));
+
+    const errorLineSet = new Set(syntaxErrors.map(e => e.line));
+    const filteredErrors = syntaxErrors.filter((err, idx) => {
+      if (idx === 0) return true; // always keep the first error
+      if (!isCascadeMessage(err.msg)) return true; // keep non-generic errors always
+      // Suppress if any prior error exists within 3 lines above this one
+      const hasPriorNearbyError = syntaxErrors
+        .slice(0, idx)
+        .some(prev => prev.line < err.line && err.line - prev.line <= 3);
+      return !hasPriorNearbyError;
+    });
+
+    filteredErrors.forEach(({ line, msg }) => addAt(line, "error", msg));
     return buildLines(rawLines, ann);
   }
 
