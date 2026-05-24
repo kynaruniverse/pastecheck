@@ -346,6 +346,75 @@ try {
     }
   });
 
+  // Missing await — scan async functions for known async calls without await
+  const KNOWN_ASYNC_CALLS = [
+    "fetch", "axios", "axios.get", "axios.post", "axios.put", "axios.delete", "axios.patch",
+    "Promise.resolve", "Promise.reject", "Promise.all", "Promise.allSettled", "Promise.race", "Promise.any",
+  ];
+  const asyncAwaitPattern = new RegExp(
+    `(?<!await\\s)(?<!await\\()\\b(${KNOWN_ASYNC_CALLS.map(k => k.replace(".", "\\.")).join("|")})\\s*\\(`,
+    "g"
+  );
+  let insideAsyncFn = false;
+  let braceDepth = 0;
+  let asyncBraceStart = 0;
+  rawLines.forEach((text, idx) => {
+    const trimmed = text.trim();
+    if (trimmed.startsWith("//")) return;
+    if (/\basync\s+function\b|\basync\s+\w+\s*[=(]/.test(text)) {
+      insideAsyncFn = true;
+      asyncBraceStart = braceDepth;
+    }
+    if (insideAsyncFn) {
+      for (const ch of text) {
+        if (ch === "{") braceDepth++;
+        else if (ch === "}") braceDepth--;
+      }
+      if (braceDepth <= asyncBraceStart && asyncBraceStart > 0) {
+        insideAsyncFn = false;
+      }
+      asyncAwaitPattern.lastIndex = 0;
+      let m;
+      while ((m = asyncAwaitPattern.exec(text)) !== null) {
+        const before = text.slice(0, m.index).trimEnd();
+        if (/\bawait\b/.test(before.split(/[;{]/).pop() ?? "")) continue;
+        ann.add(idx, "warning", `'${m[1]}()' is called without 'await' inside an async function — add 'await' before this call or the Promise will not be resolved before moving to the next line`);
+      }
+    } else {
+      for (const ch of text) {
+        if (ch === "{") braceDepth++;
+        else if (ch === "}") braceDepth--;
+      }
+    }
+  });
+
+  // No return value — flag functions whose names suggest they return a value but have no return statement
+  const RETURN_HINT_NAMES = /^(get|fetch|load|build|create|generate|find|parse|calculate|compute|format|extract|resolve|transform|map|filter|reduce|check|validate|convert)/i;
+  const fnRegex = /(?:function\s+(\w+)|(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s*)?\()/g;
+  let fnMatch;
+  while ((fnMatch = fnRegex.exec(code)) !== null) {
+    const fnName = fnMatch[1] || fnMatch[2];
+    if (!fnName || !RETURN_HINT_NAMES.test(fnName)) continue;
+    const fnStart = fnMatch.index;
+    const braceOpen = code.indexOf("{", fnStart);
+    if (braceOpen === -1) continue;
+    let depth = 0;
+    let fnEnd = -1;
+    for (let ci = braceOpen; ci < code.length; ci++) {
+      if (code[ci] === "{") depth++;
+      else if (code[ci] === "}") {
+        depth--;
+        if (depth === 0) { fnEnd = ci; break; }
+      }
+    }
+    if (fnEnd === -1) continue;
+    const fnBody = code.slice(braceOpen, fnEnd);
+    if (!/\breturn\b/.test(fnBody)) {
+      const fnLine = code.slice(0, fnStart).split("\n").length;
+      ann.add(fnLine - 1, "warning", `'${fnName}' appears to compute a value but has no 'return' statement — add 'return' before the result, or rename the function if it's intentionally void`);
+    }
+  }
+
   // TS-specific regex fallbacks — skip for large files to avoid false positives
   if (useTypeScript && rawLines.length < 200) {
     rawLines.forEach((text, idx) => {
