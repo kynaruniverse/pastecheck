@@ -703,12 +703,6 @@ function walkTree(doc: Document, source: string, tagLineMap: Map<string, number[
       result.blockInInline.push({ block: tag, inline: parentInlineTag, line });
     }
 
-    // Invalid direct children of <table>
-    const VALID_TABLE_CHILDREN = new Set(["thead", "tbody", "tfoot", "tr", "caption", "colgroup", "col"]);
-    const parentTag = (el as unknown as { parentNode?: { tagName?: string } }).parentNode?.tagName?.toLowerCase();
-    if (parentTag === "table" && !VALID_TABLE_CHILDREN.has(tag) && tag !== "#text") {
-      result.blockInInline.push({ block: tag, inline: "table", line });
-    }
 
     const nextInlineParent = INLINE_ELEMENTS.has(tag) ? tag : parentInlineTag;
     el.childNodes?.forEach((child) => visit(child, nextInlineParent));
@@ -961,12 +955,27 @@ function lintHTML(code: string): CodeLine[] {
   });
 
   walked.blockInInline.forEach(({ block, inline, line }) => {
-    if (inline === "table") {
-      ann.add(line - 1, "error", `<${block}> is not a valid direct child of <table> — only <thead>, <tbody>, <tfoot>, <tr>, <caption>, and <colgroup> are allowed inside <table>`);
-    } else {
-      ann.add(line - 1, "warning", `Block element <${block}> nested inside inline element <${inline}> — invalid HTML structure`);
-    }
+    ann.add(line - 1, "warning", `Block element <${block}> nested inside inline element <${inline}> — invalid HTML structure`);
   });
+
+  // Table child validation — regex-based because parse5 silently moves invalid children out of <table> in the AST
+  const VALID_TABLE_CHILDREN = new Set(["thead", "tbody", "tfoot", "tr", "caption", "colgroup", "col", "table"]);
+  const tableRegex = /<table[\s\S]*?<\/table>/gi;
+  let tableMatch;
+  while ((tableMatch = tableRegex.exec(code)) !== null) {
+    const tableContent = tableMatch[0];
+    const tableStartLine = code.slice(0, tableMatch.index).split("\n").length;
+    const innerTagRegex = /<([a-zA-Z][a-zA-Z0-9-]*)[\s>]/g;
+    let innerMatch;
+    while ((innerMatch = innerTagRegex.exec(tableContent)) !== null) {
+      const innerTag = innerMatch[1].toLowerCase();
+      if (!VALID_TABLE_CHILDREN.has(innerTag)) {
+        const lineNum = tableStartLine + tableContent.slice(0, innerMatch.index).split("\n").length - 1;
+        ann.add(lineNum - 1, "error", `<${innerTag}> is not a valid direct child of <table> — only <thead>, <tbody>, <tfoot>, <tr>, <caption>, and <colgroup> are allowed inside <table>`);
+        break; // one error per table block
+      }
+    }
+  }
 
   walked.missingAlt.forEach(({ line }) => {
     ann.add(line - 1, "warning", "<img> is missing an 'alt' attribute — add alt=\"description of image\" or alt=\"\" if the image is decorative");
