@@ -551,7 +551,10 @@ try {
     const hasTryCatch = /\btry\s*\{/.test(fnBody);
     if (hasRiskyOp && !hasTryCatch) {
       const fnLine = code.slice(0, fnStartMatch.index).split("\n").length;
-      ann.add(fnLine - 1, "warning", `'${fnName}' performs a risky operation but has no try/catch — wrap the risky call in try/catch to handle failures gracefully`);
+      const fnLineIdx = fnLine - 1;
+      // Find the actual function declaration line — skip blank lines
+      const actualLine = rawLines.findIndex((l, i) => i >= fnLineIdx && l.includes(fnName) && /function|=>|const|let|var/.test(l));
+      ann.add(actualLine >= 0 ? actualLine : fnLineIdx, "warning", `'${fnName}' performs a risky operation but has no try/catch — wrap the risky call in try/catch to handle failures gracefully`);
     }
   }
 
