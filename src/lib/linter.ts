@@ -377,14 +377,10 @@ try {
     if (trimmed.startsWith("//")) return;
 
     // Push a new scope on function/arrow/class/block open
-    if (
-      /\bfunction\b/.test(trimmed) ||
-      /\bclass\b/.test(trimmed) ||
-      /=>\s*\{/.test(trimmed) ||
-      /^\{/.test(trimmed)
-    ) {
+    if (/(\bfunction\b|\bclass\b|=>|\b(if|else|for|while|try|catch)\b)[^{]*\{/.test(trimmed) || /^\{/.test(trimmed)) {
       scopeStack.push(new Map());
     }
+
 
     // Pop scope on closing brace
     if (/^\}/.test(trimmed) && scopeStack.length > 1) {
