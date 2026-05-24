@@ -1152,6 +1152,9 @@ export default function Home() {
             <p className="text-xs text-center mt-2" style={{ color: "hsl(215 14% 58%)" }}>
               Multi-file mode · Shareable links · Saved collections
             </p>
+            <p className="text-xs text-center mt-1.5" style={{ color: "hsl(215 14% 38%)" }}>
+              🔒 Your code never leaves your browser.
+            </p>
           </div>
         )}
 

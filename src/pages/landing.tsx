@@ -136,6 +136,12 @@ export default function Landing() {
           >
             No sign-up. No installs. Works in your browser.
           </p>
+          <p
+            className="text-xs text-center mt-1"
+            style={{ color: "hsl(215 14% 35%)" }}
+          >
+            🔒 Your code never leaves your browser.
+          </p>
         </div>
 
         {/* Pro section */}

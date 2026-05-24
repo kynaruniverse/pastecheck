@@ -258,6 +258,33 @@ try {
       const loc = getLoc(node);
       if (loc) addAt(loc.start.line, "error", "'with' statement is forbidden in strict mode and confuses scope — remove it and reference the object properties directly");
     },
+    IfStatement(node: acorn.Node) {
+      const n = node as unknown as {
+        test: { type: string; value?: unknown };
+        loc?: NodeLoc;
+      };
+      if (!n.loc) return;
+      if (
+        n.test.type === "Literal" &&
+        (n.test.value === true || n.test.value === false)
+      ) {
+        addAt(
+          n.loc.start.line,
+          "warning",
+          `Condition is always ${n.test.value} — this branch will ${n.test.value ? "always" : "never"} run. Replace with the actual condition you intended.`
+        );
+      }
+    },
+    AssignmentExpression(node: acorn.Node) {
+      const n = node as unknown as {
+        type: string;
+        loc?: NodeLoc;
+        parent?: { type: string };
+      };
+      if (!n.loc) return;
+      // Catch assignment inside if/while/for condition via parent check
+      // acorn-walk doesn't pass parent so we use a regex fallback below
+    },
   });
   } catch {
     // TS-specific AST nodes that acorn-walk can't traverse — skip semantic checks
@@ -289,6 +316,33 @@ try {
       ann.add(idx, "error", `'${name}' is already declared — duplicate variable name in this scope — rename one of them or remove the redeclaration`);
     } else {
       currentScope.set(name, idx);
+    }
+  });
+
+  // Always-evaluating condition — regex pass for assignment in condition
+  // Catches: if (x = 5), while (x = getValue()), for (; x = y ;)
+  rawLines.forEach((text, idx) => {
+    const trimmed = text.trim();
+    if (trimmed.startsWith("//")) return;
+    // Match if/while/for followed by a condition containing a bare assignment (= but not == or === or != or !=== or +=, -=, etc.)
+    if (/^\s*(if|while|for)\s*\(/.test(text)) {
+      // Extract content between first ( and matching )
+      const parenStart = text.indexOf("(");
+      if (parenStart === -1) return;
+      let depth = 0;
+      let condContent = "";
+      for (let ci = parenStart; ci < text.length; ci++) {
+        if (text[ci] === "(") depth++;
+        else if (text[ci] === ")") {
+          depth--;
+          if (depth === 0) break;
+        }
+        condContent += text[ci];
+      }
+      // Check for bare assignment: = not preceded or followed by = or ! or + or - or * or / or < or >
+      if (/[^=!<>+\-*\/]=(?!=)/.test(condContent)) {
+        ann.add(idx, "warning", "Possible assignment inside a condition — did you mean '===' instead of '='? Assignment in a condition always evaluates to the assigned value, which is rarely what you intend.");
+      }
     }
   });
 
@@ -986,6 +1040,77 @@ export function lint(code: string): LintResult {
       break;
     default:
       lines = code.split("\n").map((text) => ({ text, type: "normal", messages: [] }));
+  }
+
+  // Credential / secret detection — runs across all languages
+  if (language !== "unknown") {
+    const credentialPatterns: Array<{ pattern: RegExp; message: string }> = [
+      {
+        pattern: /(['"`])[A-Za-z0-9\/+]{40,}\1/,
+        message: "Possible hardcoded secret detected — long base64-like string found. Never commit API keys or tokens — use environment variables instead.",
+      },
+      {
+        pattern: /sk[-_][a-zA-Z0-9]{20,}/,
+        message: "Possible Stripe secret key detected — starts with 'sk_'. Move this to an environment variable immediately — never expose secret keys in code.",
+      },
+      {
+        pattern: /pk[-_](live|test)[-_][a-zA-Z0-9]{20,}/i,
+        message: "Possible Stripe publishable key detected — move API keys to environment variables even if publishable keys are less sensitive.",
+      },
+      {
+        pattern: /AIza[0-9A-Za-z\-_]{35}/,
+        message: "Possible Google API key detected — starts with 'AIza'. Move this to an environment variable — exposed keys can be abused and billed to your account.",
+      },
+      {
+        pattern: /AKIA[0-9A-Z]{16}/,
+        message: "Possible AWS Access Key ID detected — starts with 'AKIA'. Rotate this key immediately and move it to an environment variable.",
+      },
+      {
+        pattern: /ghp_[a-zA-Z0-9]{36}/,
+        message: "Possible GitHub Personal Access Token detected — starts with 'ghp_'. Revoke and regenerate this token, then use environment variables.",
+      },
+      {
+        pattern: /xox[baprs]-[0-9A-Za-z\-]{10,}/,
+        message: "Possible Slack API token detected — starts with 'xox'. Move this to an environment variable — exposed tokens can compromise your workspace.",
+      },
+      {
+        pattern: /password\s*[:=]\s*['"`][^'"`\s]{6,}['"`]/i,
+        message: "Possible hardcoded password detected — never store passwords in source code. Use environment variables or a secrets manager.",
+      },
+      {
+        pattern: /secret\s*[:=]\s*['"`][^'"`\s]{6,}['"`]/i,
+        message: "Possible hardcoded secret value detected — move this to an environment variable and remove it from source code.",
+      },
+      {
+        pattern: /api[_-]?key\s*[:=]\s*['"`][^'"`\s]{8,}['"`]/i,
+        message: "Possible hardcoded API key detected — move this to an environment variable. Exposed API keys can be stolen from public repositories.",
+      },
+    ];
+
+    const rawLines = code.split("\n");
+    const credAnn = new AnnotationMap();
+
+    rawLines.forEach((lineText, idx) => {
+      const trimmed = lineText.trim();
+      if (!trimmed || trimmed.startsWith("//") || trimmed.startsWith("#") || trimmed.startsWith("*")) return;
+      for (const { pattern, message } of credentialPatterns) {
+        if (pattern.test(lineText)) {
+          credAnn.add(idx, "error", message);
+          break; // one warning per line maximum
+        }
+      }
+    });
+
+    // Merge credential annotations into existing lines
+    lines = lines.map((line, idx) => {
+      const credEntry = credAnn.get(idx);
+      if (!credEntry) return line;
+      return {
+        ...line,
+        type: "error" as LineType,
+        messages: [...line.messages, ...credEntry.messages],
+      };
+    });
   }
 
   // GA: track language used
