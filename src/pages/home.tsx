@@ -866,7 +866,6 @@ export default function Home() {
 
                 {history.length > 0 && (
                   <button
-                    <button
                     type="button"
                     onClick={() => setShowHistory((v) => !v)}
                     className="w-full rounded-xl py-2.5 text-sm font-medium tracking-wide transition-all duration-150"
