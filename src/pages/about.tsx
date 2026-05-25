@@ -1,6 +1,7 @@
 import { useLocation } from "wouter";
 import { Helmet } from "react-helmet-async";
 import NavMenu from "@/components/NavMenu";
+import Logo from "@/components/Logo";
 
 export default function About() {
   const [, navigate] = useLocation();
@@ -21,20 +22,7 @@ export default function About() {
 
         {/* Nav */}
         <div className="pt-8 flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-            <span
-              className="inline-flex items-center justify-center rounded-lg w-8 h-8 text-sm font-bold shrink-0"
-              style={{ background: "hsl(210 80% 60%)", color: "hsl(222 16% 6%)" }}
-            >
-              P
-            </span>
-            <span
-              className="text-base font-bold tracking-tight"
-              style={{ color: "hsl(210 20% 92%)" }}
-            >
-              PasteCheck
-            </span>
-          </div>
+          <Logo size="sm" onClick={() => navigate("/")} />
           <button
             onClick={() => navigate("/check")}
             className="rounded-xl px-4 py-2 text-sm font-bold"

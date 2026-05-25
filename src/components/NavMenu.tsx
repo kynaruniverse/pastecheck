@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Logo from "@/components/Logo";
 import { supabase } from "@/lib/supabase";
 
 export default function NavMenu() {
@@ -87,23 +88,7 @@ export default function NavMenu() {
       >
         {/* Drawer header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "32px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <span
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: "8px",
-                width: "28px",
-                height: "28px",
-                fontSize: "12px",
-                fontWeight: 700,
-                background: "hsl(210 80% 60%)",
-                color: "hsl(222 16% 6%)",
-              }}
-            >P</span>
-            <span style={{ fontSize: "14px", fontWeight: 700, color: "hsl(210 20% 92%)" }}>PasteCheck</span>
-          </div>
+          <Logo size="sm" />
           <button
             onClick={() => setOpen(false)}
             style={{

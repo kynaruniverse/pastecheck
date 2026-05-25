@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import NavMenu from "@/components/NavMenu";
+import Logo from "@/components/Logo";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -44,13 +45,7 @@ export default function Login() {
       <div className="w-full max-w-sm flex flex-col gap-6">
 
         {/* Logo */}
-        <div className="flex flex-col items-center gap-2 mb-2">
-          <span
-            className="inline-flex items-center justify-center rounded-xl w-12 h-12 text-lg font-bold"
-            style={{ background: "hsl(210 80% 60%)", color: "hsl(222 16% 6%)" }}
-          >P</span>
-          <span className="text-base font-bold tracking-tight" style={{ color: "hsl(210 20% 92%)" }}>PasteCheck</span>
-        </div>
+        <Logo size="lg" />
 
         {/* Card */}
         <div className="rounded-2xl px-6 py-7 flex flex-col gap-5" style={{ background: "hsl(222 16% 14%)", border: "1px solid hsl(220 13% 22%)" }}>

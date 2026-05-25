@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import NavMenu from "@/components/NavMenu";
+import Logo from "@/components/Logo";
 import { lint, detectLanguage, type LintResult, type Language } from "@/lib/linter";
 import FeedbackForm from "@/components/FeedbackForm";
 import { supabase } from "@/lib/supabase";
@@ -709,13 +710,8 @@ export default function Home() {
 
         <header className="mb-6">
           <div className="flex items-center gap-2 mb-1">
-            <span
-              className="inline-flex items-center justify-center rounded-lg w-8 h-8 text-sm font-bold"
-              style={{ background: "hsl(210 80% 60%)", color: "hsl(222 16% 6%)" }}
-            >P</span>
-            <h1 className="text-xl font-bold tracking-tight" style={{ color: "hsl(210 20% 92%)", fontFamily: "var(--app-font-sans)" }}>
-              PasteCheck
-            </h1>
+            <Logo size="sm" />
+            <h1 className="sr-only">PasteCheck</h1>
             {isPro && (
               <span
                 className="text-xs font-bold px-2 py-0.5 rounded-full"

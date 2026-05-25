@@ -1,6 +1,7 @@
 import { useLocation } from "wouter";
 import { Helmet } from "react-helmet-async";
 import NavMenu from "@/components/NavMenu";
+import Logo from "@/components/Logo";
 
 const features = [
   {
@@ -66,19 +67,8 @@ export default function Landing() {
       <div className="mx-auto w-full max-w-2xl px-5 flex flex-col flex-1">
 
         {/* Nav */}
-        <div className="pt-8 flex items-center gap-2">
-          <span
-            className="inline-flex items-center justify-center rounded-lg w-8 h-8 text-sm font-bold shrink-0"
-            style={{ background: "hsl(210 80% 60%)", color: "hsl(222 16% 6%)" }}
-          >
-            P
-          </span>
-          <span
-            className="text-base font-bold tracking-tight"
-            style={{ color: "hsl(210 20% 92%)" }}
-          >
-            PasteCheck
-          </span>
+        <div className="pt-8">
+          <Logo size="sm" />
         </div>
         <NavMenu />
 
