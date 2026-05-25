@@ -546,6 +546,7 @@ export default function Home() {
 
   // ── Dev toggle (tap version 5 times) ──────────────────────────────────────
   function handleVersionTap() {
+    if (!import.meta.env.DEV) return;
     const next = tapCount + 1;
     setTapCount(next);
     if (next >= 5) {
