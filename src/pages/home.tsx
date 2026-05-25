@@ -515,6 +515,7 @@ export default function Home() {
   // Upsell triggers
   const [shareAttempted, setShareAttempted] = useState(false);
   const [multiAttempted, setMultiAttempted] = useState(false);
+  const upgradeRef = useRef<HTMLDivElement>(null);
 
   // Shared
   const [history, setHistory] = useState<Array<{ code: string; result: LintResult }>>(() => {
@@ -759,6 +760,7 @@ export default function Home() {
                 setCode("");
               } else {
                 setMultiAttempted(true);
+                setTimeout(() => upgradeRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 50);
               }
             }}
             className="flex-1 rounded-lg py-2 text-xs font-semibold transition-all flex items-center justify-center gap-1.5"
@@ -1144,7 +1146,7 @@ export default function Home() {
 
         {/* ── Upgrade to Pro button (free users only, shown after multi-file attempt) ── */}
         {!isPro && multiAttempted && (
-          <div className="mt-8">
+          <div className="mt-8" ref={upgradeRef}>
             <button
               onClick={async () => {
                 try {
