@@ -1,5 +1,4 @@
 import { Switch, Route, Router as WouterRouter } from "wouter";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
 import About from "@/pages/about";
@@ -11,8 +10,6 @@ import AuthCallback from "@/pages/auth-callback";
 import Collections from "@/pages/collections";
 import CollectionDetail from "@/pages/collection-detail";
 import ForgotPassword from "@/pages/forgot-password";
-
-const queryClient = new QueryClient();
 
 function Router() {
   return (
@@ -34,11 +31,9 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <Router />
-      </WouterRouter>
-    </QueryClientProvider>
+    <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+      <Router />
+    </WouterRouter>
   );
 }
 
