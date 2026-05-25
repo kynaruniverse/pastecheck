@@ -208,10 +208,12 @@ function lintJavaScript(code: string, useTypeScript = false): CodeLine[] {
               const entry = `Syntax error: ${msg2}`;
               if (syntaxErrors.find((e) => e.line === err2.loc!.line)) continue;
               const isFirstError = lastErrorLine === -1;
-              const isFarFromLast = (err2.loc.line - lastErrorLine) > 2;
               const isSpecific = !isGeneric(msg2);
-              const isImmediatelyAfterFirst = lastErrorLine !== -1 && (err2.loc.line - lastErrorLine) === 1;
-              if ((isFirstError || isSpecific || isFarFromLast) && !isImmediatelyAfterFirst) {
+
+              // Only allow subsequent errors if they are specific.
+              // Generic errors ("Unexpected token") are almost always structural cascades
+              // triggered by an earlier unclosed block, regardless of line distance.
+              if (isFirstError || isSpecific) {
                 syntaxErrors.push({ line: err2.loc.line, msg: entry });
                 lastErrorLine = err2.loc.line;
               }
@@ -361,11 +363,12 @@ try {
         parent?: { type: string };
       };
       if (!n.loc) return;
-      // Catch assignment inside if/while/for condition via parent check
+// Catch assignment inside if/while/for condition via parent check
       // acorn-walk doesn't pass parent so we use a regex fallback below
     },
-  });
-  } catch {
+  }, { ...walk.base, ...tsStubs });
+} catch {
+
     // TS-specific AST nodes that acorn-walk can't traverse — skip semantic checks
   }
 
@@ -907,12 +910,13 @@ function walkTree(doc: Document, source: string, tagLineMap: Map<string, number[
 
     if (parentInlineTag && BLOCK_ELEMENTS.has(tag)) {
       result.blockInInline.push({ block: tag, inline: parentInlineTag, line });
-    }
+}
 
 
-    const nextInlineParent = INLINE_ELEMENTS.has(tag) ? tag : parentInlineTag;
+    const nextInlineParent = INLINE_ELEMENTS.has(tag) ? tag : (BLOCK_ELEMENTS.has(tag) ? null : parentInlineTag);
     el.childNodes?.forEach((child) => visit(child, nextInlineParent));
-  }
+}
+
 
   doc.childNodes?.forEach((c) => visit(c, null));
 
