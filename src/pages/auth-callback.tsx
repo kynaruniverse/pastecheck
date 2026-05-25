@@ -18,14 +18,14 @@ export default function AuthCallback() {
         if (error) {
           window.location.href = "/login";
         } else {
-          // Confirmed — send to login to sign in with password
-          window.location.href = "/login";
+          // Confirmed — send to login with success banner
+          window.location.href = "/login?confirmed=1";
         }
       } else {
         // Normal sign in callback
         const { data } = await supabase.auth.getSession();
         if (data.session) {
-          window.location.href = "/collections";
+          window.location.href = "/check";
         } else {
           window.location.href = "/login";
         }

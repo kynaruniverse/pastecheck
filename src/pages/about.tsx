@@ -12,10 +12,11 @@ export default function About() {
       style={{ background: "hsl(222 16% 10%)" }}
     >
       <Helmet>
-        <title>About PasteCheck — How It Works & Supported Languages</title>
-        <meta name="description" content="Learn how PasteCheck checks JavaScript, TypeScript, Python, HTML and CSS for errors instantly. Free online linter that works on mobile with no sign-up required." />
-        <meta property="og:title" content="About PasteCheck — How It Works & Supported Languages" />
-        <meta property="og:description" content="Learn how PasteCheck checks JavaScript, TypeScript, Python, HTML and CSS for errors instantly. Free online linter that works on mobile with no sign-up required." />
+        <title>What is a Syntax Error? How PasteCheck Finds & Explains Code Errors</title>
+        <meta name="description" content="Learn what syntax errors are in JavaScript, Python, HTML and CSS — and how PasteCheck finds them instantly in your browser. No sign-up, no installs, works on mobile." />
+        <meta property="og:title" content="What is a Syntax Error? How PasteCheck Finds & Explains Code Errors" />
+        <meta property="og:description" content="Learn what syntax errors are in JavaScript, Python, HTML and CSS — and how PasteCheck finds them instantly in your browser. No sign-up, no installs, works on mobile." />
+        <meta property="og:image" content="/opengraph.jpg" />
       </Helmet>
       <div className="mx-auto w-full max-w-2xl px-5 flex flex-col flex-1">
         <NavMenu />
@@ -24,6 +25,7 @@ export default function About() {
         <div className="pt-8 flex items-center justify-between">
           <Logo size="sm" onClick={() => navigate("/")} />
           <button
+            type="button"
             onClick={() => navigate("/check")}
             className="rounded-xl px-4 py-2 text-sm font-bold"
             style={{ background: "hsl(210 80% 60%)", color: "hsl(222 16% 6%)", border: "none", cursor: "pointer" }}
@@ -40,10 +42,10 @@ export default function About() {
               className="text-3xl font-extrabold leading-tight tracking-tight mb-4"
               style={{ color: "hsl(210 20% 95%)" }}
             >
-              Free Online Code Error Checker
+              What Is a Syntax Error — and How Do You Fix One?
             </h1>
             <p className="text-base leading-relaxed" style={{ color: "hsl(215 14% 58%)" }}>
-              PasteCheck is a free online JavaScript linter, Python syntax checker, and HTML validator — all in one place. Paste your code and see every error and warning highlighted instantly, with no sign-up required and no installations needed. Works directly in your browser, including on mobile devices.
+              A syntax error means your code has broken the rules of the language — a missing bracket, a wrong indent, an unclosed tag. The interpreter can't read it, so nothing runs. PasteCheck is a free browser-based tool that finds syntax errors in JavaScript, TypeScript, Python, HTML and CSS instantly — and explains each one in plain English so you know exactly what to fix and why.
             </p>
           </div>
 
@@ -52,16 +54,19 @@ export default function About() {
               className="text-xl font-bold mb-3"
               style={{ color: "hsl(210 20% 92%)" }}
             >
-              Why PasteCheck?
+              Why PasteCheck exists
             </h2>
             <p className="text-base leading-relaxed mb-4" style={{ color: "hsl(215 14% 58%)" }}>
-              Most developers have pasted broken code into an AI assistant hoping it will catch errors — only to get inconsistent results, reformatted code, or new bugs introduced. PasteCheck solves that by running dedicated language parsers directly on your code, giving you precise, reliable error locations every time.
+              I built PasteCheck entirely on an Android phone. No laptop, no desktop — just a mobile browser, a GitHub repo, and a lot of frustration at tools that assumed I was sitting at a desk.
             </p>
             <p className="text-base leading-relaxed mb-4" style={{ color: "hsl(215 14% 58%)" }}>
-              Built specifically with mobile developers in mind, PasteCheck works seamlessly on Android and iOS — no desktop required.
+              Every time I pasted broken code into an AI assistant to check it, I got something back that was subtly different — reformatted, partially rewritten, or quietly broken in a new way. I didn't want my code changed. I wanted to know what was wrong with it and why, so I could fix it myself and actually understand what I'd done.
+            </p>
+            <p className="text-base leading-relaxed mb-4" style={{ color: "hsl(215 14% 58%)" }}>
+              PasteCheck runs dedicated language parsers directly on your code — nothing is sent to an AI, nothing is rewritten. You get precise error locations, plain-English explanations, and a nudge toward understanding the mistake rather than just patching it.
             </p>
             <p className="text-base leading-relaxed" style={{ color: "hsl(215 14% 58%)" }}>
-              PasteCheck doesn't auto-fix your code. It shows you exactly what's wrong and why — so you learn from mistakes when you make them, not when they reach production.
+              It doesn't auto-fix. That's deliberate. The goal is to help you understand what broke and why — so you learn when you make the mistake, not when it reaches production.
             </p>
           </div>
 
@@ -184,6 +189,7 @@ export default function About() {
           </div>
 
           <button
+            type="button"
             onClick={() => navigate("/check")}
             className="w-full rounded-2xl py-4 text-base font-bold tracking-wide transition-all duration-150 active:scale-[0.97]"
             style={{

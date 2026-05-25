@@ -1,7 +1,12 @@
 import Stripe from "stripe";
+import { createClient } from "@supabase/supabase-js";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
+const supabase = createClient(
+  process.env.SUPABASE_URL as string,
+  process.env.SUPABASE_SERVICE_ROLE_KEY as string
+);
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
@@ -9,15 +14,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    // Resolve user from auth header if present
+    let clientReferenceId: string | undefined;
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+    if (token) {
+      const { data: { user } } = await supabase.auth.getUser(token);
+      if (user) clientReferenceId = user.id;
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       payment_method_types: ["card"],
       line_items: [
         {
-          price: "price_1TaZUoV05VoRnWpnKDfIJL5m",
+          price: process.env.STRIPE_PRICE_ID as string,
           quantity: 1,
         },
       ],
+      ...(clientReferenceId ? { client_reference_id: clientReferenceId } : {}),
       success_url: "https://www.pastecheck.co.uk/success?session_id={CHECKOUT_SESSION_ID}",
       cancel_url: "https://www.pastecheck.co.uk/check",
     });

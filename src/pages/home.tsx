@@ -1,30 +1,11 @@
 import { useState, useRef, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
+import { toast, Toaster } from "sonner";
 import NavMenu from "@/components/NavMenu";
 import Logo from "@/components/Logo";
 import { lint, detectLanguage, type LintResult, type Language } from "@/lib/linter";
 import FeedbackForm from "@/components/FeedbackForm";
 import { supabase } from "@/lib/supabase";
-
-// Inject keyframes once
-if (typeof document !== "undefined" && !document.getElementById("pc-keyframes")) {
-  const style = document.createElement("style");
-  style.id = "pc-keyframes";
-  style.textContent = `
-    @keyframes shimmer {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
-    }
-    @keyframes upgradeGlow {
-      0%, 100% { box-shadow: 0 0 12px hsla(210,80%,60%,0.3); }
-      50% { box-shadow: 0 0 24px hsla(210,80%,60%,0.6); }
-    }
-    @keyframes probadgepulse {
-      0%, 100% { box-shadow: 0 0 0 0 hsla(210,80%,60%,0.4); }
-      50% { box-shadow: 0 0 0 5px hsla(210,80%,60%,0); }
-    }
-  `;
-  document.head.appendChild(style);
-}
 
 const LANG_LABELS: Record<Exclude<Language, "unknown">, string> = {
   javascript: "JavaScript",
@@ -114,6 +95,7 @@ function InAppSurvey({ onDismiss }: { onDismiss: () => void }) {
       <div className="flex flex-col gap-2">
         {SURVEY_OPTIONS.map((option) => (
           <button
+            type="button"
             key={option}
             onClick={() => handleOption(option)}
             className="w-full rounded-lg py-2 text-xs font-medium transition-all duration-150 active:scale-[0.98]"
@@ -129,6 +111,7 @@ function InAppSurvey({ onDismiss }: { onDismiss: () => void }) {
         ))}
       </div>
       <button
+        type="button"
         onClick={onDismiss}
         className="text-xs text-center"
         style={{ background: "none", border: "none", color: "hsl(215 14% 40%)", cursor: "pointer" }}
@@ -161,6 +144,7 @@ function DebugNudge({ errorCount, warningCount }: { errorCount: number; warningC
       style={{ background: "hsl(222 16% 13%)", border: "1px solid hsl(220 13% 26%)" }}
     >
       <button
+        type="button"
         onClick={() => setOpen((v) => !v)}
         className="w-full flex items-center justify-between px-4 py-3"
         style={{ background: "none", border: "none", cursor: "pointer", WebkitTapHighlightColor: "transparent" }}
@@ -224,11 +208,13 @@ function SaveToCollectionButton({ code, language, lines }: { code: string; langu
     setSaved(collectionId);
     setOpen(false);
     setTimeout(() => setSaved(null), 2500);
+    toast.success("Saved to collection");
   }
 
   return (
     <div className="flex flex-col gap-2">
       <button
+        type="button"
         onClick={handleOpen}
         className="w-full rounded-xl py-3 text-sm font-semibold transition-all duration-150 active:scale-[0.98]"
         style={{
@@ -253,6 +239,7 @@ function SaveToCollectionButton({ code, language, lines }: { code: string; langu
               <p className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>No collections yet.</p>
               <a href="/collections">
                 <button
+                  type="button"
                   className="text-xs font-semibold px-3 py-1.5 rounded-lg"
                   style={{ background: "hsl(210 80% 60%)", color: "hsl(222 16% 6%)", border: "none", cursor: "pointer" }}
                 >
@@ -263,6 +250,7 @@ function SaveToCollectionButton({ code, language, lines }: { code: string; langu
           ) : (
             collections.map((col) => (
               <button
+                type="button"
                 key={col.id}
                 onClick={() => handleSave(col.id)}
                 disabled={saving === col.id}
@@ -310,8 +298,8 @@ function ResultRating({ language, errorCount, warningCount }: { language: string
   return (
     <div className="flex items-center justify-center gap-4 py-2">
       <span className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>Was this result helpful?</span>
-      <button onClick={() => handleRate("up")} className="text-lg transition-opacity hover:opacity-70 active:scale-90" style={{ background: "none", border: "none", cursor: "pointer" }} aria-label="Helpful">👍</button>
-      <button onClick={() => handleRate("down")} className="text-lg transition-opacity hover:opacity-70 active:scale-90" style={{ background: "none", border: "none", cursor: "pointer" }} aria-label="Not helpful">👎</button>
+      <button type="button" onClick={() => handleRate("up")} className="text-lg transition-opacity hover:opacity-70 active:scale-90" style={{ background: "none", border: "none", cursor: "pointer" }} aria-label="Helpful">👍</button>
+      <button type="button" onClick={() => handleRate("down")} className="text-lg transition-opacity hover:opacity-70 active:scale-90" style={{ background: "none", border: "none", cursor: "pointer" }} aria-label="Not helpful">👎</button>
     </div>
   );
 }
@@ -349,6 +337,7 @@ function FileResultPanel({ fileResult, defaultOpen }: { fileResult: FileResult; 
     >
       {/* File header — tap to collapse */}
       <button
+        type="button"
         onClick={() => setOpen((v) => !v)}
         className="w-full flex items-center justify-between px-4 py-3"
         style={{
@@ -549,6 +538,8 @@ export default function Home() {
   const errorCount = result?.lines.filter((l) => l.type === "error").length ?? 0;
   const warningCount = result?.lines.filter((l) => l.type === "warning").length ?? 0;
   const isLowConfidence = code.trim().split("\n").filter((l) => l.trim().length > 0).length < 5;
+  const totalChecks = history.length;
+  const showRateSignal = !isPro && totalChecks >= 5;
 
   // ── Dev toggle (tap version 5 times) ──────────────────────────────────────
   function handleVersionTap() {
@@ -627,9 +618,13 @@ export default function Home() {
     if (!result) return;
     setSharing(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       const res = await fetch("/api/share", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
         body: JSON.stringify({
           code,
           language: result.language,
@@ -640,7 +635,12 @@ export default function Home() {
       if (data.id) {
         const url = `https://www.pastecheck.co.uk/s/${data.id}`;
         setShareUrl(url);
-        try { await navigator.clipboard.writeText(url); } catch {}
+        try {
+          await navigator.clipboard.writeText(url);
+          toast.success("Link copied to clipboard");
+        } catch {
+          toast.success("Share link generated");
+        }
       }
     } catch {}
     setSharing(false);
@@ -708,7 +708,15 @@ export default function Home() {
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen w-full" style={{ background: "hsl(222 16% 10%)" }}>
+      <Toaster position="bottom-center" theme="dark" richColors />
       <div className="mx-auto w-full max-w-2xl px-4 pb-10 pt-8">
+        <Helmet>
+          <title>PasteCheck — Paste and Check Your Code</title>
+          <meta name="description" content="Paste your JavaScript, TypeScript, Python, HTML or CSS code and instantly see syntax errors and warnings highlighted. Free, no login, works on mobile." />
+          <meta property="og:title" content="PasteCheck — Paste and Check Your Code" />
+          <meta property="og:description" content="Paste your JavaScript, TypeScript, Python, HTML or CSS code and instantly see syntax errors and warnings highlighted. Free, no login, works on mobile." />
+          <meta property="og:image" content="/opengraph.jpg" />
+        </Helmet>
 
         {/* Nav */}
         <NavMenu />
@@ -731,6 +739,34 @@ export default function Home() {
           <p className="text-sm" style={{ color: "hsl(215 14% 55%)" }}>
             Paste your code and check for errors and warnings instantly.
           </p>
+          <p className="text-sm" style={{ color: "hsl(215 14% 55%)" }}>
+            Paste your code and check for errors and warnings instantly.
+          </p>
+          <p className="text-xs mt-1" style={{ color: "hsl(215 14% 38%)" }}>
+            Free online checker for JavaScript, TypeScript, Python, HTML and CSS — no sign-up required.
+          </p>
+          {showRateSignal && (
+            <div className="mt-3 rounded-lg px-3 py-2 flex items-center justify-between gap-3" style={{ background: "hsl(210 80% 60% / 0.07)", border: "1px solid hsl(210 80% 60% / 0.18)" }}>
+              <span className="text-xs" style={{ color: "hsl(215 14% 52%)" }}>
+                {totalChecks} checks today — Pro unlocks multi-file mode and saved history.
+              </span>
+              <a
+                href="/api/create-checkout"
+                onClick={async (e) => {
+                  e.preventDefault();
+                  try {
+                    const res = await fetch("/api/create-checkout", { method: "POST" });
+                    const data = await res.json();
+                    if (data.url) window.location.href = data.url;
+                  } catch {}
+                }}
+                className="text-xs font-semibold shrink-0"
+                style={{ color: "hsl(210 80% 65%)", textDecoration: "none" }}
+              >
+                Upgrade →
+              </a>
+            </div>
+          )}
         </header>
 
         {/* ── Mode tabs (always visible — Multi-File locked for free users) ── */}
@@ -739,6 +775,7 @@ export default function Home() {
           style={{ background: "hsl(222 16% 13%)", border: "1px solid hsl(220 13% 22%)" }}
         >
           <button
+            type="button"
             onClick={() => { if (isPro) { setProMode("single"); handleReset(); } }}
             className="flex-1 rounded-lg py-2 text-xs font-semibold transition-all"
             style={{
@@ -751,6 +788,7 @@ export default function Home() {
             Single File
           </button>
           <button
+            type="button"
             onClick={() => {
               if (isPro) {
                 setProMode("multi");
@@ -816,6 +854,10 @@ export default function Home() {
                   />
                 </div>
 
+                <p className="text-xs text-center" style={{ color: "hsl(215 14% 38%)" }}>
+                  🔒 Your code never leaves your browser.
+                </p>
+
                 {inputError && (
                   <div className="rounded-xl px-4 py-3 text-sm flex items-center gap-2" style={{ background: "rgba(234,179,8,0.08)", border: "1px solid rgba(234,179,8,0.25)", color: "rgb(253,224,71)" }}>
                     <span className="shrink-0">⚠</span><span>{inputError}</span>
@@ -824,6 +866,8 @@ export default function Home() {
 
                 {history.length > 0 && (
                   <button
+                    <button
+                    type="button"
                     onClick={() => setShowHistory((v) => !v)}
                     className="w-full rounded-xl py-2.5 text-sm font-medium tracking-wide transition-all duration-150"
                     style={{ background: "hsl(220 13% 16%)", color: "hsl(215 14% 55%)", border: "1px solid hsl(220 13% 22%)", cursor: "pointer" }}
@@ -837,15 +881,24 @@ export default function Home() {
                     {history.map((item, idx) => {
                       const errors = item.result.lines.filter((l) => l.type === "error").length;
                       const warnings = item.result.lines.filter((l) => l.type === "warning").length;
-                      const preview = item.code.trim().split("\n")[0].slice(0, 48);
+                      const lang = item.result.language;
+                      const timestamp = new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
                       return (
                         <button
                           key={idx}
+                          type="button"
                           onClick={() => { setCode(item.code); setResult(item.result); setChecked(true); setExpanded(new Set()); setShowHistory(false); }}
                           className="w-full rounded-xl px-4 py-3 text-left transition-all duration-150"
                           style={{ background: "hsl(222 16% 13%)", border: "1px solid hsl(220 13% 22%)", cursor: "pointer" }}
                         >
-                          <div className="text-xs font-mono truncate" style={{ color: "hsl(210 20% 72%)" }}>{preview}</div>
+                          <div className="flex items-center justify-between gap-2">
+                            {lang !== "unknown" && (
+                              <span className="text-xs font-semibold" style={{ color: LANG_COLOR[lang as Exclude<Language, "unknown">] }}>
+                                {LANG_LABELS[lang as Exclude<Language, "unknown">]}
+                              </span>
+                            )}
+                            <span className="text-xs ml-auto" style={{ color: "hsl(215 14% 38%)" }}>{timestamp}</span>
+                          </div>
                           <div className="flex gap-3 mt-1">
                             {errors > 0 && <span className="text-xs" style={{ color: "rgb(248,113,113)" }}>{errors} {errors === 1 ? "error" : "errors"}</span>}
                             {warnings > 0 && <span className="text-xs" style={{ color: "rgb(253,224,71)" }}>{warnings} {warnings === 1 ? "warning" : "warnings"}</span>}
@@ -858,6 +911,7 @@ export default function Home() {
                 )}
 
                 <button
+                  type="button"
                   onClick={handleCheck}
                   disabled={!code.trim()}
                   className="w-full rounded-xl py-3.5 text-sm font-semibold tracking-wide transition-all duration-150 active:scale-[0.98]"
@@ -956,6 +1010,7 @@ export default function Home() {
                 {isPro && (
                   <div className="flex flex-col gap-2">
                     <button
+                      type="button"
                       onClick={handleShare}
                       disabled={sharing}
                       className="w-full rounded-xl py-3 text-sm font-semibold transition-all duration-150 active:scale-[0.98]"
@@ -999,6 +1054,7 @@ export default function Home() {
                   >
                     <span className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>🔗 Share this check — Pro feature</span>
                     <button
+                      type="button"
                       onClick={async (e) => {
                         e.stopPropagation();
                         setShareAttempted(true);
@@ -1031,6 +1087,7 @@ export default function Home() {
                   style={{ background: "hsl(220 13% 16%)", color: "hsl(215 14% 55%)", border: "1px solid hsl(220 13% 22%)", cursor: "pointer" }}
                 >Copy result as text</button>
                 <button
+                  type="button"
                   onClick={handleReset}
                   className="w-full rounded-xl py-3.5 text-sm font-semibold tracking-wide transition-all duration-150 active:scale-[0.98]"
                   style={{ background: "hsl(220 13% 20%)", color: "hsl(210 20% 75%)", border: "1px solid hsl(220 13% 26%)", cursor: "pointer" }}
@@ -1090,6 +1147,7 @@ export default function Home() {
 
                 {files.length < 5 && (
                   <button
+                    type="button"
                     onClick={handleAddFile}
                     className="w-full rounded-xl py-2.5 text-sm font-medium transition-all duration-150"
                     style={{ background: "hsl(220 13% 16%)", color: "hsl(215 14% 55%)", border: "1px solid hsl(220 13% 22%)", cursor: "pointer" }}
@@ -1103,6 +1161,7 @@ export default function Home() {
                 )}
 
                 <button
+                  type="button"
                   onClick={handleCheckAll}
                   className="w-full rounded-xl py-3.5 text-sm font-semibold tracking-wide transition-all duration-150 active:scale-[0.98]"
                   style={{ background: "hsl(210 80% 60%)", color: "hsl(222 16% 6%)", border: "none", cursor: "pointer" }}
@@ -1151,6 +1210,7 @@ export default function Home() {
                 )}
 
                 <button
+                  type="button"
                   onClick={handleMultiReset}
                   className="w-full rounded-xl py-3.5 text-sm font-semibold tracking-wide transition-all duration-150 active:scale-[0.98]"
                   style={{ background: "hsl(220 13% 20%)", color: "hsl(210 20% 75%)", border: "1px solid hsl(220 13% 26%)", cursor: "pointer" }}
@@ -1174,6 +1234,7 @@ export default function Home() {
                   alert("Something went wrong. Please try again.");
                 }
               }}
+              type="button"
               className="w-full rounded-xl py-3.5 text-sm font-semibold tracking-wide transition-all duration-150 active:scale-[0.97]"
               style={{
                 background: "hsl(210 80% 60%)",
@@ -1202,7 +1263,10 @@ export default function Home() {
             style={{ background: "none", border: "none", cursor: "default", WebkitTapHighlightColor: "transparent" }}
           >
             <span className="text-xs" style={{ color: "hsl(215 14% 30%)" }}>
-              PasteCheck v2.7
+              PasteCheck v2.16
+            </span>
+            <span className="text-xs mt-1 block" style={{ color: "hsl(215 14% 26%)" }}>
+              📱 Coded entirely on an Android phone.
             </span>
           </button>
         </div>

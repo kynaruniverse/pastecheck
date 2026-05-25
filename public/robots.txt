@@ -1,2 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /collections
+Disallow: /collections/
+Disallow: /s/
+Disallow: /login
+Disallow: /signup

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import NavMenu from "@/components/NavMenu";
 import Logo from "@/components/Logo";
@@ -8,6 +8,12 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmed, setConfirmed] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("confirmed") === "1") setConfirmed(true);
+  }, []);
 
   async function handleLogin() {
     if (!email || !password) { setError("Please enter your email and password."); return; }
@@ -54,6 +60,12 @@ export default function Login() {
             <p className="text-sm" style={{ color: "hsl(215 14% 52%)" }}>Welcome back to PasteCheck.</p>
           </div>
 
+          {confirmed && (
+            <div className="rounded-xl px-4 py-3 text-sm" style={{ background: "hsla(142,70%,45%,0.12)", border: "1px solid hsla(142,70%,45%,0.25)", color: "rgb(134,239,172)" }}>
+              Email confirmed — sign in to continue.
+            </div>
+          )}
+
           {error && (
             <div className="rounded-xl px-4 py-3 text-sm" style={{ background: "hsla(0,70%,50%,0.12)", border: "1px solid hsla(0,70%,50%,0.25)", color: "rgb(248,113,113)" }}>
               {error}
@@ -88,6 +100,7 @@ export default function Login() {
           </div>
 
           <button
+            type="button"
             onClick={handleLogin}
             disabled={loading}
             className="w-full rounded-xl py-3 text-sm font-bold"

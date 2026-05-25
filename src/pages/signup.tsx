@@ -77,6 +77,7 @@ export default function Signup() {
                 placeholder="you@example.com"
                 className="w-full rounded-xl px-4 py-3 text-sm outline-none"
                 style={{ background: "hsl(222 16% 10%)", border: "1px solid hsl(220 13% 26%)", color: "hsl(210 20% 90%)" }}
+                onKeyDown={(e) => e.key === "Enter" && handleSignup()}
               />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -88,6 +89,7 @@ export default function Signup() {
                 placeholder="Min. 6 characters"
                 className="w-full rounded-xl px-4 py-3 text-sm outline-none"
                 style={{ background: "hsl(222 16% 10%)", border: "1px solid hsl(220 13% 26%)", color: "hsl(210 20% 90%)" }}
+                onKeyDown={(e) => e.key === "Enter" && handleSignup()}
               />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -105,6 +107,7 @@ export default function Signup() {
           </div>
 
           <button
+            type="button"
             onClick={handleSignup}
             disabled={loading}
             className="w-full rounded-xl py-3 text-sm font-bold"

@@ -17,7 +17,13 @@ export default function Collections() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchCollections();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        window.location.href = "/login";
+      } else {
+        fetchCollections();
+      }
+    });
   }, []);
 
   async function fetchCollections() {
@@ -76,6 +82,7 @@ export default function Collections() {
               </h1>
             </div>
             <button
+              type="button"
               onClick={() => setShowCreate((v) => !v)}
               className="text-xs font-semibold px-3 py-1.5 rounded-lg"
               style={{ background: "hsl(210 80% 60%)", color: "hsl(222 16% 6%)", border: "none", cursor: "pointer" }}
@@ -111,6 +118,7 @@ export default function Collections() {
             />
             <div className="flex gap-2">
               <button
+                type="button"
                 onClick={handleCreate}
                 disabled={creating || !newName.trim()}
                 className="flex-1 rounded-lg py-2 text-xs font-semibold"
@@ -124,6 +132,7 @@ export default function Collections() {
                 {creating ? "Creating..." : "Create"}
               </button>
               <button
+                type="button"
                 onClick={() => { setShowCreate(false); setNewName(""); }}
                 className="px-4 rounded-lg py-2 text-xs"
                 style={{ background: "hsl(220 13% 18%)", color: "hsl(215 14% 55%)", border: "1px solid hsl(220 13% 26%)", cursor: "pointer" }}
@@ -178,6 +187,7 @@ export default function Collections() {
                   </p>
                 </a>
                 <button
+                  type="button"
                   onClick={() => handleDelete(col.id)}
                   className="ml-3 shrink-0 text-xs px-2 py-1 rounded"
                   style={{ background: "none", border: "none", color: "hsl(215 14% 40%)", cursor: "pointer" }}

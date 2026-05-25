@@ -173,7 +173,7 @@ function lintJavaScript(code: string, useTypeScript = false): CodeLine[] {
 
     const lines = code.split("\n");
 
-    if (!containsJSX && lines.length < 300) {
+    if (lines.length < 300) {
       // Non-JSX: line-by-line recovery with simple cascade suppression.
       // Rule: always keep the first error. Only add subsequent errors if:
       // 1. message is non-generic (specific errors are always real), OR

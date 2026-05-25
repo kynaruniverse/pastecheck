@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
+import { Helmet } from "react-helmet-async";
 import type { LintResult, Language } from "@/lib/linter";
 import NavMenu from "@/components/NavMenu";
 
@@ -71,6 +72,14 @@ export default function Shared() {
 
   return (
     <div className="min-h-screen w-full" style={{ background: "hsl(222 16% 10%)" }}>
+      <Helmet>
+        <title>Shared Code Check — PasteCheck</title>
+        <meta name="description" content="View a shared code check result from PasteCheck — instant syntax error and warning detection for JavaScript, TypeScript, Python, HTML and CSS." />
+        <meta property="og:title" content="Shared Code Check — PasteCheck" />
+        <meta property="og:description" content="View a shared code check result from PasteCheck — instant syntax error and warning detection for JavaScript, TypeScript, Python, HTML and CSS." />
+        <meta property="og:image" content="/opengraph.jpg" />
+        <meta name="robots" content="noindex" />
+      </Helmet>
       <NavMenu />
       <div className="mx-auto w-full max-w-2xl px-4 pb-10 pt-8">
         <header className="mb-6">
@@ -147,6 +156,10 @@ export default function Shared() {
             })}
           </div>
         </div>
+
+        <p className="text-xs text-center mb-3" style={{ color: "hsl(215 14% 38%)" }}>
+          🔗 This link is permanent — it won't expire.
+        </p>
 
         {/* CTA */}
         <div className="rounded-xl px-4 py-4 text-center flex flex-col gap-3" style={{ background: "hsl(222 16% 13%)", border: "1px solid hsl(220 13% 22%)" }}>

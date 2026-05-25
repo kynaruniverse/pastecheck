@@ -86,6 +86,7 @@ export default function NavMenu() {
 
         {/* Right side — burger */}
         <button
+          type="button"
           onClick={() => setOpen(true)}
           aria-label="Open menu"
           style={{
@@ -147,6 +148,7 @@ export default function NavMenu() {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "32px" }}>
           <Logo size="sm" />
           <button
+            type="button"
             onClick={() => setOpen(false)}
             style={{
               background: "none",
@@ -162,7 +164,7 @@ export default function NavMenu() {
 
         {/* Nav links */}
         <nav style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1 }}>
-          {[...navItems, { label: "Collections", href: "/collections" }].map((item) => (
+          {[...navItems, ...(isLoggedIn ? [{ label: "Collections", href: "/collections" }] : [])].map((item) => (
             <a
               key={item.href}
               href={item.href}
@@ -192,6 +194,7 @@ export default function NavMenu() {
         <div style={{ borderTop: "1px solid hsl(220 13% 20%)", paddingTop: "16px", marginTop: "8px" }}>
           {isLoggedIn ? (
             <button
+              type="button"
               onClick={handleSignOut}
               style={{
                 width: "100%",

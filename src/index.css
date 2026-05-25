@@ -58,7 +58,7 @@
   --destructive-foreground: 0 0% 100%;
 
   --app-font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
-  --app-font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+  --app-font-mono: ui-monospace, 'Cascadia Code', Consolas, 'Courier New', monospace;
   --radius: 0.625rem;
 }
 
@@ -106,6 +106,21 @@
   .hidden-mobile {
     display: none !important;
   }
+}
+
+@keyframes probadgepulse {
+  0%, 100% { box-shadow: 0 0 0 0 hsla(210,80%,60%,0.4); }
+  50% { box-shadow: 0 0 0 5px hsla(210,80%,60%,0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes upgradeGlow {
+  0%, 100% { box-shadow: 0 0 12px hsla(210,80%,60%,0.3); }
+  50% { box-shadow: 0 0 24px hsla(210,80%,60%,0.6); }
 }
 
 @layer utilities {

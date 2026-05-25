@@ -86,6 +86,7 @@ export default function Success() {
                 { icon: "📁", label: "Create a Collection", desc: "Save and organise your checks", href: "/collections" },
               ].map((item) => (
                 <button
+                  type="button"
                   key={item.label}
                   onClick={() => navigate(item.href)}
                   className="w-full rounded-xl px-4 py-3 flex items-center gap-3 text-left transition-all duration-150 active:scale-[0.98]"

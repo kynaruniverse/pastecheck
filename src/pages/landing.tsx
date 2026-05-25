@@ -1,6 +1,7 @@
 import { useLocation } from "wouter";
 import { Helmet } from "react-helmet-async";
 import NavMenu from "@/components/NavMenu";
+import Logo from "@/components/Logo";
 
 const features = [
   {
@@ -31,7 +32,7 @@ const features = [
       </svg>
     ),
     title: "Understand, Not Just Find",
-    desc: "Tap any highlighted line for a plain-English explanation of what broke and why. Your last 10 checks are saved so you can jump back instantly.",
+    desc: "Tap any highlighted line for a plain-English explanation of what broke and why. Your last 5 checks are saved locally so you can jump back instantly.",
   },
 ];
 
@@ -55,12 +56,6 @@ export default function Landing() {
         <meta name="description" content="Paste your JavaScript, TypeScript, Python, HTML or CSS and instantly see every error highlighted. Free, no sign-up, works on mobile." />
         <meta property="og:title" content="PasteCheck — Free Online Code Error Checker" />
         <meta property="og:description" content="Paste your JavaScript, TypeScript, Python, HTML or CSS and instantly see every error highlighted. Free, no sign-up, works on mobile." />
-        <style>{`
-          @keyframes probadgepulse {
-            0%, 100% { box-shadow: 0 0 0 0 hsla(210,80%,60%,0.5); }
-            50% { box-shadow: 0 0 0 5px hsla(210,80%,60%,0); }
-          }
-        `}</style>
       </Helmet>
 
       <div className="mx-auto w-full max-w-2xl px-5 flex flex-col flex-1">
@@ -103,6 +98,7 @@ export default function Landing() {
           </p>
 
           <button
+            type="button"
             onClick={() => navigate("/check")}
             className="w-full rounded-2xl py-4 text-base font-bold tracking-wide transition-all duration-150 active:scale-[0.97] mb-4"
             style={{
@@ -169,7 +165,16 @@ export default function Landing() {
               ))}
             </div>
             <button
-              onClick={() => navigate("/check")}
+              type="button"
+              onClick={async () => {
+                try {
+                  const res = await fetch("/api/create-checkout", { method: "POST" });
+                  const data = await res.json();
+                  if (data.url) window.location.href = data.url;
+                } catch {
+                  alert("Something went wrong. Please try again.");
+                }
+              }}
               className="w-full rounded-xl py-3 text-sm font-semibold transition-all duration-150 active:scale-[0.98]"
               style={{
                 background: "hsl(210 80% 60%)",
@@ -179,7 +184,7 @@ export default function Landing() {
                 boxShadow: "0 0 16px hsla(210,80%,60%,0.3)",
               }}
             >
-              Start Free — Upgrade Anytime
+              Upgrade to Pro — £4/month
             </button>
           </div>
         </div>

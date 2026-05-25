@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useParams } from "wouter";
 import { supabase } from "@/lib/supabase";
 import { type LintResult } from "@/lib/linter";
 import NavMenu from "@/components/NavMenu";
@@ -17,11 +18,6 @@ interface Collection {
   name: string;
 }
 
-function getCollectionId(): string {
-  const parts = window.location.pathname.split("/");
-  return parts[parts.length - 1] ?? "";
-}
-
 export default function CollectionDetail() {
   const [collection, setCollection] = useState<Collection | null>(null);
   const [checks, setChecks] = useState<SavedCheck[]>([]);
@@ -36,10 +32,16 @@ export default function CollectionDetail() {
       return next;
     });
   }
-  const collectionId = getCollectionId();
+  const { id: collectionId = "" } = useParams<{ id: string }>();
 
   useEffect(() => {
-    fetchData();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        window.location.href = "/login";
+      } else {
+        fetchData();
+      }
+    });
   }, []);
 
   async function fetchData() {
@@ -113,6 +115,7 @@ export default function CollectionDetail() {
             </p>
             <a href="/check">
               <button
+                type="button"
                 className="mt-2 px-4 py-2 rounded-lg text-xs font-semibold"
                 style={{ background: "hsl(210 80% 60%)", color: "hsl(222 16% 6%)", border: "none", cursor: "pointer" }}
               >
@@ -173,6 +176,7 @@ export default function CollectionDetail() {
                         }}
                       >›</span>
                       <button
+                        type="button"
                         onClick={(e) => { e.stopPropagation(); handleDeleteCheck(check.id); }}
                         className="text-xs px-2 py-1 rounded ml-1"
                         style={{ background: "none", border: "none", color: "hsl(215 14% 40%)", cursor: "pointer" }}
