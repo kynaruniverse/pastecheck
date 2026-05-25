@@ -209,11 +209,15 @@ function lintJavaScript(code: string, useTypeScript = false): CodeLine[] {
               if (syntaxErrors.find((e) => e.line === err2.loc!.line)) continue;
               const isFirstError = lastErrorLine === -1;
               const isSpecific = !isGeneric(msg2);
-
-              // Only allow subsequent errors if they are specific.
-              // Generic errors ("Unexpected token") are almost always structural cascades
+              
+              // Only allow subsequent errors if they are specific. 
+              // Generic errors ("Unexpected token") are almost always structural cascades 
               // triggered by an earlier unclosed block, regardless of line distance.
               if (isFirstError || isSpecific) {
+                if (isFirstError) {
+                  // We found the root cause! Clear the inaccurate global error from the bottom of the file
+                  syntaxErrors.length = 0; 
+                }
                 syntaxErrors.push({ line: err2.loc.line, msg: entry });
                 lastErrorLine = err2.loc.line;
               }
