@@ -105,6 +105,9 @@ export default function Login() {
             Don't have an account?{" "}
             <a href="/signup" style={{ color: "hsl(210 80% 65%)", textDecoration: "none", fontWeight: 600 }}>Sign up</a>
           </p>
+          <p className="text-center text-xs" style={{ color: "hsl(215 14% 48%)" }}>
+            <a href="/forgot-password" style={{ color: "hsl(215 14% 48%)", textDecoration: "none" }}>Forgot your password?</a>
+          </p>
         </div>
 
       </div>
