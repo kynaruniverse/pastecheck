@@ -47,7 +47,7 @@ export default function Success() {
     <div className="min-h-screen w-full flex items-center justify-center px-4" style={{ background: "hsl(222 16% 10%)" }}>
       <NavMenu />
       <div className="w-full max-w-sm flex flex-col items-center gap-6 text-center">
-        {{status === "loading" ? (
+        {status === "loading" ? (
           <div className="text-sm" style={{ color: "hsl(215 14% 55%)" }}>Activating Pro...</div>
         ) : status === "unverified" ? (
           <div className="flex flex-col items-center gap-4">
