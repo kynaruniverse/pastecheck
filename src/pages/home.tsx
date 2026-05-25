@@ -583,7 +583,7 @@ export default function Home() {
     setInputError(null);
 
     setHistory((prev) => {
-      const updated = [{ code, result: r }, ...prev].slice(0, 10);
+      const updated = [{ code, result: r }, ...prev].slice(0, isPro ? 100 : 5);
       try { localStorage.setItem("pastecheck_history", JSON.stringify(updated)); } catch {}
       const checkNumber = updated.length;
       if ([3, 5, 10].includes(checkNumber)) {
@@ -591,7 +591,7 @@ export default function Home() {
           (window as any).gtag("event", "check_milestone", { event_category: "Engagement", event_label: `check_${checkNumber}` });
         }
       }
-      if (checkNumber === 3 && !surveyDismissed) setShowSurvey(true);
+      if (checkNumber === 5 && !surveyDismissed) setShowSurvey(true);
       return updated;
     });
   }
@@ -1013,6 +1013,23 @@ export default function Home() {
                     >Upgrade</button>
                   </div>
                 )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!result) return;
+                    const flagged = result.lines.filter(l => l.type !== "normal" && l.messages.length > 0);
+                    if (flagged.length === 0) {
+                      navigator.clipboard.writeText("No issues found — looks clean!");
+                      return;
+                    }
+                    const text = flagged.map(l =>
+                      `Line ${result.lines.indexOf(l) + 1} [${l.type.toUpperCase()}]: ${l.messages.join(" | ")}`
+                    ).join("\n");
+                    navigator.clipboard.writeText(text);
+                  }}
+                  className="w-full rounded-xl py-3 text-sm font-medium transition-all duration-150 active:scale-[0.98]"
+                  style={{ background: "hsl(220 13% 16%)", color: "hsl(215 14% 55%)", border: "1px solid hsl(220 13% 22%)", cursor: "pointer" }}
+                >Copy result as text</button>
                 <button
                   onClick={handleReset}
                   className="w-full rounded-xl py-3.5 text-sm font-semibold tracking-wide transition-all duration-150 active:scale-[0.98]"

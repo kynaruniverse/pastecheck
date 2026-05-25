@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import Logo from "@/components/Logo";
 import { supabase } from "@/lib/supabase";
+import { useLocation } from "wouter";
 
 export default function NavMenu() {
   const [open, setOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [location] = useLocation();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -22,40 +24,95 @@ export default function NavMenu() {
   const navItems = [
     { label: "Home", href: "/" },
     { label: "Check My Code", href: "/check" },
-    { label: "Collections", href: "/collections" },
     { label: "About", href: "/about" },
   ];
 
   return (
     <>
-      {/* Burger button */}
-      <button
-        onClick={() => setOpen(true)}
+      {/* ── Sticky top bar ── */}
+      <div
         style={{
           position: "fixed",
-          bottom: "24px",
-          right: "16px",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "48px",
           zIndex: 100,
-          width: "40px",
-          height: "40px",
-          borderRadius: "12px",
-          background: "hsl(222 16% 16%)",
-          border: "1px solid hsl(220 13% 24%)",
-          cursor: "pointer",
+          background: "hsl(222 16% 8%)",
+          borderBottom: "1px solid hsl(220 13% 18%)",
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center",
-          gap: "5px",
-          WebkitTapHighlightColor: "transparent",
+          justifyContent: "space-between",
+          padding: "0 16px",
         }}
       >
-        <span style={{ display: "block", width: "16px", height: "1.5px", background: "hsl(210 20% 72%)", borderRadius: "2px" }} />
-        <span style={{ display: "block", width: "16px", height: "1.5px", background: "hsl(210 20% 72%)", borderRadius: "2px" }} />
-        <span style={{ display: "block", width: "16px", height: "1.5px", background: "hsl(210 20% 72%)", borderRadius: "2px" }} />
-      </button>
+        {/* Logo */}
+        <a href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center" }}>
+          <Logo size="sm" />
+        </a>
 
-      {/* Backdrop */}
+        {/* Nav links — hidden on small screens */}
+        <nav
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
+          }}
+          className="hidden-mobile"
+        >
+          {navItems.map((item) => {
+            const active = location === item.href;
+            return (
+              <a
+                key={item.href}
+                href={item.href}
+                style={{
+                  textDecoration: "none",
+                  padding: "6px 12px",
+                  borderRadius: "8px",
+                  fontSize: "13px",
+                  fontWeight: 500,
+                  color: active ? "hsl(210 80% 65%)" : "hsl(215 14% 55%)",
+                  background: active ? "hsl(210 80% 60% / 0.1)" : "transparent",
+                  transition: "color 0.1s, background 0.1s",
+                  borderBottom: active ? "1px solid hsl(210 80% 60% / 0.4)" : "1px solid transparent",
+                }}
+              >
+                {item.label}
+              </a>
+            );
+          })}
+        </nav>
+
+        {/* Right side — burger */}
+        <button
+          onClick={() => setOpen(true)}
+          aria-label="Open menu"
+          style={{
+            width: "36px",
+            height: "36px",
+            borderRadius: "10px",
+            background: "hsl(222 16% 16%)",
+            border: "1px solid hsl(220 13% 24%)",
+            cursor: "pointer",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "5px",
+            WebkitTapHighlightColor: "transparent",
+          }}
+        >
+          <span style={{ display: "block", width: "16px", height: "1.5px", background: "hsl(210 20% 72%)", borderRadius: "2px" }} />
+          <span style={{ display: "block", width: "16px", height: "1.5px", background: "hsl(210 20% 72%)", borderRadius: "2px" }} />
+          <span style={{ display: "block", width: "16px", height: "1.5px", background: "hsl(210 20% 72%)", borderRadius: "2px" }} />
+        </button>
+      </div>
+
+      {/* ── Spacer to push page content below fixed bar ── */}
+      <div style={{ height: "48px" }} />
+
+      {/* ── Backdrop ── */}
       {open && (
         <div
           onClick={() => setOpen(false)}
@@ -68,7 +125,7 @@ export default function NavMenu() {
         />
       )}
 
-      {/* Drawer */}
+      {/* ── Drawer ── */}
       <div
         style={{
           position: "fixed",
@@ -105,7 +162,7 @@ export default function NavMenu() {
 
         {/* Nav links */}
         <nav style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1 }}>
-          {navItems.map((item) => (
+          {[...navItems, { label: "Collections", href: "/collections" }].map((item) => (
             <a
               key={item.href}
               href={item.href}
@@ -117,12 +174,13 @@ export default function NavMenu() {
                   borderRadius: "10px",
                   fontSize: "14px",
                   fontWeight: 500,
-                  color: "hsl(210 20% 78%)",
+                  color: location === item.href ? "hsl(210 80% 65%)" : "hsl(210 20% 78%)",
+                  background: location === item.href ? "hsl(210 80% 60% / 0.08)" : "transparent",
                   cursor: "pointer",
                   transition: "background 0.1s",
                 }}
                 onMouseEnter={(e) => (e.currentTarget.style.background = "hsl(220 13% 18%)")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = location === item.href ? "hsl(210 80% 60% / 0.08)" : "transparent")}
               >
                 {item.label}
               </div>
@@ -130,7 +188,7 @@ export default function NavMenu() {
           ))}
         </nav>
 
-        {/* Auth action — bottom of drawer */}
+        {/* Auth action */}
         <div style={{ borderTop: "1px solid hsl(220 13% 20%)", paddingTop: "16px", marginTop: "8px" }}>
           {isLoggedIn ? (
             <button
@@ -174,7 +232,6 @@ export default function NavMenu() {
             </a>
           )}
         </div>
-
       </div>
     </>
   );

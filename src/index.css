@@ -101,7 +101,18 @@
   }
 }
 
+
+@media (max-width: 640px) {
+  .hidden-mobile {
+    display: none !important;
+  }
+}
+
 @layer utilities {
+  .hidden-mobile {
+    display: flex;
+  }
+
   .font-mono {
     font-family: var(--app-font-mono);
   }
