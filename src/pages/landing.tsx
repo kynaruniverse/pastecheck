@@ -1,7 +1,6 @@
 import { useLocation } from "wouter";
 import { Helmet } from "react-helmet-async";
 import NavMenu from "@/components/NavMenu";
-import Logo from "@/components/Logo";
 
 const features = [
   {
@@ -67,9 +66,6 @@ export default function Landing() {
       <div className="mx-auto w-full max-w-2xl px-5 flex flex-col flex-1">
 
         {/* Nav */}
-        <div className="pt-8">
-          <Logo size="sm" />
-        </div>
         <NavMenu />
 
         {/* Hero */}
