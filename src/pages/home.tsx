@@ -512,6 +512,10 @@ export default function Home() {
   const [multiChecked, setMultiChecked] = useState(false);
   const [multiInputError, setMultiInputError] = useState<string | null>(null);
 
+  // Upsell triggers
+  const [shareAttempted, setShareAttempted] = useState(false);
+  const [multiAttempted, setMultiAttempted] = useState(false);
+
   // Shared
   const [history, setHistory] = useState<Array<{ code: string; result: LintResult }>>(() => {
     try {
@@ -728,38 +732,48 @@ export default function Home() {
           </p>
         </header>
 
-        {/* ── Mode tabs (Pro only) ── */}
-        {isPro && (
-          <div
-            className="flex rounded-xl mb-5 p-1"
-            style={{ background: "hsl(222 16% 13%)", border: "1px solid hsl(220 13% 22%)" }}
+        {/* ── Mode tabs (always visible — Multi-File locked for free users) ── */}
+        <div
+          className="flex rounded-xl mb-5 p-1"
+          style={{ background: "hsl(222 16% 13%)", border: "1px solid hsl(220 13% 22%)" }}
+        >
+          <button
+            onClick={() => { if (isPro) { setProMode("single"); handleReset(); } }}
+            className="flex-1 rounded-lg py-2 text-xs font-semibold transition-all"
+            style={{
+              background: isPro && proMode === "single" ? "hsl(210 80% 60%)" : !isPro ? "hsl(210 80% 60%)" : "transparent",
+              color: isPro && proMode === "single" ? "hsl(222 16% 6%)" : !isPro ? "hsl(222 16% 6%)" : "hsl(215 14% 55%)",
+              border: "none",
+              cursor: "pointer",
+            }}
           >
-            <button
-              onClick={() => { setProMode("single"); handleReset(); }}
-              className="flex-1 rounded-lg py-2 text-xs font-semibold transition-all"
-              style={{
-                background: proMode === "single" ? "hsl(210 80% 60%)" : "transparent",
-                color: proMode === "single" ? "hsl(222 16% 6%)" : "hsl(215 14% 55%)",
-                border: "none",
-                cursor: "pointer",
-              }}
-            >
-              Single File
-            </button>
-            <button
-              onClick={() => { setProMode("multi"); handleMultiReset(); setChecked(false); setResult(null); setCode(""); }}
-              className="flex-1 rounded-lg py-2 text-xs font-semibold transition-all"
-              style={{
-                background: proMode === "multi" ? "hsl(210 80% 60%)" : "transparent",
-                color: proMode === "multi" ? "hsl(222 16% 6%)" : "hsl(215 14% 55%)",
-                border: "none",
-                cursor: "pointer",
-              }}
-            >
-              Multi-File
-            </button>
-          </div>
-        )}
+            Single File
+          </button>
+          <button
+            onClick={() => {
+              if (isPro) {
+                setProMode("multi");
+                handleMultiReset();
+                setChecked(false);
+                setResult(null);
+                setCode("");
+              } else {
+                setMultiAttempted(true);
+              }
+            }}
+            className="flex-1 rounded-lg py-2 text-xs font-semibold transition-all flex items-center justify-center gap-1.5"
+            style={{
+              background: isPro && proMode === "multi" ? "hsl(210 80% 60%)" : "transparent",
+              color: isPro && proMode === "multi" ? "hsl(222 16% 6%)" : "hsl(215 14% 55%)",
+              border: "none",
+              cursor: isPro ? "pointer" : "pointer",
+              opacity: isPro ? 1 : 0.6,
+            }}
+          >
+            Multi-File
+            {!isPro && <span className="text-xs" style={{ color: "hsl(210 80% 60%)", fontSize: "9px" }}>PRO</span>}
+          </button>
+        </div>
 
         {/* ════════════════════════════════════════════════════════════════════
             SINGLE FILE MODE
@@ -934,7 +948,7 @@ export default function Home() {
 
                 {showSurvey && <InAppSurvey onDismiss={() => { setShowSurvey(false); setSurveyDismissed(true); }} />}
                 {(errorCount > 0 || warningCount > 0) && <DebugNudge errorCount={errorCount} warningCount={warningCount} />}
-                <ResultRating language={result?.language ?? "unknown"} errorCount={errorCount} warningCount={warningCount} />
+                {(errorCount > 0 || warningCount > 0) && <ResultRating language={result?.language ?? "unknown"} errorCount={errorCount} warningCount={warningCount} />}
 
                 {/* Share button — Pro only */}
                 {isPro && (
@@ -974,12 +988,18 @@ export default function Home() {
                   />
                 )}
 
-                {/* Share upsell — free users */}
+                {/* Share upsell — free users, shown after tapping the share nudge */}
                 {!isPro && (
-                  <div className="rounded-xl px-4 py-3 flex items-center justify-between gap-3" style={{ background: "hsl(222 16% 13%)", border: "1px solid hsl(220 13% 22%)" }}>
+                  <div
+                    className="rounded-xl px-4 py-3 flex items-center justify-between gap-3"
+                    style={{ background: "hsl(222 16% 13%)", border: "1px solid hsl(220 13% 22%)", cursor: "pointer" }}
+                    onClick={() => setShareAttempted(true)}
+                  >
                     <span className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>🔗 Share this check — Pro feature</span>
                     <button
-                      onClick={async () => {
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        setShareAttempted(true);
                         try {
                           const res = await fetch("/api/create-checkout", { method: "POST" });
                           const data = await res.json();
@@ -1122,8 +1142,8 @@ export default function Home() {
           </>
         )}
 
-        {/* ── Upgrade to Pro button (free users only) ── */}
-        {!isPro && (
+        {/* ── Upgrade to Pro button (free users only, shown after multi-file attempt) ── */}
+        {!isPro && multiAttempted && (
           <div className="mt-8">
             <button
               onClick={async () => {
