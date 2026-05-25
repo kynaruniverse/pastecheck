@@ -68,9 +68,10 @@ export function detectLanguage(code: string): Language {
   if (!looksLikeCode(trimmed)) return "unknown";
 
   if (
-    /^[\s\S]*\{[\s\S]*:[\s\S]*\}/.test(trimmed) &&
+    /^\s*([.#]?[\w-]+|\*|\[[\w-]+[\w-="']*\])\s*\{/.test(trimmed) &&
     !/<[a-zA-Z]/.test(trimmed) &&
-    /^\s*([.#]?[\w-]+|\*|\[[\w-]+\])\s*\{/.test(trimmed)
+    !/^\s*(const|let|var|function|class|import|export|return|if|for|while)\b/.test(trimmed) &&
+    /\{[^}]*:/.test(trimmed)
   ) {
     return "css";
   }
@@ -440,7 +441,7 @@ try {
   // Missing await — scan async functions for known async calls without await
   const KNOWN_ASYNC_CALLS = [
     "fetch", "axios", "axios.get", "axios.post", "axios.put", "axios.delete", "axios.patch",
-    "Promise.resolve", "Promise.reject", "Promise.all", "Promise.allSettled", "Promise.race", "Promise.any",
+    "Promise.all", "Promise.allSettled", "Promise.race", "Promise.any",
   ];
   const asyncAwaitPattern = new RegExp(
     `(?<!await\\s)(?<!await\\()\\b(${KNOWN_ASYNC_CALLS.map(k => k.replace(".", "\\.")).join("|")})\\s*\\(`,
@@ -480,7 +481,7 @@ try {
   });
 
   // No return value — flag functions whose names suggest they return a value but have no return statement
-  const RETURN_HINT_NAMES = /^(get|fetch|load|build|create|generate|find|parse|calculate|compute|format|extract|resolve|transform|map|filter|reduce|check|validate|convert)/i;
+  const RETURN_HINT_NAMES = /^(get|fetch|find|parse|calculate|compute|format|extract|transform|map|filter|reduce|validate|convert)/i;
   const fnRegex = /(?:function\s+(\w+)|(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s*)?\()/g;
   let fnMatch;
   while ((fnMatch = fnRegex.exec(code)) !== null) {
@@ -511,14 +512,10 @@ try {
     /\bfetch\s*\(/,
     /\baxios\s*[\.\(]/,
     /\bJSON\.parse\s*\(/,
-    /\bJSON\.stringify\s*\(/,
     /\blocalStorage\s*\./,
     /\bsessionStorage\s*\./,
-    /\bdocument\s*\./,
-    /\bwindow\s*\./,
     /\bfs\s*\./,
     /\brequire\s*\(/,
-    /\bPromise\s*\./,
   ];
 
   const fnStartRegex = /(?:^|\s)(?:async\s+)?function\s+(\w+)\s*\(|(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s*)?\(/gm;
@@ -557,12 +554,6 @@ try {
       if (trimmed.startsWith("//")) return;
       if (/:\s*any\b/.test(text)) {
         ann.add(idx, "warning", "Avoid 'any' — use a specific type or 'unknown' for safer typing — 'any' disables TypeScript's type checking on this value");
-      }
-      if (/\bvar\s+/.test(text)) {
-        ann.add(idx, "warning", "Prefer 'let' or 'const' over 'var' — use 'const' if the value never changes, 'let' if it does");
-      }
-      if (/\bconsole\s*\./.test(text)) {
-        ann.add(idx, "warning", "Avoid console statements in production code — remove before deploying or wrap in a debug flag");
       }
     });
   }
@@ -634,7 +625,7 @@ function lintPython(code: string): CodeLine[] {
   rawLines.forEach((text, idx) => {
     if (!text.trim() || text.trim().startsWith("#")) return;
     const indentMatch = text.match(/^(\s*)/);
-    const currentIndent = indentMatch ? indentMatch[1].replace(/\t/g, "    ").length : 0;
+    const currentIndent = indentMatch ? indentMatch[1].replace(/\t/g, "        ").length : 0;
     const expectedIndent = indentStack[indentStack.length - 1];
     
     let prevLine: string | undefined;
@@ -1299,6 +1290,7 @@ function lintCSS(code: string): CodeLine[] {
 }
 
 export function lint(code: string): LintResult {
+  code = code.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
   const language = detectLanguage(code);
   let lines: CodeLine[];
 
