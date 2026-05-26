@@ -23,12 +23,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (user) clientReferenceId = user.id;
     }
 
+    const { plan } = req.body || {};
+    const priceId = plan === "annual"
+      ? process.env.STRIPE_ANNUAL_PRICE_ID as string
+      : process.env.STRIPE_PRICE_ID as string;
+
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       payment_method_types: ["card"],
       line_items: [
         {
-          price: process.env.STRIPE_PRICE_ID as string,
+          price: priceId,
           quantity: 1,
         },
       ],

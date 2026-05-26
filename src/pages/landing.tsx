@@ -164,28 +164,59 @@ export default function Landing() {
                 </div>
               ))}
             </div>
-            <button
-              type="button"
-              onClick={async () => {
-                try {
-                  const res = await fetch("/api/create-checkout", { method: "POST" });
-                  const data = await res.json();
-                  if (data.url) window.location.href = data.url;
-                } catch {
-                  alert("Something went wrong. Please try again.");
-                }
-              }}
-              className="w-full rounded-xl py-3 text-sm font-semibold transition-all duration-150 active:scale-[0.98]"
-              style={{
-                background: "hsl(210 80% 60%)",
-                color: "hsl(222 16% 6%)",
-                border: "none",
-                cursor: "pointer",
-                boxShadow: "0 0 16px hsla(210,80%,60%,0.3)",
-              }}
-            >
-              Upgrade to Pro — £4/month
-            </button>
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    const res = await fetch("/api/create-checkout", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ plan: "annual" }),
+                    });
+                    const data = await res.json();
+                    if (data.url) window.location.href = data.url;
+                  } catch {
+                    alert("Something went wrong. Please try again.");
+                  }
+                }}
+                className="w-full rounded-xl py-3 text-sm font-semibold transition-all duration-150 active:scale-[0.98]"
+                style={{
+                  background: "hsl(210 80% 60%)",
+                  color: "hsl(222 16% 6%)",
+                  border: "none",
+                  cursor: "pointer",
+                  boxShadow: "0 0 16px hsla(210,80%,60%,0.3)",
+                }}
+              >
+                Upgrade to Pro — £35/year <span style={{ opacity: 0.7, fontSize: "0.75rem" }}>(save £13)</span>
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    const res = await fetch("/api/create-checkout", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ plan: "monthly" }),
+                    });
+                    const data = await res.json();
+                    if (data.url) window.location.href = data.url;
+                  } catch {
+                    alert("Something went wrong. Please try again.");
+                  }
+                }}
+                className="w-full rounded-xl py-3 text-sm font-semibold transition-all duration-150 active:scale-[0.98]"
+                style={{
+                  background: "transparent",
+                  color: "hsl(210 80% 65%)",
+                  border: "1px solid hsla(210,80%,60%,0.4)",
+                  cursor: "pointer",
+                }}
+              >
+                Upgrade to Pro — £4/month
+              </button>
+            </div>
           </div>
         </div>
 
