@@ -74,14 +74,14 @@ export default function CollectionDetail() {
     check.lines.filter((l) => l.type === "warning").length;
 
   return (
-    <div className="min-h-screen w-full" style={{ background: "hsl(222 16% 10%)" }}>
+    <div className="min-h-screen w-full" style={{ background: "hsl(220 8% 9%)" }}>
       <NavMenu />
       <div className="mx-auto w-full max-w-2xl px-4 pb-10 pt-8">
 
         <header className="mb-6">
           <div className="flex items-center gap-2 mb-1">
             <a href="/collections" style={{ textDecoration: "none" }}>
-              <span className="text-sm" style={{ color: "hsl(210 80% 60%)" }}>← Collections</span>
+              <span className="text-sm" style={{ color: "hsl(262 83% 75%)" }}>← Collections</span>
             </a>
           </div>
           <h1 className="text-xl font-bold tracking-tight" style={{ color: "hsl(210 20% 92%)" }}>
@@ -106,7 +106,7 @@ export default function CollectionDetail() {
         ) : checks.length === 0 ? (
           <div
             className="rounded-xl px-4 py-10 text-center flex flex-col items-center gap-2"
-            style={{ background: "hsl(222 16% 13%)", border: "1px solid hsl(220 13% 22%)" }}
+            style={{ background: "hsl(220 8% 12%)", border: "1px solid hsl(220 13% 22%)" }}
           >
             <span style={{ fontSize: "1.75rem" }}>📋</span>
             <p className="text-sm font-medium" style={{ color: "hsl(210 20% 72%)" }}>No saved checks yet</p>
@@ -117,7 +117,7 @@ export default function CollectionDetail() {
               <button
                 type="button"
                 className="mt-2 px-4 py-2 rounded-lg text-xs font-semibold"
-                style={{ background: "hsl(210 80% 60%)", color: "hsl(222 16% 6%)", border: "none", cursor: "pointer" }}
+                style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)", border: "none", cursor: "pointer" }}
               >
                 Go to tool
               </button>
@@ -132,7 +132,7 @@ export default function CollectionDetail() {
                 <div
                   key={check.id}
                   className="rounded-xl px-4 py-3"
-                  style={{ background: "hsl(222 16% 13%)", border: "1px solid hsl(220 13% 22%)" }}
+                  style={{ background: "hsl(220 8% 12%)", border: "1px solid hsl(220 13% 22%)" }}
                 >
                   <div
                     className="flex items-start justify-between gap-2"
@@ -186,7 +186,7 @@ export default function CollectionDetail() {
                   {expanded.has(check.id) && (
                     <div
                       className="mt-2 rounded-lg px-3 py-2 overflow-x-auto"
-                      style={{ background: "hsl(222 16% 10%)", fontFamily: "var(--app-font-mono)", fontSize: "11.5px", lineHeight: "1.6" }}
+                      style={{ background: "hsl(220 8% 9%)", fontFamily: "var(--app-font-mono)", fontSize: "11.5px", lineHeight: "1.6" }}
                     >
                       <pre style={{ color: "hsl(210 20% 72%)", margin: 0, whiteSpace: "pre-wrap", wordBreak: "break-all" }}>
                         {check.code.trim()}

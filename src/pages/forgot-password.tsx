@@ -23,7 +23,7 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center px-4" style={{ background: "hsl(222 16% 10%)" }}>
+    <div className="min-h-screen w-full flex items-center justify-center px-4" style={{ background: "hsl(220 8% 9%)" }}>background: "hsl(222 16% 14%)",
       <NavMenu />
       <div className="w-full max-w-sm flex flex-col gap-5">
         <div className="text-center">
@@ -51,10 +51,10 @@ export default function ForgotPassword() {
               autoComplete="email"
               className="w-full rounded-xl px-4 py-3 text-sm outline-none"
               style={{
-                background: "hsl(222 16% 14%)",
+                background: "hsl(220 8% 13%)",
                 border: `1px solid ${error ? "rgba(220,38,38,0.6)" : "hsl(220 13% 24%)"}`,
                 color: "hsl(210 20% 88%)",
-                caretColor: "hsl(210 80% 60%)",
+                caretColor: "hsl(262 83% 75%)",
               }}
             />
             {error && (
@@ -66,8 +66,8 @@ export default function ForgotPassword() {
               disabled={status === "loading"}
               className="w-full rounded-xl py-3 text-sm font-semibold transition-all duration-150 active:scale-[0.98]"
               style={{
-                background: status === "loading" ? "hsl(220 13% 22%)" : "hsl(210 80% 60%)",
-                color: status === "loading" ? "hsl(215 14% 45%)" : "hsl(222 16% 6%)",
+                background: status === "loading" ? "hsl(220 13% 22%)" : "hsl(262 83% 75%)",
+                color: status === "loading" ? "hsl(215 14% 45%)" : "hsl(220 8% 6%)",
                 border: "none",
                 cursor: status === "loading" ? "not-allowed" : "pointer",
               }}
@@ -78,7 +78,7 @@ export default function ForgotPassword() {
         )}
 
         <p className="text-xs text-center" style={{ color: "hsl(215 14% 40%)" }}>
-          <a href="/login" style={{ color: "hsl(210 80% 60%)", textDecoration: "none" }}>Back to sign in</a>
+          <a href="/login" style={{ color: "hsl(262 83% 75%)", textDecoration: "none" }}>Back to sign in</a>
         </p>
       </div>
     </div>

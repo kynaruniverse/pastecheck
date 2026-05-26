@@ -50,7 +50,7 @@ export default function FeedbackForm() {
             onClick={() => setOpen(true)}
             className="w-full rounded-xl py-3 text-sm font-medium transition-all duration-150 active:scale-[0.98]"
             style={{
-              background: "hsl(222 16% 16%)",
+              background: "hsl(220 8% 15%)",
               color: "hsl(210 20% 72%)",
               border: "1px solid hsl(220 13% 26%)",
               cursor: "pointer",
@@ -147,11 +147,11 @@ export default function FeedbackForm() {
                   spellCheck={false}
                   className="w-full resize-none rounded-xl px-3 py-2.5 text-sm outline-none"
                   style={{
-                    background: "hsl(222 16% 10%)",
+                    background: "hsl(220 8% 9%)",
                     color: "hsl(210 20% 85%)",
                     border: "1px solid hsl(220 13% 24%)",
                     fontFamily: "var(--app-font-sans)",
-                    caretColor: "hsl(210 80% 60%)",
+                    caretColor: "hsl(262 83% 75%)",
                     lineHeight: "1.55",
                   }}
                 />
@@ -168,8 +168,8 @@ export default function FeedbackForm() {
                 disabled={status === "submitting"}
                 className="w-full rounded-xl py-3 text-sm font-semibold transition-all duration-150 active:scale-[0.98]"
                 style={{
-                  background: status === "submitting" ? "hsl(220 13% 22%)" : "hsl(210 80% 60%)",
-                  color: status === "submitting" ? "hsl(215 14% 45%)" : "hsl(222 16% 6%)",
+                  background: status === "submitting" ? "hsl(220 13% 22%)" : "hsl(262 83% 75%)",
+                  color: status === "submitting" ? "hsl(215 14% 45%)" : "hsl(220 8% 6%)",
                   border: "none",
                   cursor: status === "submitting" ? "not-allowed" : "pointer",
                 }}

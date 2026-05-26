@@ -17,7 +17,7 @@ export default function Logo({ size = "sm", onClick }: LogoProps) {
             ? "rounded-xl w-12 h-12 text-lg"
             : "rounded-lg w-8 h-8 text-sm"
         }`}
-        style={{ background: "hsl(210 80% 60%)", color: "hsl(222 16% 6%)" }}
+        style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)" }}
       >
         P
       </span>

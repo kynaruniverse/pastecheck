@@ -46,7 +46,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center px-4" style={{ background: "hsl(222 16% 10%)" }}>
+    <div className="min-h-screen w-full flex items-center justify-center px-4" style={{ background: "hsl(220 8% 9%)" }}>
       <NavMenu />
       <div className="w-full max-w-sm flex flex-col gap-6">
 
@@ -54,7 +54,7 @@ export default function Login() {
         <Logo size="lg" />
 
         {/* Card */}
-        <div className="rounded-2xl px-6 py-7 flex flex-col gap-5" style={{ background: "hsl(222 16% 14%)", border: "1px solid hsl(220 13% 22%)" }}>
+        <div className="rounded-2xl px-6 py-7 flex flex-col gap-5" style={{ background: "hsl(220 8% 13%)", border: "1px solid hsl(220 13% 22%)" }}>
           <div>
             <h1 className="text-xl font-bold mb-1" style={{ color: "hsl(210 20% 92%)" }}>Sign in</h1>
             <p className="text-sm" style={{ color: "hsl(215 14% 52%)" }}>Welcome back to PasteCheck.</p>
@@ -81,7 +81,7 @@ export default function Login() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 className="w-full rounded-xl px-4 py-3 text-sm outline-none"
-                style={{ background: "hsl(222 16% 10%)", border: "1px solid hsl(220 13% 26%)", color: "hsl(210 20% 90%)" }}
+                style={{ background: "hsl(220 8% 9%)", border: "1px solid hsl(220 13% 26%)", color: "hsl(210 20% 90%)" }}
                 onKeyDown={(e) => e.key === "Enter" && handleLogin()}
               />
             </div>
@@ -93,7 +93,7 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 className="w-full rounded-xl px-4 py-3 text-sm outline-none"
-                style={{ background: "hsl(222 16% 10%)", border: "1px solid hsl(220 13% 26%)", color: "hsl(210 20% 90%)" }}
+                style={{ background: "hsl(220 8% 9%)", border: "1px solid hsl(220 13% 26%)", color: "hsl(210 20% 90%)" }}
                 onKeyDown={(e) => e.key === "Enter" && handleLogin()}
               />
             </div>
@@ -104,14 +104,14 @@ export default function Login() {
             onClick={handleLogin}
             disabled={loading}
             className="w-full rounded-xl py-3 text-sm font-bold"
-            style={{ background: loading ? "hsl(220 13% 22%)" : "hsl(210 80% 60%)", color: loading ? "hsl(215 14% 45%)" : "hsl(222 16% 6%)", border: "none", cursor: loading ? "not-allowed" : "pointer" }}
+            style={{ background: loading ? "hsl(220 13% 22%)" : "hsl(262 83% 75%)", color: loading ? "hsl(215 14% 45%)" : "hsl(220 8% 6%)", border: "none", cursor: loading ? "not-allowed" : "pointer" }}
           >
             {loading ? "Signing in…" : "Sign in"}
           </button>
 
           <p className="text-center text-xs" style={{ color: "hsl(215 14% 48%)" }}>
             Don't have an account?{" "}
-            <a href="/signup" style={{ color: "hsl(210 80% 65%)", textDecoration: "none", fontWeight: 600 }}>Sign up</a>
+            <a href="/signup" style={{ color: "hsl(262 83% 75%)", textDecoration: "none", fontWeight: 600 }}>Sign up</a>
           </p>
           <p className="text-center text-xs" style={{ color: "hsl(215 14% 48%)" }}>
             <a href="/forgot-password" style={{ color: "hsl(215 14% 48%)", textDecoration: "none" }}>Forgot your password?</a>

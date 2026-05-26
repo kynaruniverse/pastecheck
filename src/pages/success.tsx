@@ -44,7 +44,7 @@ export default function Success() {
   }, []);
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center px-4" style={{ background: "hsl(222 16% 10%)" }}>
+    <div className="min-h-screen w-full flex items-center justify-center px-4" style={{ background: "hsl(220 8% 9%)" }}>
       <NavMenu />
       <div className="w-full max-w-sm flex flex-col items-center gap-6 text-center">
         {status === "loading" ? (
@@ -91,7 +91,7 @@ export default function Success() {
                   onClick={() => navigate(item.href)}
                   className="w-full rounded-xl px-4 py-3 flex items-center gap-3 text-left transition-all duration-150 active:scale-[0.98]"
                   style={{
-                    background: "hsl(222 16% 16%)",
+                    background: "hsl(220 8% 15%)",
                     border: "1px solid hsl(220 13% 24%)",
                     cursor: "pointer",
                   }}

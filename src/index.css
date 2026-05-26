@@ -35,18 +35,18 @@
 }
 
 :root {
-  --background: 222 16% 10%;
+  --background: 220 8% 9%;
   --foreground: 210 20% 92%;
 
-  --card: 222 16% 14%;
+  --card: 220 8% 13%;
   --card-foreground: 210 20% 92%;
 
   --border: 220 13% 22%;
   --input: 220 13% 22%;
-  --ring: 210 80% 60%;
+  --ring: 262 83% 75%;
 
-  --primary: 210 80% 60%;
-  --primary-foreground: 222 16% 6%;
+  --primary: 262 83% 75%;
+  --primary-foreground: 220 8% 6%;
 
   --muted: 220 13% 18%;
   --muted-foreground: 215 14% 55%;
@@ -74,7 +74,7 @@
   }
 
   ::selection {
-    background: hsla(210, 80%, 60%, 0.3);
+    background: hsla(262, 83%, 75%, 0.3);
     color: hsl(210, 20%, 95%);
   }
 
@@ -109,8 +109,8 @@
 }
 
 @keyframes probadgepulse {
-  0%, 100% { box-shadow: 0 0 0 0 hsla(210,80%,60%,0.4); }
-  50% { box-shadow: 0 0 0 5px hsla(210,80%,60%,0); }
+  0%, 100% { box-shadow: 0 0 0 0 hsla(262,83%,75%,0.4); }
+  50% { box-shadow: 0 0 0 5px hsla(262,83%,75%,0); }
 }
 
 @keyframes shimmer {
@@ -119,8 +119,8 @@
 }
 
 @keyframes upgradeGlow {
-  0%, 100% { box-shadow: 0 0 12px hsla(210,80%,60%,0.3); }
-  50% { box-shadow: 0 0 24px hsla(210,80%,60%,0.6); }
+  0%, 100% { box-shadow: 0 0 12px hsla(262,83%,75%,0.3); }
+  50% { box-shadow: 0 0 24px hsla(262,83%,75%,0.6); }
 }
 
 @layer utilities {
@@ -141,7 +141,7 @@
 
   .overflow-x-auto::-webkit-scrollbar-track,
   .overflow-y-auto::-webkit-scrollbar-track {
-    background: hsl(222 16% 12%);
+    background: hsl(220 8% 11%);
   }
 
   .overflow-x-auto::-webkit-scrollbar-thumb,

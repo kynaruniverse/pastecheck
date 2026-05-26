@@ -38,7 +38,7 @@ export default function NavMenu() {
           right: 0,
           height: "48px",
           zIndex: 100,
-          background: "hsl(222 16% 8%)",
+          background: "hsl(220 8% 7%)",
           borderBottom: "1px solid hsl(220 13% 18%)",
           display: "flex",
           alignItems: "center",
@@ -72,10 +72,10 @@ export default function NavMenu() {
                   borderRadius: "8px",
                   fontSize: "13px",
                   fontWeight: 500,
-                  color: active ? "hsl(210 80% 65%)" : "hsl(215 14% 55%)",
-                  background: active ? "hsl(210 80% 60% / 0.1)" : "transparent",
+                  color: active ? "hsl(262 83% 75%)" : "hsl(215 14% 55%)",
+                  background: active ? "hsl(262 83% 75% / 0.1)" : "transparent",
                   transition: "color 0.1s, background 0.1s",
-                  borderBottom: active ? "1px solid hsl(210 80% 60% / 0.4)" : "1px solid transparent",
+                  borderBottom: active ? "1px solid hsl(262 83% 75% / 0.4)" : "1px solid transparent",
                 }}
               >
                 {item.label}
@@ -93,7 +93,7 @@ export default function NavMenu() {
             width: "36px",
             height: "36px",
             borderRadius: "10px",
-            background: "hsl(222 16% 16%)",
+            background: "hsl(220 8% 15%)",
             border: "1px solid hsl(220 13% 24%)",
             cursor: "pointer",
             display: "flex",
@@ -135,7 +135,7 @@ export default function NavMenu() {
           bottom: 0,
           width: "240px",
           zIndex: 102,
-          background: "hsl(222 16% 13%)",
+          background: "hsl(220 8% 12%)",
           borderLeft: "1px solid hsl(220 13% 22%)",
           transform: open ? "translateX(0)" : "translateX(100%)",
           transition: "transform 0.22s cubic-bezier(0.4,0,0.2,1)",
@@ -176,13 +176,13 @@ export default function NavMenu() {
                   borderRadius: "10px",
                   fontSize: "14px",
                   fontWeight: 500,
-                  color: location === item.href ? "hsl(210 80% 65%)" : "hsl(210 20% 78%)",
-                  background: location === item.href ? "hsl(210 80% 60% / 0.08)" : "transparent",
+                  color: location === item.href ? "hsl(262 83% 75%)" : "hsl(210 20% 78%)",
+                  background: location === item.href ? "hsl(262 83% 75% / 0.08)" : "transparent",
                   cursor: "pointer",
                   transition: "background 0.1s",
                 }}
                 onMouseEnter={(e) => (e.currentTarget.style.background = "hsl(220 13% 18%)")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = location === item.href ? "hsl(210 80% 60% / 0.08)" : "transparent")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = location === item.href ? "hsl(262 83% 75% / 0.08)" : "transparent")}
               >
                 {item.label}
               </div>
@@ -223,7 +223,7 @@ export default function NavMenu() {
                   borderRadius: "10px",
                   fontSize: "14px",
                   fontWeight: 500,
-                  color: "hsl(210 80% 65%)",
+                  color: "hsl(262 83% 75%)",
                   cursor: "pointer",
                   transition: "background 0.1s",
                 }}

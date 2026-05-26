@@ -9,7 +9,7 @@ export default function About() {
   return (
     <div
       className="min-h-screen w-full flex flex-col"
-      style={{ background: "hsl(222 16% 10%)" }}
+      style={{ background: "hsl(220 8% 9%)" }}
     >
       <Helmet>
         <title>What is a Syntax Error? How PasteCheck Finds & Explains Code Errors</title>
@@ -28,7 +28,7 @@ export default function About() {
             type="button"
             onClick={() => navigate("/check")}
             className="rounded-xl px-4 py-2 text-sm font-bold"
-            style={{ background: "hsl(210 80% 60%)", color: "hsl(222 16% 6%)", border: "none", cursor: "pointer" }}
+            style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)", border: "none", cursor: "pointer" }}
           >
             Check My Code
           </button>
@@ -90,7 +90,7 @@ export default function About() {
                   className="rounded-2xl px-5 py-4"
                   style={{ background: "hsl(222 16% 14%)", border: "1px solid hsl(220 13% 21%)" }}
                 >
-                  <p className="text-sm font-semibold mb-1" style={{ color: "hsl(210 80% 65%)" }}>{item.lang}</p>
+                  <p className="text-sm font-semibold mb-1" style={{ color: "hsl(262 83% 75%)" }}>{item.lang}</p>
                   <p className="text-xs leading-relaxed" style={{ color: "hsl(215 14% 52%)" }}>{item.detail}</p>
                 </div>
               ))}
@@ -113,11 +113,11 @@ export default function About() {
                 <div
                   key={item.step}
                   className="flex items-start gap-4 rounded-2xl px-5 py-4"
-                  style={{ background: "hsl(222 16% 14%)", border: "1px solid hsl(220 13% 21%)" }}
+                  style={{ background: "hsl(220 8% 13%)", border: "1px solid hsl(220 13% 21%)" }}
                 >
                   <span
                     className="shrink-0 inline-flex items-center justify-center rounded-xl w-8 h-8 text-sm font-bold"
-                    style={{ background: "hsl(210 80% 60%)", color: "hsl(222 16% 6%)" }}
+                    style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)" }}
                   >
                     {item.step}
                   </span>
@@ -174,9 +174,9 @@ export default function About() {
                 <div
                   key={item.title}
                   className="rounded-2xl px-5 py-4"
-                  style={{ background: "hsl(222 16% 14%)", border: "1px solid hsl(210 80% 60% / 0.2)" }}
+                  style={{ background: "hsl(220 8% 13%)", border: "1px solid hsl(262 83% 75% / 0.2)" }}
                 >
-                  <p className="text-sm font-semibold mb-1" style={{ color: "hsl(210 80% 65%)" }}>
+                  <p className="text-sm font-semibold mb-1" style={{ color: "hsl(262 83% 75%)" }}>
                     {item.icon} {item.title}
                   </p>
                   <p className="text-xs leading-relaxed" style={{ color: "hsl(215 14% 52%)" }}>{item.detail}</p>
@@ -193,11 +193,11 @@ export default function About() {
             onClick={() => navigate("/check")}
             className="w-full rounded-2xl py-4 text-base font-bold tracking-wide transition-all duration-150 active:scale-[0.97]"
             style={{
-              background: "hsl(210 80% 60%)",
-              color: "hsl(222 16% 6%)",
+              background: "hsl(262 83% 75%)",
+              color: "hsl(220 8% 6%)",
               border: "none",
               cursor: "pointer",
-              boxShadow: "0 0 32px hsla(210,80%,60%,0.25)",
+              boxShadow: "0 0 32px hsla(262,83%,75%,0.25)",
             }}
           >
             Check My Code — It's Free

@@ -164,7 +164,7 @@ function DebugNudge({ errorCount, warningCount }: { errorCount: number; warningC
         <div className="px-4 pb-4 flex flex-col gap-2" style={{ borderTop: "1px solid hsl(220 13% 20%)" }}>
           {bullets.map((b, i) => (
             <div key={i} className="flex items-start gap-2 pt-2">
-              <span style={{ color: "hsl(210 80% 60%)", fontSize: "10px", marginTop: "2px" }}>●</span>
+              <span style={{ color: "hsl(262 83% 75%)", fontSize: "10px", marginTop: "2px" }}>●</span>
               <span className="text-xs" style={{ color: "hsl(210 20% 65%)", lineHeight: "1.6" }}>{b}</span>
             </div>
           ))}
@@ -241,7 +241,7 @@ function SaveToCollectionButton({ code, language, lines }: { code: string; langu
                 <button
                   type="button"
                   className="text-xs font-semibold px-3 py-1.5 rounded-lg"
-                  style={{ background: "hsl(210 80% 60%)", color: "hsl(222 16% 6%)", border: "none", cursor: "pointer" }}
+                  style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)", border: "none", cursor: "pointer" }}
                 >
                   Create one
                 </button>
@@ -341,7 +341,7 @@ function FileResultPanel({ fileResult, defaultOpen }: { fileResult: FileResult; 
         onClick={() => setOpen((v) => !v)}
         className="w-full flex items-center justify-between px-4 py-3"
         style={{
-          background: "hsl(222 16% 13%)",
+          background: "hsl(220 8% 12%)",
           border: "none",
           cursor: "pointer",
           WebkitTapHighlightColor: "transparent",
@@ -408,7 +408,7 @@ function FileResultPanel({ fileResult, defaultOpen }: { fileResult: FileResult; 
               </p>
               <div
                 className="overflow-x-auto"
-                style={{ background: "hsl(222 16% 12%)", fontFamily: "var(--app-font-mono)", fontSize: "12.5px", lineHeight: "1.7" }}
+                style={{ background: "hsl(220 8% 11%)", fontFamily: "var(--app-font-mono)", fontSize: "12.5px", lineHeight: "1.7" }}
               >
                 {fileResult.result.lines.map((line, i) => {
                   const isFlagged = line.type !== "normal" && line.messages.length > 0;
@@ -707,7 +707,7 @@ export default function Home() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen w-full" style={{ background: "hsl(222 16% 10%)" }}>
+    <div className="min-h-screen w-full" style={{ background: "hsl(220 8% 9%)" }}>
       <Toaster position="bottom-center" theme="dark" richColors />
       <div className="mx-auto w-full max-w-2xl px-4 pb-10 pt-8">
         <Helmet>
@@ -729,8 +729,8 @@ export default function Home() {
               <span
                 className="text-xs font-bold px-2 py-0.5 rounded-full"
                 style={{
-                  background: "hsl(210 80% 60%)",
-                  color: "hsl(222 16% 6%)",
+                  background: "hsl(262 83% 75%)",
+                  color: "hsl(220 8% 6%)",
                   animation: "probadgepulse 2.5s ease-in-out infinite",
                 }}
               >PRO</span>
@@ -746,7 +746,7 @@ export default function Home() {
             Free online checker for JavaScript, TypeScript, Python, HTML and CSS — no sign-up required.
           </p>
           {showRateSignal && (
-            <div className="mt-3 rounded-lg px-3 py-2 flex items-center justify-between gap-3" style={{ background: "hsl(210 80% 60% / 0.07)", border: "1px solid hsl(210 80% 60% / 0.18)" }}>
+            <div className="mt-3 rounded-lg px-3 py-2 flex items-center justify-between gap-3" style={{ background: "hsl(262 83% 75% / 0.07)", border: "1px solid hsl(262 83% 75% / 0.18)" }}>
               <span className="text-xs" style={{ color: "hsl(215 14% 52%)" }}>
                 {totalChecks} checks today — Pro unlocks multi-file mode and saved history.
               </span>
@@ -761,7 +761,7 @@ export default function Home() {
                   } catch {}
                 }}
                 className="text-xs font-semibold shrink-0"
-                style={{ color: "hsl(210 80% 65%)", textDecoration: "none" }}
+                style={{ color: "hsl(262 83% 75%)", textDecoration: "none" }}
               >
                 Upgrade →
               </a>
@@ -779,8 +779,8 @@ export default function Home() {
             onClick={() => { if (isPro) { setProMode("single"); handleReset(); } }}
             className="flex-1 rounded-lg py-2 text-xs font-semibold transition-all"
             style={{
-              background: isPro && proMode === "single" ? "hsl(210 80% 60%)" : !isPro ? "hsl(210 80% 60%)" : "transparent",
-              color: isPro && proMode === "single" ? "hsl(222 16% 6%)" : !isPro ? "hsl(222 16% 6%)" : "hsl(215 14% 55%)",
+              background: isPro && proMode === "single" ? "hsl(262 83% 75%)" : !isPro ? "hsl(262 83% 75%)" : "transparent",
+              color: isPro && proMode === "single" ? "hsl(220 8% 6%)" : !isPro ? "hsl(220 8% 6%)" : "hsl(215 14% 55%)",
               border: "none",
               cursor: "pointer",
             }}
@@ -803,15 +803,15 @@ export default function Home() {
             }}
             className="flex-1 rounded-lg py-2 text-xs font-semibold transition-all flex items-center justify-center gap-1.5"
             style={{
-              background: isPro && proMode === "multi" ? "hsl(210 80% 60%)" : "transparent",
-              color: isPro && proMode === "multi" ? "hsl(222 16% 6%)" : "hsl(215 14% 55%)",
+              background: isPro && proMode === "multi" ? "hsl(262 83% 75%)" : "transparent",
+              color: isPro && proMode === "multi" ? "hsl(220 8% 6%)" : "hsl(215 14% 55%)",
               border: "none",
               cursor: isPro ? "pointer" : "pointer",
               opacity: isPro ? 1 : 0.6,
             }}
           >
             Multi-File
-            {!isPro && <span className="text-xs" style={{ color: "hsl(210 80% 60%)", fontSize: "9px" }}>PRO</span>}
+            {!isPro && <span className="text-xs" style={{ color: "hsl(262 83% 75%)", fontSize: "9px" }}>PRO</span>}
           </button>
         </div>
 
@@ -825,7 +825,7 @@ export default function Home() {
                 <div className="rounded-xl overflow-hidden border" style={{ borderColor: "hsl(220 13% 22%)" }}>
                   <div
                     className="flex items-center justify-between px-4 py-2 border-b"
-                    style={{ background: "hsl(222 16% 13%)", borderColor: "hsl(220 13% 22%)" }}
+                    style={{ background: "hsl(220 8% 12%)", borderColor: "hsl(220 13% 22%)" }}
                   >
                     <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "hsl(215 14% 45%)" }}>Code</span>
                     {code.length > 0 && (
@@ -844,10 +844,10 @@ export default function Home() {
                     autoCapitalize="none"
                     className="w-full resize-none outline-none text-sm leading-relaxed px-4 py-3"
                     style={{
-                      background: "hsl(222 16% 12%)",
+                      background: "hsl(220 8% 11%)",
                       color: "hsl(210 20% 88%)",
                       fontFamily: "var(--app-font-mono)",
-                      caretColor: "hsl(210 80% 60%)",
+                      caretColor: "hsl(262 83% 75%)",
                       fontSize: "13px",
                       lineHeight: "1.7",
                     }}
@@ -915,8 +915,8 @@ export default function Home() {
                   disabled={!code.trim()}
                   className="w-full rounded-xl py-3.5 text-sm font-semibold tracking-wide transition-all duration-150 active:scale-[0.98]"
                   style={{
-                    background: code.trim() ? "hsl(210 80% 60%)" : "hsl(220 13% 20%)",
-                    color: code.trim() ? "hsl(222 16% 6%)" : "hsl(215 14% 40%)",
+                    background: code.trim() ? "hsl(262 83% 75%)" : "hsl(220 13% 20%)",
+                    color: code.trim() ? "hsl(220 8% 6%)" : "hsl(215 14% 40%)",
                     cursor: code.trim() ? "pointer" : "not-allowed",
                     border: "none",
                   }}
@@ -957,11 +957,11 @@ export default function Home() {
                 )}
 
                 <div className="rounded-xl overflow-hidden border" style={{ borderColor: "hsl(220 13% 22%)" }}>
-                  <div className="flex items-center justify-between px-4 py-2 border-b" style={{ background: "hsl(222 16% 13%)", borderColor: "hsl(220 13% 22%)" }}>
+                  <div className="flex items-center justify-between px-4 py-2 border-b" style={{ background: "hsl(220 8% 12%)", borderColor: "hsl(220 13% 22%)" }}>
                     <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "hsl(215 14% 45%)" }}>Results</span>
                     <span className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>{result!.lines.length} lines</span>
                   </div>
-                  <div className="overflow-x-auto" style={{ background: "hsl(222 16% 12%)", fontFamily: "var(--app-font-mono)", fontSize: "12.5px", lineHeight: "1.7" }}>
+                  <div className="overflow-x-auto" style={{ background: "hsl(220 8% 11%)", fontFamily: "var(--app-font-mono)", fontSize: "12.5px", lineHeight: "1.7" }}>
                     {result!.lines.map((line, i) => {
                       const isFlagged = line.type !== "normal" && line.messages.length > 0;
                       const isOpen = expanded.has(i);
@@ -1029,7 +1029,7 @@ export default function Home() {
                     {shareUrl && (
                       <div className="rounded-xl px-4 py-3 flex flex-col gap-2" style={{ background: "hsl(222 16% 13%)", border: "1px solid hsl(220 13% 22%)" }}>
                         <p className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>Link copied to clipboard:</p>
-                        <p className="text-xs font-mono break-all" style={{ color: "hsl(210 80% 60%)" }}>{shareUrl}</p>
+                        <p className="text-xs font-mono break-all" style={{ color: "hsl(262 83% 75%)" }}>{shareUrl}</p>
                       </div>
                     )}
                   </div>
@@ -1064,7 +1064,7 @@ export default function Home() {
                         } catch {}
                       }}
                       className="text-xs font-semibold shrink-0 px-3 py-1.5 rounded-lg"
-                      style={{ background: "hsl(210 80% 60%)", color: "hsl(222 16% 6%)", border: "none", cursor: "pointer" }}
+                      style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)", border: "none", cursor: "pointer" }}
                     >Upgrade</button>
                   </div>
                 )}
@@ -1106,13 +1106,13 @@ export default function Home() {
               <div className="flex flex-col gap-4">
                 {files.map((file, idx) => (
                   <div key={file.id} className="rounded-xl overflow-hidden border" style={{ borderColor: "hsl(220 13% 22%)" }}>
-                    <div className="flex items-center justify-between px-3 py-2 border-b" style={{ background: "hsl(222 16% 13%)", borderColor: "hsl(220 13% 22%)" }}>
+                    <div className="flex items-center justify-between px-3 py-2 border-b" style={{ background: "hsl(220 8% 12%)", borderColor: "hsl(220 13% 22%)" }}>
                       <input
                         value={file.name}
                         onChange={(e) => handleFileNameChange(file.id, e.target.value)}
                         placeholder={`File ${idx + 1}`}
                         className="text-xs font-medium outline-none bg-transparent flex-1 min-w-0"
-                        style={{ color: "hsl(210 20% 78%)", caretColor: "hsl(210 80% 60%)" }}
+                        style={{ color: "hsl(210 20% 78%)", caretColor: "hsl(262 83% 75%)" }}
                         spellCheck={false}
                       />
                       {files.length > 1 && (
@@ -1133,10 +1133,10 @@ export default function Home() {
                       autoCapitalize="none"
                       className="w-full resize-none outline-none text-sm leading-relaxed px-4 py-3"
                       style={{
-                        background: "hsl(222 16% 12%)",
+                        background: "hsl(220 8% 11%)",
                         color: "hsl(210 20% 88%)",
                         fontFamily: "var(--app-font-mono)",
-                        caretColor: "hsl(210 80% 60%)",
+                        caretColor: "hsl(262 83% 75%)",
                         fontSize: "13px",
                         lineHeight: "1.7",
                       }}
@@ -1163,7 +1163,7 @@ export default function Home() {
                   type="button"
                   onClick={handleCheckAll}
                   className="w-full rounded-xl py-3.5 text-sm font-semibold tracking-wide transition-all duration-150 active:scale-[0.98]"
-                  style={{ background: "hsl(210 80% 60%)", color: "hsl(222 16% 6%)", border: "none", cursor: "pointer" }}
+                  style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)", border: "none", cursor: "pointer" }}
                 >Check All Files</button>
               </div>
             ) : (
@@ -1236,8 +1236,8 @@ export default function Home() {
               type="button"
               className="w-full rounded-xl py-3.5 text-sm font-semibold tracking-wide transition-all duration-150 active:scale-[0.97]"
               style={{
-                background: "hsl(210 80% 60%)",
-                color: "hsl(222 16% 6%)",
+                background: "hsl(262 83% 75%)",
+                color: "hsl(220 8% 6%)",
                 border: "none",
                 cursor: "pointer",
                 animation: "upgradeGlow 2.5s ease-in-out infinite",
@@ -1276,8 +1276,8 @@ export default function Home() {
             className="fixed bottom-6 left-1/2 rounded-xl px-4 py-2 text-xs font-semibold"
             style={{
               transform: "translateX(-50%)",
-              background: "hsl(210 80% 60%)",
-              color: "hsl(222 16% 6%)",
+              background: "hsl(262 83% 75%)",
+              color: "hsl(220 8% 6%)",
               zIndex: 50,
               pointerEvents: "none",
             }}

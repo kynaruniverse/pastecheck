@@ -25,18 +25,18 @@ export default function Signup() {
 
   if (done) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center px-4" style={{ background: "hsl(222 16% 10%)" }}>
+      <div className="min-h-screen w-full flex items-center justify-center px-4" style={{ background: "hsl(220 8% 9%)" }}>
         <NavMenu />
         <div className="w-full max-w-sm flex flex-col gap-6">
           <Logo size="lg" />
-          <div className="rounded-2xl px-6 py-7 flex flex-col gap-4 text-center" style={{ background: "hsl(222 16% 14%)", border: "1px solid hsl(220 13% 22%)" }}>
+          <div className="rounded-2xl px-6 py-7 flex flex-col gap-4 text-center" style={{ background: "hsl(220 8% 13%)", border: "1px solid hsl(220 13% 22%)" }}>
             <div className="text-3xl">📬</div>
             <h1 className="text-xl font-bold" style={{ color: "hsl(210 20% 92%)" }}>Check your email</h1>
             <p className="text-sm leading-relaxed" style={{ color: "hsl(215 14% 52%)" }}>
               We've sent a confirmation link to <span style={{ color: "hsl(210 20% 80%)", fontWeight: 600 }}>{email}</span>. Click it to activate your account, then come back to sign in.
             </p>
             <a href="/login" style={{ textDecoration: "none" }}>
-              <div className="w-full rounded-xl py-3 text-sm font-bold mt-2" style={{ background: "hsl(210 80% 60%)", color: "hsl(222 16% 6%)", cursor: "pointer" }}>
+              <div className="w-full rounded-xl py-3 text-sm font-bold mt-2" style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)", cursor: "pointer" }}>
                 Go to sign in
               </div>
             </a>
@@ -47,7 +47,7 @@ export default function Signup() {
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center px-4" style={{ background: "hsl(222 16% 10%)" }}>
+    <div className="min-h-screen w-full flex items-center justify-center px-4" style={{ background: "hsl(220 8% 9%)" }}>
       <NavMenu />
       <div className="w-full max-w-sm flex flex-col gap-6">
 
@@ -55,7 +55,7 @@ export default function Signup() {
         <Logo size="lg" />
 
         {/* Card */}
-        <div className="rounded-2xl px-6 py-7 flex flex-col gap-5" style={{ background: "hsl(222 16% 14%)", border: "1px solid hsl(220 13% 22%)" }}>
+        <div className="rounded-2xl px-6 py-7 flex flex-col gap-5" style={{ background: "hsl(220 8% 13%)", border: "1px solid hsl(220 13% 22%)" }}>
           <div>
             <h1 className="text-xl font-bold mb-1" style={{ color: "hsl(210 20% 92%)" }}>Create account</h1>
             <p className="text-sm" style={{ color: "hsl(215 14% 52%)" }}>Free to join. Upgrade to Pro anytime.</p>
@@ -76,7 +76,7 @@ export default function Signup() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 className="w-full rounded-xl px-4 py-3 text-sm outline-none"
-                style={{ background: "hsl(222 16% 10%)", border: "1px solid hsl(220 13% 26%)", color: "hsl(210 20% 90%)" }}
+                style={{ background: "hsl(220 8% 9%)", border: "1px solid hsl(220 13% 26%)", color: "hsl(210 20% 90%)" }}
                 onKeyDown={(e) => e.key === "Enter" && handleSignup()}
               />
             </div>
@@ -88,7 +88,7 @@ export default function Signup() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Min. 6 characters"
                 className="w-full rounded-xl px-4 py-3 text-sm outline-none"
-                style={{ background: "hsl(222 16% 10%)", border: "1px solid hsl(220 13% 26%)", color: "hsl(210 20% 90%)" }}
+                style={{ background: "hsl(220 8% 9%)", border: "1px solid hsl(220 13% 26%)", color: "hsl(210 20% 90%)" }}
                 onKeyDown={(e) => e.key === "Enter" && handleSignup()}
               />
             </div>
@@ -100,7 +100,7 @@ export default function Signup() {
                 onChange={(e) => setConfirm(e.target.value)}
                 placeholder="••••••••"
                 className="w-full rounded-xl px-4 py-3 text-sm outline-none"
-                style={{ background: "hsl(222 16% 10%)", border: "1px solid hsl(220 13% 26%)", color: "hsl(210 20% 90%)" }}
+                style={{ background: "hsl(220 8% 9%)", border: "1px solid hsl(220 13% 26%)", color: "hsl(210 20% 90%)" }}
                 onKeyDown={(e) => e.key === "Enter" && handleSignup()}
               />
             </div>
@@ -111,14 +111,14 @@ export default function Signup() {
             onClick={handleSignup}
             disabled={loading}
             className="w-full rounded-xl py-3 text-sm font-bold"
-            style={{ background: loading ? "hsl(220 13% 22%)" : "hsl(210 80% 60%)", color: loading ? "hsl(215 14% 45%)" : "hsl(222 16% 6%)", border: "none", cursor: loading ? "not-allowed" : "pointer" }}
+            style={{ background: loading ? "hsl(220 13% 22%)" : "hsl(262 83% 75%)", color: loading ? "hsl(215 14% 45%)" : "hsl(220 8% 6%)", border: "none", cursor: loading ? "not-allowed" : "pointer" }}
           >
             {loading ? "Creating account…" : "Create account"}
           </button>
 
           <p className="text-center text-xs" style={{ color: "hsl(215 14% 48%)" }}>
             Already have an account?{" "}
-            <a href="/login" style={{ color: "hsl(210 80% 65%)", textDecoration: "none", fontWeight: 600 }}>Sign in</a>
+            <a href="/login" style={{ color: "hsl(262 83% 75%)", textDecoration: "none", fontWeight: 600 }}>Sign in</a>
           </p>
         </div>
 

@@ -44,10 +44,10 @@ export default function Landing() {
       className="min-h-screen w-full flex flex-col"
       style={{
         background: `
-          radial-gradient(ellipse 80% 50% at 20% 10%, hsla(210,80%,55%,0.22) 0%, transparent 60%),
-          radial-gradient(ellipse 60% 40% at 85% 20%, hsla(250,70%,60%,0.16) 0%, transparent 55%),
+          radial-gradient(ellipse 80% 50% at 20% 10%, hsla(262,83%,65%,0.22) 0%, transparent 60%),
+          radial-gradient(ellipse 60% 40% at 85% 20%, hsla(262,83%,65%,0.16) 0%, transparent 55%),
           radial-gradient(ellipse 50% 35% at 50% 60%, hsla(190,70%,50%,0.10) 0%, transparent 55%),
-          hsl(222 16% 10%)
+          hsl(220 8% 9%)
         `,
       }}
     >
@@ -69,9 +69,9 @@ export default function Landing() {
             <span
               className="inline-block text-xs font-semibold uppercase tracking-widest px-3 py-1 rounded-full"
               style={{
-                background: "rgba(96,165,250,0.15)",
-                color: "rgb(96,165,250)",
-                border: "1px solid rgba(96,165,250,0.3)",
+                background: "rgba(167,139,250,0.15)",
+                color: "rgb(167,139,250)",
+                border: "1px solid rgba(167,139,250,0.3)",
               }}
             >
               Free · Pro available
@@ -85,8 +85,8 @@ export default function Landing() {
             Catch Code Errors
             <br />
             <span style={{
-              color: "hsl(210 80% 65%)",
-              textShadow: "0 0 30px hsla(210,80%,65%,0.5)",
+              color: "hsl(262 83% 75%)",
+              textShadow: "0 0 30px hsla(262,83%,75%,0.5)",
             }}>Instantly.</span>
           </h1>
 
@@ -102,11 +102,11 @@ export default function Landing() {
             onClick={() => navigate("/check")}
             className="w-full rounded-2xl py-4 text-base font-bold tracking-wide transition-all duration-150 active:scale-[0.97] mb-4"
             style={{
-              background: "hsl(210 80% 60%)",
-              color: "hsl(222 16% 6%)",
+              background: "hsl(262 83% 75%)",
+              color: "hsl(220 8% 6%)",
               border: "none",
               cursor: "pointer",
-              boxShadow: "0 0 40px hsla(210,80%,60%,0.45), 0 4px 16px hsla(210,80%,60%,0.3)",
+              boxShadow: "0 0 40px hsla(262,83%,75%,0.45), 0 4px 16px hsla(262,83%,75%,0.3)",
             }}
           >
             Check My Code
@@ -131,17 +131,17 @@ export default function Landing() {
           <div
             className="rounded-2xl px-5 py-5 flex flex-col gap-4"
             style={{
-              background: "linear-gradient(135deg, hsl(222 16% 16%) 0%, hsl(224 20% 14%) 100%)",
-              border: "1px solid hsla(210,80%,60%,0.35)",
-              boxShadow: "0 0 24px hsla(210,80%,60%,0.12), inset 0 1px 0 hsla(210,80%,80%,0.08)",
+              background: "linear-gradient(135deg, hsl(220 8% 15%) 0%, hsl(220 8% 13%) 100%)",
+              border: "1px solid hsla(262,83%,75%,0.35)",
+              boxShadow: "0 0 24px hsla(262,83%,75%,0.12), inset 0 1px 0 hsla(262,83%,75%,0.08)",
             }}
           >
             <div className="flex items-center gap-2">
               <span
                 className="text-xs font-bold px-2 py-0.5 rounded-full"
                 style={{
-                  background: "hsl(210 80% 60%)",
-                  color: "hsl(222 16% 6%)",
+                  background: "hsl(262 83% 75%)",
+                  color: "hsl(220 8% 6%)",
                   animation: "probadgepulse 2.5s ease-in-out infinite",
                 }}
               >PRO</span>
@@ -182,11 +182,11 @@ export default function Landing() {
                 }}
                 className="w-full rounded-xl py-3 text-sm font-semibold transition-all duration-150 active:scale-[0.98]"
                 style={{
-                  background: "hsl(210 80% 60%)",
-                  color: "hsl(222 16% 6%)",
+                  background: "hsl(262 83% 75%)",
+                  color: "hsl(220 8% 6%)",
                   border: "none",
                   cursor: "pointer",
-                  boxShadow: "0 0 16px hsla(210,80%,60%,0.3)",
+                  boxShadow: "0 0 16px hsla(262,83%,75%,0.3)",
                 }}
               >
                 Upgrade to Pro — £35/year <span style={{ opacity: 0.7, fontSize: "0.75rem" }}>(save £13)</span>
@@ -209,8 +209,8 @@ export default function Landing() {
                 className="w-full rounded-xl py-3 text-sm font-semibold transition-all duration-150 active:scale-[0.98]"
                 style={{
                   background: "transparent",
-                  color: "hsl(210 80% 65%)",
-                  border: "1px solid hsla(210,80%,60%,0.4)",
+                  color: "hsl(262 83% 75%)",
+                  border: "1px solid hsla(262,83%,75%,0.4)",
                   cursor: "pointer",
                 }}
               >
@@ -227,7 +227,7 @@ export default function Landing() {
               key={f.title}
               className="flex items-start gap-4 rounded-2xl px-5 py-4"
               style={{
-                background: "hsl(222 16% 14%)",
+                background: "hsl(220 8% 13%)",
                 border: "1px solid hsl(220 13% 22%)",
               }}
             >
@@ -235,7 +235,7 @@ export default function Landing() {
                 className="shrink-0 mt-0.5 flex items-center justify-center rounded-xl w-10 h-10"
                 style={{
                   background: "hsl(220 13% 19%)",
-                  color: "hsl(210 80% 65%)",
+                  color: "hsl(262 83% 75%)",
                 }}
               >
                 {f.icon}

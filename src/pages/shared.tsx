@@ -49,7 +49,7 @@ export default function Shared() {
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "hsl(222 16% 10%)" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "hsl(220 8% 9%)" }}>
         <span className="text-sm" style={{ color: "hsl(215 14% 55%)" }}>Loading check...</span>
       </div>
     );
@@ -57,10 +57,10 @@ export default function Shared() {
 
   if (status === "notfound") {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "hsl(222 16% 10%)" }}>
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "hsl(220 8% 9%)" }}>
         <div className="text-center flex flex-col gap-4">
           <p className="text-sm" style={{ color: "hsl(215 14% 55%)" }}>Check not found or expired.</p>
-          <a href="/check" className="text-sm font-semibold" style={{ color: "hsl(210 80% 60%)" }}>Check your own code →</a>
+          <a href="/check" className="text-sm font-semibold" style={{ color: "hsl(262 83% 75%)" }}>Check your own code →</a>
         </div>
       </div>
     );
@@ -71,7 +71,7 @@ export default function Shared() {
   const lang = data!.language;
 
   return (
-    <div className="min-h-screen w-full" style={{ background: "hsl(222 16% 10%)" }}>
+    <div className="min-h-screen w-full" style={{ background: "hsl(220 8% 9%)" }}>
       <Helmet>
         <title>Shared Code Check — PasteCheck</title>
         <meta name="description" content="View a shared code check result from PasteCheck — instant syntax error and warning detection for JavaScript, TypeScript, Python, HTML and CSS." />
@@ -84,7 +84,7 @@ export default function Shared() {
       <div className="mx-auto w-full max-w-2xl px-4 pb-10 pt-8">
         <header className="mb-6">
           <div className="flex items-center gap-2 mb-1">
-            <span className="inline-flex items-center justify-center rounded-lg w-8 h-8 text-sm font-bold" style={{ background: "hsl(210 80% 60%)", color: "hsl(222 16% 6%)" }}>P</span>
+            <span className="inline-flex items-center justify-center rounded-lg w-8 h-8 text-sm font-bold" style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)" }}>P</span>
             <h1 className="text-xl font-bold tracking-tight" style={{ color: "hsl(210 20% 92%)" }}>PasteCheck</h1>
             <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "hsl(220 13% 20%)", color: "hsl(215 14% 55%)" }}>Shared Result</span>
           </div>
@@ -113,11 +113,11 @@ export default function Shared() {
 
         {/* Code results */}
         <div className="rounded-xl overflow-hidden border mb-4" style={{ borderColor: "hsl(220 13% 22%)" }}>
-          <div className="flex items-center justify-between px-4 py-2 border-b" style={{ background: "hsl(222 16% 13%)", borderColor: "hsl(220 13% 22%)" }}>
+          <div className="flex items-center justify-between px-4 py-2 border-b" style={{ background: "hsl(220 8% 12%)", borderColor: "hsl(220 13% 22%)" }}>
             <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "hsl(215 14% 45%)" }}>Results</span>
             <span className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>{data!.lines.length} lines</span>
           </div>
-          <div className="overflow-x-auto" style={{ background: "hsl(222 16% 12%)", fontFamily: "var(--app-font-mono)", fontSize: "12.5px", lineHeight: "1.7" }}>
+          <div className="overflow-x-auto" style={{ background: "hsl(220 8% 11%)", fontFamily: "var(--app-font-mono)", fontSize: "12.5px", lineHeight: "1.7" }}>
             {data!.lines.map((line, i) => {
               const isFlagged = line.type !== "normal" && line.messages.length > 0;
               const isOpen = expanded.has(i);
@@ -162,12 +162,12 @@ export default function Shared() {
         </p>
 
         {/* CTA */}
-        <div className="rounded-xl px-4 py-4 text-center flex flex-col gap-3" style={{ background: "hsl(222 16% 13%)", border: "1px solid hsl(220 13% 22%)" }}>
+        <div className="rounded-xl px-4 py-4 text-center flex flex-col gap-3" style={{ background: "hsl(220 8% 12%)", border: "1px solid hsl(220 13% 22%)" }}>
           <p className="text-sm font-medium" style={{ color: "hsl(210 20% 78%)" }}>Check your own code — free, no signup</p>
           <a
             href="/check"
             className="w-full rounded-xl py-3 text-sm font-semibold inline-block"
-            style={{ background: "hsl(210 80% 60%)", color: "hsl(222 16% 6%)" }}
+            style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)" }}
           >Try PasteCheck Free →</a>
         </div>
       </div>
