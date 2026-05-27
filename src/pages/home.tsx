@@ -827,7 +827,32 @@ export default function Home() {
                     className="flex items-center justify-between px-4 py-2 border-b"
                     style={{ background: "hsl(220 8% 12%)", borderColor: "hsl(220 13% 22%)" }}
                   >
-                    <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "hsl(215 14% 45%)" }}>Code</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "hsl(215 14% 45%)" }}>Code</span>
+                      {(() => {
+                        const detectedLang = detectLanguage(code);
+                        if (code.trim().length > 0 && detectedLang !== "unknown") {
+                          return (
+                            <div className="flex items-center gap-1.5">
+                              <span
+                                style={{
+                                  width: "7px",
+                                  height: "7px",
+                                  borderRadius: "50%",
+                                  background: LANG_COLOR[detectedLang as Exclude<Language, "unknown">],
+                                  display: "inline-block",
+                                  flexShrink: 0,
+                                }}
+                              />
+                              <span className="text-xs font-semibold" style={{ color: LANG_COLOR[detectedLang as Exclude<Language, "unknown">] }}>
+                                {LANG_LABELS[detectedLang as Exclude<Language, "unknown">]}
+                              </span>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
+                    </div>
                     {code.length > 0 && (
                       <span className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>{code.split("\n").length} lines</span>
                     )}
@@ -931,7 +956,32 @@ export default function Home() {
                       className="flex items-center justify-between px-4 py-2 border-b"
                       style={{ background: "hsl(220 8% 12%)", borderColor: "hsl(220 13% 22%)" }}
                     >
-                      <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "hsl(215 14% 45%)" }}>Code</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "hsl(215 14% 45%)" }}>Code</span>
+                        {(() => {
+                          const detectedLang = detectLanguage(code);
+                          if (code.trim().length > 0 && detectedLang !== "unknown") {
+                            return (
+                              <div className="flex items-center gap-1.5">
+                                <span
+                                  style={{
+                                    width: "7px",
+                                    height: "7px",
+                                    borderRadius: "50%",
+                                    background: LANG_COLOR[detectedLang as Exclude<Language, "unknown">],
+                                    display: "inline-block",
+                                    flexShrink: 0,
+                                  }}
+                                />
+                                <span className="text-xs font-semibold" style={{ color: LANG_COLOR[detectedLang as Exclude<Language, "unknown">] }}>
+                                  {LANG_LABELS[detectedLang as Exclude<Language, "unknown">]}
+                                </span>
+                              </div>
+                            );
+                          }
+                          return null;
+                        })()}
+                      </div>
                       {code.length > 0 && (
                         <span className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>{code.split("\n").length} lines</span>
                       )}
