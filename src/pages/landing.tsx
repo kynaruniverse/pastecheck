@@ -195,31 +195,54 @@ export default function Landing() {
         {/* Pro section */}
         <div className="pb-6 flex flex-col gap-3">
           <div
-            className="rounded-2xl px-5 py-5 flex flex-col gap-4"
+            className="rounded-2xl px-5 py-6 flex flex-col gap-5"
             style={{
               background: "linear-gradient(135deg, hsl(220 8% 15%) 0%, hsl(220 8% 13%) 100%)",
               border: "1px solid hsla(262,83%,75%,0.35)",
               boxShadow: "0 0 24px hsla(262,83%,75%,0.12), inset 0 1px 0 hsla(262,83%,75%,0.08)",
             }}
           >
-            <div className="flex items-center gap-2">
+            {/* Badge + headline */}
+            <div className="flex flex-col gap-2">
               <span
-                className="text-xs font-bold px-2 py-0.5 rounded-full"
+                className="text-xs font-bold px-2 py-0.5 rounded-full self-start"
                 style={{
                   background: "hsl(262 83% 75%)",
                   color: "hsl(220 8% 6%)",
-                  animation: "probadgepulse 2.5s ease-in-out infinite",
+                  animation: "probadgepulse 2.5s ease-in-out 3",
                 }}
               >PRO</span>
-              <span className="text-sm font-semibold" style={{ color: "hsl(210 20% 92%)" }}>
-                £4/month — everything unlocked
-              </span>
+              <h2 className="text-lg font-extrabold leading-snug" style={{ color: "hsl(210 20% 95%)" }}>
+                Stop checking the same file twice.
+              </h2>
+              <p className="text-sm leading-relaxed" style={{ color: "hsl(215 14% 55%)" }}>
+                Pro gives you a persistent workspace — check multiple files at once, save results to named collections, and share any check with a permanent link. Everything synced across your devices.
+              </p>
             </div>
-            <div className="flex flex-col gap-2.5">
+
+            {/* Features */}
+            <div className="flex flex-col gap-3">
               {[
-                { icon: "📂", label: "Multi-file mode", desc: "Check up to 5 files at once with per-file results." },
-                { icon: "🔗", label: "Shareable links", desc: "Generate a permanent URL for any check result." },
-                { icon: "📁", label: "Saved collections", desc: "Save checks to named collections, synced across devices." },
+                {
+                  icon: "📂",
+                  label: "Multi-file mode",
+                  desc: "Check up to 5 files in one session. Per-file results, summary bar, no copy-pasting between tabs.",
+                },
+                {
+                  icon: "📁",
+                  label: "Saved collections",
+                  desc: "Save any check to a named collection. Synced across devices via your account — nothing lost when you close the tab.",
+                },
+                {
+                  icon: "🔗",
+                  label: "Shareable links",
+                  desc: "Generate a permanent URL for any result. Send it to a teammate or bookmark it for later.",
+                },
+                {
+                  icon: "🕓",
+                  label: "Full check history",
+                  desc: "Free users get 5 saved checks. Pro keeps up to 100 — so your last session is always one tap away.",
+                },
               ].map((item) => (
                 <div key={item.label} className="flex items-start gap-3">
                   <span className="text-base shrink-0 mt-0.5">{item.icon}</span>
@@ -230,6 +253,23 @@ export default function Landing() {
                 </div>
               ))}
             </div>
+
+            {/* Pricing proof */}
+            <div
+              className="rounded-xl px-4 py-3 flex flex-col gap-1"
+              style={{ background: "hsla(262,83%,75%,0.07)", border: "1px solid hsla(262,83%,75%,0.15)" }}
+            >
+              <div className="flex items-baseline justify-between">
+                <span className="text-sm font-bold" style={{ color: "hsl(262 83% 75%)" }}>£35 / year</span>
+                <span className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>less than 68p a week</span>
+              </div>
+              <div className="flex items-baseline justify-between">
+                <span className="text-sm font-semibold" style={{ color: "hsl(210 20% 70%)" }}>£4 / month</span>
+                <span className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>cancel any time</span>
+              </div>
+            </div>
+
+            {/* CTAs */}
             <div className="flex flex-col gap-2">
               <button
                 type="button"
@@ -255,7 +295,7 @@ export default function Landing() {
                   boxShadow: "0 0 16px hsla(262,83%,75%,0.3)",
                 }}
               >
-                Upgrade to Pro — £35/year <span style={{ opacity: 0.7, fontSize: "0.75rem" }}>(save £13)</span>
+                Get Pro — £35/year <span style={{ opacity: 0.7, fontSize: "0.75rem" }}>save £13</span>
               </button>
               <button
                 type="button"
@@ -280,7 +320,7 @@ export default function Landing() {
                   cursor: "pointer",
                 }}
               >
-                Upgrade to Pro — £4/month
+                Get Pro — £4/month
               </button>
             </div>
           </div>

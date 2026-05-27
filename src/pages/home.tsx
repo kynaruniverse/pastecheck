@@ -731,7 +731,7 @@ export default function Home() {
                 style={{
                   background: "hsl(262 83% 75%)",
                   color: "hsl(220 8% 6%)",
-                  animation: "probadgepulse 2.5s ease-in-out infinite",
+                  animation: "probadgepulse 2.5s ease-in-out 3",
                 }}
               >PRO</span>
             )}
@@ -1003,7 +1003,6 @@ export default function Home() {
 
                 {showSurvey && <InAppSurvey onDismiss={() => { setShowSurvey(false); setSurveyDismissed(true); }} />}
                 {(errorCount > 0 || warningCount > 0) && <DebugNudge errorCount={errorCount} warningCount={warningCount} />}
-                {(errorCount > 0 || warningCount > 0) && <ResultRating language={result?.language ?? "unknown"} errorCount={errorCount} warningCount={warningCount} />}
 
                 <button
                   type="button"
@@ -1241,7 +1240,7 @@ export default function Home() {
                 color: "hsl(220 8% 6%)",
                 border: "none",
                 cursor: "pointer",
-                animation: "upgradeGlow 2.5s ease-in-out infinite",
+                animation: "upgradeGlow 2.5s ease-in-out 3",
               }}
             >
               Upgrade to Pro — £4/month
