@@ -19,7 +19,7 @@ export default function Logo({ size = "sm", onClick }: LogoProps) {
         }`}
         style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)" }}
       >
-        P
+        {"</>"}
       </span>
       <span
         className={`font-bold tracking-tight ${isLg ? "text-base" : "text-base"}`}
