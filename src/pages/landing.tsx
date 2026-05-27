@@ -91,11 +91,77 @@ export default function Landing() {
           </h1>
 
           <p
-            className="text-base leading-relaxed mb-10 max-w-sm"
+            className="text-base leading-relaxed mb-6 max-w-sm"
             style={{ color: "hsl(215 14% 58%)" }}
           >
             Paste your JavaScript, TypeScript, Python, HTML or CSS and see every error highlighted instantly — with plain-English explanations, not just line numbers.
           </p>
+
+          {/* Annotated hero snippet */}
+          <div
+            className="rounded-xl overflow-hidden mb-10"
+            style={{ border: "1px solid hsl(220 13% 22%)", background: "hsl(220 8% 11%)" }}
+          >
+            {/* File header */}
+            <div
+              className="flex items-center justify-between px-4 py-2"
+              style={{ background: "hsl(220 8% 12%)", borderBottom: "1px solid hsl(220 13% 18%)" }}
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium" style={{ color: "hsl(210 20% 72%)" }}>example.js</span>
+                <span className="text-xs font-semibold" style={{ color: "rgb(250,204,21)" }}>JavaScript</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: "rgba(220,38,38,0.18)", color: "rgb(248,113,113)" }}>1 error</span>
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: "rgba(234,179,8,0.14)", color: "rgb(253,224,71)" }}>1 warning</span>
+              </div>
+            </div>
+
+            {/* Code lines */}
+            <div style={{ fontFamily: "var(--app-font-mono)", fontSize: "12.5px", lineHeight: "1.7" }}>
+
+              {/* Line 1 — normal */}
+              <div className="flex" style={{ borderLeft: "3px solid transparent" }}>
+                <span className="select-none text-right shrink-0 px-3 py-0.5" style={{ color: "hsl(215 14% 35%)", minWidth: "42px" }}>1</span>
+                <span className="whitespace-pre py-0.5" style={{ color: "hsl(210 20% 82%)" }}>{"function greet(name) {"}</span>
+              </div>
+
+              {/* Line 2 — warning */}
+              <div className="flex" style={{ background: "rgba(234,179,8,0.10)", borderLeft: "3px solid rgb(234,179,8)" }}>
+                <span className="select-none text-right shrink-0 px-3 py-0.5" style={{ color: "hsl(215 14% 35%)", minWidth: "42px" }}>2</span>
+                <span className="whitespace-pre py-0.5 flex-1" style={{ color: "rgb(253,224,71)" }}>{"  var message = 'Hello, ' + name;"}</span>
+                <span className="shrink-0 px-2 py-0.5 self-center text-xs" style={{ color: "rgba(253,224,71,0.6)", fontFamily: "var(--app-font-sans)" }}>›</span>
+              </div>
+              {/* Warning explanation */}
+              <div style={{ background: "rgba(234,179,8,0.06)", borderLeft: "3px solid rgba(234,179,8,0.45)" }}>
+                <div className="px-3 py-1 text-xs flex items-start gap-1.5" style={{ fontFamily: "var(--app-font-sans)", color: "rgb(253,224,71)" }}>
+                  <span className="mt-px shrink-0">⚠</span>
+                  <span style={{ opacity: 0.9 }}>{"Avoid 'var' — use 'const' or 'let' instead. 'var' leaks out of blocks and causes hard-to-find bugs."}</span>
+                </div>
+              </div>
+
+              {/* Line 3 — normal */}
+              <div className="flex" style={{ borderLeft: "3px solid transparent" }}>
+                <span className="select-none text-right shrink-0 px-3 py-0.5" style={{ color: "hsl(215 14% 35%)", minWidth: "42px" }}>3</span>
+                <span className="whitespace-pre py-0.5" style={{ color: "hsl(210 20% 82%)" }}>{"  console.log(message)"}</span>
+              </div>
+
+              {/* Line 4 — error */}
+              <div className="flex" style={{ background: "rgba(220,38,38,0.14)", borderLeft: "3px solid rgb(220,38,38)" }}>
+                <span className="select-none text-right shrink-0 px-3 py-0.5" style={{ color: "hsl(215 14% 35%)", minWidth: "42px" }}>4</span>
+                <span className="whitespace-pre py-0.5 flex-1" style={{ color: "rgb(252,165,165)" }}>{"}"}</span>
+                <span className="shrink-0 px-2 py-0.5 self-center text-xs" style={{ color: "rgba(252,165,165,0.6)", fontFamily: "var(--app-font-sans)" }}>›</span>
+              </div>
+              {/* Error explanation */}
+              <div style={{ background: "rgba(220,38,38,0.07)", borderLeft: "3px solid rgba(220,38,38,0.45)" }}>
+                <div className="px-3 py-1 text-xs flex items-start gap-1.5" style={{ fontFamily: "var(--app-font-sans)", color: "rgb(252,165,165)" }}>
+                  <span className="mt-px shrink-0">✕</span>
+                  <span style={{ opacity: 0.9 }}>{"Missing return statement — the function exits without returning 'message'. Add: return message;"}</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
 
           <button
             type="button"
