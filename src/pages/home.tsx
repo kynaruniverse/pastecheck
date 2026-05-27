@@ -739,9 +739,6 @@ export default function Home() {
           <p className="text-sm" style={{ color: "hsl(215 14% 55%)" }}>
             Paste your code and check for errors and warnings instantly.
           </p>
-          <p className="text-sm" style={{ color: "hsl(215 14% 55%)" }}>
-            Paste your code and check for errors and warnings instantly.
-          </p>
           <p className="text-xs mt-1" style={{ color: "hsl(215 14% 38%)" }}>
             Free online checker for JavaScript, TypeScript, Python, HTML and CSS — no sign-up required.
           </p>
@@ -1353,7 +1350,7 @@ export default function Home() {
             style={{ background: "none", border: "none", cursor: "default", WebkitTapHighlightColor: "transparent" }}
           >
             <span className="text-xs" style={{ color: "hsl(215 14% 30%)" }}>
-              PasteCheck v2.16
+              PasteCheck v2.19
             </span>
             <span className="text-xs mt-1 block" style={{ color: "hsl(215 14% 26%)" }}>
               📱 Coded entirely on an Android phone.
