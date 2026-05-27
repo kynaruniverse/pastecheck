@@ -327,7 +327,7 @@ export default function Landing() {
         </div>
 
         {/* Feature cards */}
-        <div className="pb-12 flex flex-col gap-3">
+        <div className="pb-6 flex flex-col gap-3">
           {features.map((f) => (
             <div
               key={f.title}
@@ -362,6 +362,21 @@ export default function Landing() {
               </div>
             </div>
           ))}
+        </div>
+
+      {/* Footer */}
+        <div
+          className="py-6 flex flex-col items-center gap-2"
+          style={{ borderTop: "1px solid hsl(220 13% 16%)" }}
+        >
+          <div className="flex items-center gap-4">
+            <a href="/privacy" className="text-xs" style={{ color: "hsl(215 14% 40%)", textDecoration: "none" }}>Privacy Policy</a>
+            <span style={{ color: "hsl(215 14% 28%)", fontSize: "10px" }}>·</span>
+            <a href="/terms" className="text-xs" style={{ color: "hsl(215 14% 40%)", textDecoration: "none" }}>Terms of Service</a>
+            <span style={{ color: "hsl(215 14% 28%)", fontSize: "10px" }}>·</span>
+            <a href="/about" className="text-xs" style={{ color: "hsl(215 14% 40%)", textDecoration: "none" }}>About</a>
+          </div>
+          <p className="text-xs" style={{ color: "hsl(215 14% 28%)" }}>© 2026 PasteCheck</p>
         </div>
 
       </div>
