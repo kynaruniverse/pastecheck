@@ -1082,14 +1082,14 @@ export default function Home() {
                     ).join("\n");
                     navigator.clipboard.writeText(text);
                   }}
-                  className="w-full rounded-xl py-3 text-sm font-medium transition-all duration-150 active:scale-[0.98]"
-                  style={{ background: "hsl(220 13% 16%)", color: "hsl(215 14% 55%)", border: "1px solid hsl(220 13% 22%)", cursor: "pointer" }}
+                  className="w-full rounded-xl py-2.5 text-sm font-medium transition-all duration-150 active:scale-[0.98]"
+                  style={{ background: "transparent", color: "hsl(215 14% 52%)", border: "1px solid hsl(220 13% 22%)", cursor: "pointer" }}
                 >Copy result as text</button>
                 <button
                   type="button"
                   onClick={handleReset}
                   className="w-full rounded-xl py-3.5 text-sm font-semibold tracking-wide transition-all duration-150 active:scale-[0.98]"
-                  style={{ background: "hsl(220 13% 20%)", color: "hsl(210 20% 75%)", border: "1px solid hsl(220 13% 26%)", cursor: "pointer" }}
+                  style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)", border: "none", cursor: "pointer" }}
                 >Check New Code</button>
                 <FeedbackForm />
               </div>
@@ -1212,7 +1212,7 @@ export default function Home() {
                   type="button"
                   onClick={handleMultiReset}
                   className="w-full rounded-xl py-3.5 text-sm font-semibold tracking-wide transition-all duration-150 active:scale-[0.98]"
-                  style={{ background: "hsl(220 13% 20%)", color: "hsl(210 20% 75%)", border: "1px solid hsl(220 13% 26%)", cursor: "pointer" }}
+                  style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)", border: "none", cursor: "pointer" }}
                 >Check New Files</button>
                 <FeedbackForm />
               </div>
