@@ -1005,6 +1005,22 @@ export default function Home() {
                 {(errorCount > 0 || warningCount > 0) && <DebugNudge errorCount={errorCount} warningCount={warningCount} />}
                 {(errorCount > 0 || warningCount > 0) && <ResultRating language={result?.language ?? "unknown"} errorCount={errorCount} warningCount={warningCount} />}
 
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="w-full rounded-xl py-3.5 text-sm font-semibold tracking-wide transition-all duration-150 active:scale-[0.98]"
+                  style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)", border: "none", cursor: "pointer" }}
+                >Check New Code</button>
+
+                {/* Save to collection — Pro only */}
+                {isPro && (
+                  <SaveToCollectionButton
+                    code={code}
+                    language={result?.language ?? "unknown"}
+                    lines={result?.lines ?? []}
+                  />
+                )}
+
                 {/* Share button — Pro only */}
                 {isPro && (
                   <div className="flex flex-col gap-2">
@@ -1033,15 +1049,6 @@ export default function Home() {
                       </div>
                     )}
                   </div>
-                )}
-
-                {/* Save to collection — Pro only */}
-                {isPro && (
-                  <SaveToCollectionButton
-                    code={code}
-                    language={result?.language ?? "unknown"}
-                    lines={result?.lines ?? []}
-                  />
                 )}
 
                 {/* Share upsell — free users, shown after tapping the share nudge */}
@@ -1085,12 +1092,6 @@ export default function Home() {
                   className="w-full rounded-xl py-2.5 text-sm font-medium transition-all duration-150 active:scale-[0.98]"
                   style={{ background: "transparent", color: "hsl(215 14% 52%)", border: "1px solid hsl(220 13% 22%)", cursor: "pointer" }}
                 >Copy result as text</button>
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  className="w-full rounded-xl py-3.5 text-sm font-semibold tracking-wide transition-all duration-150 active:scale-[0.98]"
-                  style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)", border: "none", cursor: "pointer" }}
-                >Check New Code</button>
                 <FeedbackForm />
               </div>
             )}
