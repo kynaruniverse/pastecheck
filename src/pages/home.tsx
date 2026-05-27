@@ -709,7 +709,7 @@ export default function Home() {
   return (
     <div className="min-h-screen w-full" style={{ background: "hsl(220 8% 9%)" }}>
       <Toaster position="bottom-center" theme="dark" richColors />
-      <div className="mx-auto w-full max-w-2xl px-4 pb-10 pt-8">
+      <div className={`mx-auto w-full px-4 pb-10 pt-8 ${checked ? "max-w-5xl" : "max-w-2xl"}`}>
         <Helmet>
           <title>PasteCheck — Paste and Check Your Code</title>
           <meta name="description" content="Paste your JavaScript, TypeScript, Python, HTML or CSS code and instantly see syntax errors and warnings highlighted. Free, no login, works on mobile." />
@@ -923,7 +923,47 @@ export default function Home() {
                 >Check Code</button>
               </div>
             ) : (
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6">
+                {/* ── Left pane: input (desktop only) ── */}
+                <div className="hidden md:flex md:flex-col md:gap-4 md:w-[45%] md:sticky md:top-8">
+                  <div className="rounded-xl overflow-hidden border" style={{ borderColor: "hsl(220 13% 22%)" }}>
+                    <div
+                      className="flex items-center justify-between px-4 py-2 border-b"
+                      style={{ background: "hsl(220 8% 12%)", borderColor: "hsl(220 13% 22%)" }}
+                    >
+                      <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "hsl(215 14% 45%)" }}>Code</span>
+                      {code.length > 0 && (
+                        <span className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>{code.split("\n").length} lines</span>
+                      )}
+                    </div>
+                    <textarea
+                      value={code}
+                      onChange={handleCodeChange}
+                      rows={24}
+                      spellCheck={false}
+                      autoCorrect="off"
+                      autoCapitalize="none"
+                      className="w-full resize-none outline-none text-sm leading-relaxed px-4 py-3"
+                      style={{
+                        background: "hsl(220 8% 11%)",
+                        color: "hsl(210 20% 88%)",
+                        fontFamily: "var(--app-font-mono)",
+                        caretColor: "hsl(262 83% 75%)",
+                        fontSize: "13px",
+                        lineHeight: "1.7",
+                      }}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleReset}
+                    className="w-full rounded-xl py-3.5 text-sm font-semibold tracking-wide transition-all duration-150 active:scale-[0.98]"
+                    style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)", border: "none", cursor: "pointer" }}
+                  >Check New Code</button>
+                </div>
+
+                {/* ── Right pane: results (desktop) / full width (mobile) ── */}
+                <div className="flex flex-col gap-4 md:flex-1">
                 <div className="flex items-center justify-between">
                   <div className="flex gap-3 flex-1">
                     <div className="flex-1 rounded-xl px-4 py-3 flex flex-col items-center justify-center" style={{ background: "rgba(220, 38, 38, 0.12)", border: "1px solid rgba(220,38,38,0.25)" }}>
@@ -1092,6 +1132,7 @@ export default function Home() {
                   style={{ background: "transparent", color: "hsl(215 14% 52%)", border: "1px solid hsl(220 13% 22%)", cursor: "pointer" }}
                 >Copy result as text</button>
                 <FeedbackForm />
+                </div>{/* end right pane */}
               </div>
             )}
           </>
