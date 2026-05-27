@@ -7,6 +7,9 @@ export default function Privacy() {
       <Helmet>
         <title>Privacy Policy — PasteCheck</title>
         <meta name="description" content="Privacy policy for PasteCheck. How we handle your data." />
+        <meta property="og:title" content="Privacy Policy — PasteCheck" />
+        <meta property="og:description" content="Privacy policy for PasteCheck. How we handle your data." />
+        <meta property="og:image" content="/opengraph.jpg" />
       </Helmet>
       <div className="mx-auto w-full max-w-2xl px-5 pb-16">
         <NavMenu />

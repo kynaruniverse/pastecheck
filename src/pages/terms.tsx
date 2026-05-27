@@ -7,6 +7,9 @@ export default function Terms() {
       <Helmet>
         <title>Terms of Service — PasteCheck</title>
         <meta name="description" content="Terms of service for PasteCheck." />
+        <meta property="og:title" content="Terms of Service — PasteCheck" />
+        <meta property="og:description" content="Terms of service for PasteCheck." />
+        <meta property="og:image" content="/opengraph.jpg" />
       </Helmet>
       <div className="mx-auto w-full max-w-2xl px-5 pb-16">
         <NavMenu />

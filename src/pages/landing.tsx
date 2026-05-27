@@ -56,6 +56,7 @@ export default function Landing() {
         <meta name="description" content="Paste your JavaScript, TypeScript, Python, HTML or CSS and instantly see every error highlighted. Free, no sign-up, works on mobile." />
         <meta property="og:title" content="PasteCheck — Free Online Code Error Checker" />
         <meta property="og:description" content="Paste your JavaScript, TypeScript, Python, HTML or CSS and instantly see every error highlighted. Free, no sign-up, works on mobile." />
+        <meta property="og:image" content="/opengraph.jpg" />
       </Helmet>
 
       <div className="mx-auto w-full max-w-2xl px-5 flex flex-col flex-1">
