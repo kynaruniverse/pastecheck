@@ -40,7 +40,15 @@ export default function FeedbackForm() {
     setStatus("idle");
   }
 
-  if (!FORM_ID) return null;
+  if (!FORM_ID) {
+    if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
+      (window as any).gtag("event", "feedback_form_missing", {
+        event_category: "error",
+        event_label: "VITE_FORMSPREE_ID not set",
+      });
+    }
+    return null;
+  }
 
   return (
     <div className="w-full">

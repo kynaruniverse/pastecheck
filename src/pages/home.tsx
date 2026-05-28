@@ -517,6 +517,7 @@ export default function Home() {
   const [inputError, setInputError] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const prevErrorCount = useRef<number>(0);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -605,6 +606,7 @@ export default function Home() {
     if (detectLanguage(code) === "unknown") { setInputError("No code detected — please paste JavaScript, Python or HTML code."); return; }
     setChecking(true);
     setTimeout(() => {
+    prevErrorCount.current = result?.lines.filter((l) => l.type === "error").length ?? 0;
     const r = lint(code);
     setResult(r);
     setChecked(true);
@@ -1149,7 +1151,7 @@ export default function Home() {
                   </div>
                 </div>
 
-                {errorCount === 0 && warningCount === 0 && result !== null && (
+                {errorCount === 0 && warningCount === 0 && result !== null && prevErrorCount.current > 0 && (
                   <div className="rounded-xl px-4 py-5 flex flex-col items-center gap-2 text-center" style={{ background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.2)" }}>
                     <span style={{ fontSize: "28px" }}>✓</span>
                     <p className="text-sm font-semibold" style={{ color: "rgb(134,239,172)" }}>All errors fixed!</p>
