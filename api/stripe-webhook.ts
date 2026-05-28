@@ -48,17 +48,32 @@ export default async function handler(req: any, res: any) {
       return res.status(200).json({ received: true });
     }
 
+    const userId = session.client_reference_id;
     const email = session.customer_email;
-    if (!email) {
+
+    if (!userId && !email) {
       return res.status(200).json({ received: true });
     }
 
-    const { error } = await supabase
-      .from("users")
-      .update({ is_pro: true })
-      .eq("email", email);
+    let updateError: any = null;
 
-    if (error) {
+    if (userId) {
+      // Preferred path — match by Supabase user ID, no email collision risk
+      const { error } = await supabase
+        .from("users")
+        .update({ is_pro: true })
+        .eq("id", userId);
+      updateError = error;
+    } else if (email) {
+      // Fallback — guest checkout or session without auth token
+      const { error } = await supabase
+        .from("users")
+        .update({ is_pro: true })
+        .eq("email", email);
+      updateError = error;
+    }
+
+    if (updateError) {
       return res.status(500).json({ error: "Failed to update user pro status" });
     }
   }

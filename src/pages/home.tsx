@@ -488,12 +488,33 @@ export default function Home() {
   const [proToast, setProToast] = useState<string | null>(null);
   
   // Single-file mode (free)
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState(() => {
+    try {
+      const seen = localStorage.getItem("pastecheck_seen");
+      if (!seen) {
+        localStorage.setItem("pastecheck_seen", "true");
+        return `function calculateTotal(items) {\n  var total = 0\n  for (let i = 0; i <= items.length; i++) {\n    total = total + items[i].price\n  }\n  console.log(total)\n}`;
+      }
+    } catch {}
+    return "";
+  });
   const [result, setResult] = useState<LintResult | null>(null);
   const [checked, setChecked] = useState(false);
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const [inputError, setInputError] = useState<string | null>(null);
+  const [checking, setChecking] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        if (!checked) handleCheck();
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [checked, code]);
 
   // Multi-file mode (pro)
   const [files, setFiles] = useState<FileEntry[]>([makeFile("File 1")]);
@@ -566,12 +587,25 @@ export default function Home() {
 
   function handleCheck() {
     if (!code.trim()) { setInputError("Please paste some code first"); return; }
+    if (code.length > 100000) { setInputError("That file is too large to check — please paste under 100KB of code."); return; }
+    if (code.split("\n").length > 3000) { setInputError("Too many lines — please paste under 3,000 lines of code."); return; }
     if (detectLanguage(code) === "unknown") { setInputError("No code detected — please paste JavaScript, Python or HTML code."); return; }
+    setChecking(true);
+    setTimeout(() => {
     const r = lint(code);
     setResult(r);
     setChecked(true);
-    setExpanded(new Set());
+    const firstThree = new Set(
+      r.lines
+        .map((l, i) => ({ l, i }))
+        .filter(({ l }) => l.type !== "normal" && l.messages.length > 0)
+        .slice(0, 3)
+        .map(({ i }) => i)
+    );
+    setExpanded(firstThree);
     setInputError(null);
+    setChecking(false);
+    }, 0);
 
     setHistory((prev) => {
       const updated = [{ code, result: r }, ...prev].slice(0, isPro ? 100 : 5);
@@ -642,7 +676,11 @@ export default function Home() {
           toast.success("Share link generated");
         }
       }
-    } catch {}
+    } catch (err) {
+      if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
+        (window as any).gtag("event", "share_error", { event_category: "Error", event_label: String(err) });
+      }
+    }
     setSharing(false);
   }
 
@@ -753,9 +791,13 @@ export default function Home() {
                   e.preventDefault();
                   try {
                     const res = await fetch("/api/create-checkout", { method: "POST" });
-                    const data = await res.json();
-                    if (data.url) window.location.href = data.url;
-                  } catch {}
+                          const data = await res.json();
+                          if (data.url) window.location.href = data.url;
+                        } catch (err) {
+                          if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
+                            (window as any).gtag("event", "checkout_error", { event_category: "Error", event_label: String(err) });
+                          }
+                        }
                 }}
                 className="text-xs font-semibold shrink-0"
                 style={{ color: "hsl(262 83% 75%)", textDecoration: "none" }}
@@ -858,7 +900,7 @@ export default function Home() {
                     ref={textareaRef}
                     value={code}
                     onChange={handleCodeChange}
-                    placeholder={"// Paste your code here...\nfunction example() {\n  var x = undefined\n  if (x == null) {\n    console.log('warning!')\n  }\n}"}
+                    placeholder="// Paste your code here..."
                     rows={16}
                     autoFocus
                     spellCheck={false}
@@ -942,7 +984,7 @@ export default function Home() {
                     cursor: code.trim() ? "pointer" : "not-allowed",
                     border: "none",
                   }}
-                >Check Code</button>
+                >{checking ? "Checking..." : "Check Code"}</button>
               </div>
             ) : (
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6">
@@ -1154,7 +1196,11 @@ export default function Home() {
                           const res = await fetch("/api/create-checkout", { method: "POST" });
                           const data = await res.json();
                           if (data.url) window.location.href = data.url;
-                        } catch {}
+                        } catch (err) {
+                          if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
+                            (window as any).gtag("event", "checkout_error", { event_category: "Error", event_label: String(err) });
+                          }
+                        }
                       }}
                       className="text-xs font-semibold shrink-0 px-3 py-1.5 rounded-lg"
                       style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)", border: "none", cursor: "pointer" }}
