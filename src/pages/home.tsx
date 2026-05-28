@@ -632,7 +632,7 @@ export default function Home() {
       if (checkNumber === 5 && !surveyDismissed) setShowSurvey(true);
       return updated;
     });
-    }, 0);
+  }, 0);
 
     
 
