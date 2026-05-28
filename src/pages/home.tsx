@@ -633,8 +633,7 @@ export default function Home() {
       return updated;
     });
   }, 0);
-
-    
+  }
 
   function handleReset() {
     setCode("");
