@@ -620,8 +620,6 @@ export default function Home() {
     setExpanded(firstThree);
     setInputError(null);
     setChecking(false);
-    }, 0);
-
     setHistory((prev) => {
       const updated = [{ code, result: r }, ...prev].slice(0, isPro ? 100 : 5);
       try { localStorage.setItem("pastecheck_history", JSON.stringify(updated)); } catch {}
@@ -634,7 +632,9 @@ export default function Home() {
       if (checkNumber === 5 && !surveyDismissed) setShowSurvey(true);
       return updated;
     });
-  }
+    }, 0);
+
+    
 
   function handleReset() {
     setCode("");
