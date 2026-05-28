@@ -50,4 +50,39 @@
     <priority>0.3</priority>
   </url>
 
+<url>
+    <loc>https://www.pastecheck.co.uk/fix/unexpected-token-javascript</loc>
+    <lastmod>2026-05-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://www.pastecheck.co.uk/fix/cannot-read-properties-of-undefined</loc>
+    <lastmod>2026-05-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://www.pastecheck.co.uk/fix/missing-parenthesis-after-argument-list</loc>
+    <lastmod>2026-05-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://www.pastecheck.co.uk/fix/python-indentation-error</loc>
+    <lastmod>2026-05-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://www.pastecheck.co.uk/fix/unexpected-end-of-json-input</loc>
+    <lastmod>2026-05-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
 </urlset>

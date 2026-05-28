@@ -18,6 +18,7 @@ export default function FixPage() {
       <Helmet>
         <title>{config.title} | PasteCheck</title>
         <meta name="description" content={config.summary} />
+        <link rel="canonical" href={`https://www.pastecheck.co.uk/fix/${config.slug}`} />
       </Helmet>
 
       <p className="text-sm font-mono mb-3" style={{ color: "#a78bfa" }}>
