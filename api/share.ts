@@ -6,6 +6,8 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY as string
 );
 
+const shareAttempts = new Map<string, { count: number; resetAt: number }>();
+
 function generateShareId(): string {
   return Math.random().toString(36).slice(2, 9);
 }
@@ -30,6 +32,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .single();
     if (!userData?.is_pro) {
       return res.status(403).json({ error: "Pro subscription required" });
+    }
+
+    // Rate limit — 20 shares per user per hour (in-memory, resets on cold start)
+    const now = Date.now();
+    const shareEntry = shareAttempts.get(user.id);
+    if (shareEntry && now < shareEntry.resetAt) {
+      if (shareEntry.count >= 20) {
+        return res.status(429).json({ error: "Rate limit exceeded — try again later" });
+      }
+      shareEntry.count++;
+    } else {
+      shareAttempts.set(user.id, { count: 1, resetAt: now + 60 * 60 * 1000 });
     }
 
     // Payload size limit — 100KB

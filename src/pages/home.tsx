@@ -4,8 +4,21 @@ import { toast, Toaster } from "sonner";
 import NavMenu from "@/components/NavMenu";
 import Logo from "@/components/Logo";
 import { lint, detectLanguage, type LintResult, type Language } from "@/lib/linter";
-import FeedbackForm from "@/components/FeedbackForm";
 import { supabase } from "@/lib/supabase";
+import FeedbackForm from "@/components/FeedbackForm";
+
+function logFeedbackFormMissing() {
+  if (!import.meta.env.VITE_FORMSPREE_ID) {
+    if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
+      (window as any).gtag("event", "feedback_form_missing", {
+        event_category: "Error",
+        event_label: "VITE_FORMSPREE_ID not set",
+      });
+    }
+    console.warn("[PasteCheck] FeedbackForm: VITE_FORMSPREE_ID is not set. Feedback will be silently lost.");
+  }
+}
+logFeedbackFormMissing();
 
 const LANG_LABELS: Record<Exclude<Language, "unknown">, string> = {
   javascript: "JavaScript",
@@ -1091,7 +1104,13 @@ export default function Home() {
                     <span className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>{result!.lines.length} lines</span>
                   </div>
                   <div className="overflow-x-auto" style={{ background: "hsl(220 8% 11%)", fontFamily: "var(--app-font-mono)", fontSize: "12.5px", lineHeight: "1.7" }}>
-                    {result!.lines.map((line, i) => {
+                    {[...result!.lines]
+                      .map((line, i) => ({ line, i }))
+                      .sort((a, b) => {
+                        const rank = (t: string) => t === "error" ? 0 : t === "warning" ? 1 : 2;
+                        return rank(a.line.type) - rank(b.line.type);
+                      })
+                      .map(({ line, i }) => {
                       const isFlagged = line.type !== "normal" && line.messages.length > 0;
                       const isOpen = expanded.has(i);
                       return (
@@ -1129,6 +1148,14 @@ export default function Home() {
                     })}
                   </div>
                 </div>
+
+                {errorCount === 0 && warningCount === 0 && result !== null && (
+                  <div className="rounded-xl px-4 py-5 flex flex-col items-center gap-2 text-center" style={{ background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.2)" }}>
+                    <span style={{ fontSize: "28px" }}>✓</span>
+                    <p className="text-sm font-semibold" style={{ color: "rgb(134,239,172)" }}>All errors fixed!</p>
+                    <p className="text-xs" style={{ color: "rgb(134,239,172)", opacity: 0.7 }}>Your code is clean — no issues found.</p>
+                  </div>
+                )}
 
                 {showSurvey && <InAppSurvey onDismiss={() => { setShowSurvey(false); setSurveyDismissed(true); }} />}
                 {(errorCount > 0 || warningCount > 0) && <DebugNudge errorCount={errorCount} warningCount={warningCount} />}
@@ -1396,7 +1423,7 @@ export default function Home() {
             style={{ background: "none", border: "none", cursor: "default", WebkitTapHighlightColor: "transparent" }}
           >
             <span className="text-xs" style={{ color: "hsl(215 14% 30%)" }}>
-              PasteCheck v2.19
+              PasteCheck v2.31
             </span>
             <span className="text-xs mt-1 block" style={{ color: "hsl(215 14% 26%)" }}>
               📱 Coded entirely on an Android phone.

@@ -91,7 +91,6 @@
 
   button, a {
     -webkit-tap-highlight-color: transparent;
-    outline: none;
   }
 
   button:focus-visible, a:focus-visible {
@@ -163,5 +162,14 @@
   .line-warning {
     background-color: rgba(234, 179, 8, 0.12);
     border-left: 3px solid rgb(234, 179, 8);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

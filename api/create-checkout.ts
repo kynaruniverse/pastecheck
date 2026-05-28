@@ -8,9 +8,24 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY as string
 );
 
+const checkoutAttempts = new Map<string, { count: number; resetAt: number }>();
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  // Rate limit — 5 checkout attempts per IP per hour (in-memory, resets on cold start)
+  const ip = (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ?? "unknown";
+  const now = Date.now();
+  const entry = checkoutAttempts.get(ip);
+  if (entry && now < entry.resetAt) {
+    if (entry.count >= 5) {
+      return res.status(429).json({ error: "Too many requests — try again later" });
+    }
+    entry.count++;
+  } else {
+    checkoutAttempts.set(ip, { count: 1, resetAt: now + 60 * 60 * 1000 });
   }
 
   try {

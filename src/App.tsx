@@ -11,6 +11,8 @@ import Collections from "@/pages/collections";
 import CollectionDetail from "@/pages/collection-detail";
 import ForgotPassword from "@/pages/forgot-password";
 import NotFound from "@/pages/not-found";
+import NotFound from "@/pages/not-found";
+import FixPage from "@/pages/fix";
 import Privacy from "@/pages/privacy";
 import Terms from "@/pages/terms";
 
@@ -30,6 +32,7 @@ function Router() {
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
+      <Route path="/fix/:slug" component={FixPage} />
       <Route component={NotFound} />
     </Switch>
   );
