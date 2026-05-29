@@ -831,6 +831,21 @@ export default function Home() {
         {/* Nav */}
         <NavMenu />
 
+        {/* Sticky reset button — mobile only, visible after check */}
+        {checked && (
+          <div
+            className="md:hidden fixed top-0 left-0 right-0 z-40 px-4 py-2"
+            style={{ background: "hsl(220 8% 9%)", borderBottom: "1px solid hsl(220 13% 16%)" }}
+          >
+            <button
+              type="button"
+              onClick={handleReset}
+              className="w-full rounded-xl py-2.5 text-sm font-semibold tracking-wide transition-all duration-150 active:scale-[0.98]"
+              style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)", border: "none", cursor: "pointer" }}
+            >Check New Code</button>
+          </div>
+        )}
+
         <header className="mb-6">
           <div className="flex items-center gap-2 mb-1">
             <Logo size="sm" />
