@@ -378,6 +378,7 @@ export default function Landing() {
             <a href="/about" className="text-xs" style={{ color: "hsl(215 14% 40%)", textDecoration: "none" }}>About</a>
           </div>
           <p className="text-xs" style={{ color: "hsl(215 14% 28%)" }}>© 2026 PasteCheck</p>
+          <p className="text-xs" style={{ color: "hsl(215 14% 26%)" }}>📱 Coded entirely on an Android phone. · v2.33</p>
         </div>
 
       </div>
