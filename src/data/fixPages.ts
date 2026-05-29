@@ -667,4 +667,177 @@ loadData();`,
     secondaryCtaHref: "/fix/is-not-a-function-javascript",
     searchIntent: "error-fix",
   },
+{
+    title: "How to fix: IndexError — list index out of range in Python",
+    slug: "python-indexerror-list-index-out-of-range",
+    language: "Python",
+    summary:
+      "A Python IndexError means you tried to access a position in a list that doesn't exist. Lists are zero-indexed — a list with 3 items has positions 0, 1, and 2. Accessing position 3 throws this error.",
+    whyItHappens:
+      "Python lists start at index 0, not 1. If your list has 5 items, the valid indexes are 0 through 4. Accessing index 5 — or any index equal to or greater than the length of the list — raises an IndexError. The most common cause is an off-by-one error in a loop, or assuming a list has more items than it does.",
+    brokenExample: `items = ["apple", "banana", "cherry"]
+
+for i in range(4):
+    print(items[i])`,
+    fixedExample: `items = ["apple", "banana", "cherry"]
+
+for i in range(len(items)):
+    print(items[i])
+
+# Or more Pythonically:
+for item in items:
+    print(item)`,
+    commonCauses: [
+      "Using range(n) where n is larger than the list length",
+      "Hardcoding an index without checking the list length first",
+      "An off-by-one error — using <= instead of < in a loop condition",
+      "A list that is shorter than expected because a filter or slice removed items",
+      "Accessing the last item with list[len(list)] instead of list[-1] or list[len(list)-1]",
+    ],
+    primaryCtaCopy: "Paste your Python and find the exact index error",
+    secondaryCtaLabel: "See more Python errors",
+    secondaryCtaHref: "/fix/python-typeerror",
+    searchIntent: "error-fix",
+  },
+  {
+    title: "How to fix: fetch is not defined in JavaScript",
+    slug: "javascript-fetch-is-not-defined",
+    language: "JavaScript",
+    summary:
+      "This error means JavaScript cannot find the fetch function. In older Node.js versions fetch does not exist by default — it is a browser API that was only added to Node.js in version 18.",
+    whyItHappens:
+      "fetch is a browser-native function for making HTTP requests. It was introduced to Node.js in version 18. If you are running Node.js 16 or earlier, fetch does not exist and you will get this ReferenceError. It can also appear in browser code if the script runs in an environment that doesn't support fetch, such as very old browsers or certain server-side rendering setups.",
+    brokenExample: `// Running in Node.js 16 or earlier
+const response = await fetch("https://api.example.com/data");
+const data = await response.json();
+console.log(data);`,
+    fixedExample: `// Option 1: Upgrade to Node.js 18 or later (fetch is built in)
+
+// Option 2: Use the node-fetch package in older Node.js
+import fetch from "node-fetch";
+
+const response = await fetch("https://api.example.com/data");
+const data = await response.json();
+console.log(data);
+
+// Option 3: Use the built-in https module in Node.js
+const https = require("https");`,
+    commonCauses: [
+      "Running in Node.js 16 or earlier where fetch is not built in",
+      "Using fetch in a server-side script that runs outside the browser",
+      "A build tool or test runner that doesn't polyfill browser globals",
+      "Forgetting to import node-fetch when using it as a package",
+      "A typo — fetch spelled incorrectly or called with wrong capitalisation",
+    ],
+    primaryCtaCopy: "Paste your JavaScript and check for other issues",
+    secondaryCtaLabel: "See more JavaScript errors",
+    secondaryCtaHref: "/fix/referenceerror-not-defined-javascript",
+    searchIntent: "error-fix",
+  },
+  {
+    title: "How to fix: async await not working in JavaScript",
+    slug: "javascript-async-await-not-working",
+    language: "JavaScript",
+    summary:
+      "When async/await seems to not work, the code usually isn't broken — it's running in the wrong order. The most common cause is forgetting to await a Promise, or using await outside an async function.",
+    whyItHappens:
+      "async/await is syntactic sugar over Promises. When you call an async function without await, you get a Promise back — not the resolved value. Your code then continues immediately with that unresolved Promise, which looks like undefined or an object rather than the data you expected. The fix is almost always adding a missing await, or making the containing function async so await is valid inside it.",
+    brokenExample: `function getData() {
+  const response = fetch("/api/data");
+  const data = response.json();
+  console.log(data);
+}
+
+getData();`,
+    fixedExample: `async function getData() {
+  const response = await fetch("/api/data");
+  const data = await response.json();
+  console.log(data);
+}
+
+getData();`,
+    commonCauses: [
+      "Forgetting await before fetch, axios, or any function that returns a Promise",
+      "Using await inside a function that is not marked async",
+      "Calling an async function without await and expecting the result immediately",
+      "Using await at the top level in an environment that doesn't support top-level await",
+      "A Promise chain mixed with async/await — .then() and await on the same call",
+    ],
+    primaryCtaCopy: "Paste your code and find the async issue",
+    secondaryCtaLabel: "See more JavaScript errors",
+    secondaryCtaHref: "/fix/javascript-promise-unhandled-rejection",
+    searchIntent: "error-fix",
+  },
+  {
+    title: "How to fix: CSS property not working",
+    slug: "css-property-not-working",
+    language: "CSS",
+    summary:
+      "When a CSS property has no visible effect, the rule is usually being overridden, applied to the wrong element, or written with a syntax error. The browser is silently ignoring it.",
+    whyItHappens:
+      "Browsers apply CSS rules based on specificity — the most specific rule wins. If a more specific rule elsewhere sets the same property, your rule loses silently. CSS also ignores properties with invalid values entirely, with no error message. A misspelled property name, a missing unit, or an unsupported value all cause the browser to skip the rule as if it doesn't exist.",
+    brokenExample: `/* Rule being overridden by a more specific selector */
+p { color: red; }
+.content p { color: blue; } /* This wins — more specific */
+
+/* Missing unit — browser ignores this entirely */
+.box {
+  width: 200;
+  margin: 10;
+}`,
+    fixedExample: `/* Increase specificity or use a more targeted selector */
+.content p { color: red; }
+
+/* Add units to numeric values */
+.box {
+  width: 200px;
+  margin: 10px;
+}`,
+    commonCauses: [
+      "A more specific selector elsewhere overrides the rule — check browser DevTools",
+      "Missing units on numeric values — width: 200 is invalid, width: 200px is correct",
+      "A misspelled property name — the browser silently ignores unknown properties",
+      "The property is not inherited and is being set on a parent instead of the target element",
+      "A media query or pseudo-class condition is not being met",
+    ],
+    primaryCtaCopy: "Paste your CSS and find invalid properties instantly",
+    secondaryCtaLabel: "See more HTML errors",
+    secondaryCtaHref: "/fix/html-unclosed-tag",
+    searchIntent: "debug-help",
+  },
+  {
+    title: "How to fix: Cannot read properties of null in JavaScript",
+    slug: "cannot-read-properties-of-null-javascript",
+    language: "JavaScript",
+    summary:
+      "This error means your code tried to access a property on null. Unlike undefined, null is an explicit empty value — something intentionally set to nothing. You cannot read properties from it.",
+    whyItHappens:
+      "null is a deliberate absence of value. It appears when a DOM query finds no matching element, when an API explicitly returns null, or when a variable is initialised as null before a value is assigned. JavaScript throws this error the moment you try to access any property on null — there is nothing there to read from. The fix is always to check for null before accessing properties.",
+    brokenExample: `const element = document.querySelector(".does-not-exist");
+element.style.display = "none";
+
+// or
+
+const user = null;
+console.log(user.name);`,
+    fixedExample: `const element = document.querySelector(".does-not-exist");
+if (element) {
+  element.style.display = "none";
+}
+
+// or use optional chaining
+const user = null;
+console.log(user?.name); // undefined, not an error`,
+    commonCauses: [
+      "document.querySelector returning null because the element doesn't exist or hasn't loaded yet",
+      "An API response explicitly returning null instead of an object",
+      "A variable initialised as null and used before being assigned a real value",
+      "Optional chaining (?.) not used when navigating potentially null values",
+      "A race condition where the DOM element is accessed before it is rendered",
+    ],
+    primaryCtaCopy: "Paste your code and find the null reference",
+    secondaryCtaLabel: "See more JavaScript errors",
+    secondaryCtaHref: "/fix/cannot-read-properties-of-undefined",
+    searchIntent: "error-fix",
+  },
 ];

@@ -161,4 +161,35 @@
     <lastmod>2026-05-28</lastmod>
   </url>
 
+<url>
+    <loc>https://www.pastecheck.co.uk/fix/python-indexerror-list-index-out-of-range</loc>
+    <priority>0.8</priority>
+    <lastmod>2026-05-28</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.pastecheck.co.uk/fix/javascript-fetch-is-not-defined</loc>
+    <priority>0.8</priority>
+    <lastmod>2026-05-28</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.pastecheck.co.uk/fix/javascript-async-await-not-working</loc>
+    <priority>0.8</priority>
+    <lastmod>2026-05-28</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.pastecheck.co.uk/fix/css-property-not-working</loc>
+    <priority>0.8</priority>
+    <lastmod>2026-05-28</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.pastecheck.co.uk/fix/cannot-read-properties-of-null-javascript</loc>
+    <priority>0.8</priority>
+    <lastmod>2026-05-28</lastmod>
+    <changefreq>monthly</changefreq>
+  </url>
+
 </urlset>
