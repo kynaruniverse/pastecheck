@@ -840,4 +840,796 @@ console.log(user?.name); // undefined, not an error`,
     secondaryCtaHref: "/fix/cannot-read-properties-of-undefined",
     searchIntent: "error-fix",
   },
+  {
+    title: "How to check AI generated code for errors",
+    slug: "check-ai-generated-code-errors",
+    language: "JavaScript",
+    summary:
+      "AI-generated code looks confident and complete — but it makes real mistakes. Missing error handling, undefined variables, credential leaks, and logic errors are common. Pasting it through a linter before you run it catches these instantly.",
+    whyItHappens:
+      "AI models generate code by predicting what code looks like, not by running it. The output is syntactically plausible but untested. Common patterns include functions that never handle the case where a fetch fails, variables used before they are defined, credentials hardcoded in the source, and conditions that are always true or always false. None of these produce a visible error until they do — in production, in front of a user.",
+    brokenExample: `// AI-generated code — looks fine at a glance
+const API_KEY = "sk-abc123realkey";
+
+async function getUser(id) {
+  const response = fetch("/api/users/" + id);
+  const data = response.json();
+  return data.user.profile.name;
+}`,
+    fixedExample: `// After linting — issues caught before running
+// ⚠ Credential detected: API_KEY looks like a real secret — move to .env
+// ⚠ Missing await before fetch()
+// ⚠ Missing await before response.json()
+// ⚠ No error handling — getUser() has no try/catch
+
+const API_KEY = process.env.API_KEY;
+
+async function getUser(id) {
+  try {
+    const response = await fetch("/api/users/" + id);
+    const data = await response.json();
+    return data?.user?.profile?.name ?? null;
+  } catch (error) {
+    console.error("Failed to fetch user:", error);
+    return null;
+  }
+}`,
+    commonCauses: [
+      "Missing await on fetch or async calls — AI frequently omits these",
+      "Hardcoded credentials — API keys, tokens, and passwords left in source",
+      "No error handling — AI-generated functions rarely include try/catch",
+      "Always-true or always-false conditions — logic errors that never surface until runtime",
+      "Variables used before they are defined or returned from a function that returns undefined",
+    ],
+    primaryCtaCopy: "Paste your AI-generated code and catch errors before they ship",
+    secondaryCtaLabel: "See more JavaScript errors",
+    secondaryCtaHref: "/fix/unexpected-token-javascript",
+    searchIntent: "debug-help",
+  },
+  {
+    title: "How to fix: SyntaxError — cannot use import statement outside a module",
+    slug: "cannot-use-import-statement-outside-module",
+    language: "JavaScript",
+    summary:
+      "This error means you used an ES module import statement in a file that Node.js is treating as a CommonJS script. The fix is either adding type: 'module' to your package.json or switching to require().",
+    whyItHappens:
+      "Node.js supports two module systems: CommonJS (require/module.exports) and ES Modules (import/export). By default, .js files are treated as CommonJS. If you write import syntax in a CommonJS file, Node.js throws this error because the two systems are incompatible. You need to either declare the file as an ES module or use the CommonJS equivalent.",
+    brokenExample: `// package.json has no "type": "module"
+// This throws in Node.js by default
+
+import express from "express";
+import { readFile } from "fs/promises";
+
+const app = express();`,
+    fixedExample: `// Option 1: Add to package.json
+// { "type": "module" }
+
+// Option 2: Rename the file to .mjs
+// myfile.mjs
+
+// Option 3: Use CommonJS require instead
+const express = require("express");
+const { readFile } = require("fs/promises");
+
+const app = express();`,
+    commonCauses: [
+      'Missing "type": "module" in package.json when using import syntax',
+      "A .js file using import/export when the project expects CommonJS",
+      "Running a browser-style ES module file directly in Node.js",
+      "A build tool not transpiling import statements before the file reaches Node.js",
+      "Mixing require() and import in the same file",
+    ],
+    primaryCtaCopy: "Paste your JavaScript and find module errors instantly",
+    secondaryCtaLabel: "See more JavaScript errors",
+    secondaryCtaHref: "/fix/referenceerror-not-defined-javascript",
+    searchIntent: "error-fix",
+  },
+  {
+    title: "How to fix: Unclosed string literal in JavaScript",
+    slug: "javascript-unclosed-string-literal",
+    language: "JavaScript",
+    summary:
+      "An unclosed string literal means a string was opened with a quote but never closed. JavaScript reads everything after it as part of the string — including the rest of your code — until it reaches the end of the line and throws a SyntaxError.",
+    whyItHappens:
+      "Strings in JavaScript must open and close with matching quote characters — single, double, or backtick. If the closing quote is missing, forgotten, or mismatched (opening with one type, closing with another), the parser never sees the end of the string. Everything on that line after the opening quote is consumed — including other code — and the error is thrown at the end of the line or when the parser encounters something completely invalid.",
+    brokenExample: `const message = "Hello, world;
+const name = "Alice";
+
+const greeting = \`Welcome back, \${name};`,
+    fixedExample: `const message = "Hello, world";
+const name = "Alice";
+
+const greeting = \`Welcome back, \${name}\`;`,
+    commonCauses: [
+      "Forgetting the closing quote at the end of a string",
+      "Using a different quote type to close than to open",
+      "An apostrophe inside a single-quoted string without escaping it",
+      "A template literal with a missing closing backtick",
+      "Copy-pasting code that used smart quotes instead of straight quotes",
+    ],
+    primaryCtaCopy: "Paste your code and find unclosed strings instantly",
+    secondaryCtaLabel: "See more JavaScript errors",
+    secondaryCtaHref: "/fix/unexpected-token-javascript",
+    searchIntent: "error-fix",
+  },
+  {
+    title: "How to fix: Expected assignment or function call — no-unused-expressions",
+    slug: "javascript-no-unused-expressions",
+    language: "JavaScript",
+    summary:
+      "This warning means a line of code evaluates an expression but does nothing with the result. The most common cause is calling a comparison when an assignment was intended, or writing a ternary without assigning its result.",
+    whyItHappens:
+      "JavaScript evaluates expressions for their side effects or their return value. A standalone expression that produces a value nobody reads is almost always a mistake — either an assignment using = was accidentally written as a comparison ==, or a function call result was evaluated but never stored or returned. Linters flag this because it indicates the code does less than the developer intended.",
+    brokenExample: `let count = 0;
+
+count == 1; // comparison result discarded — should be count = 1
+
+const label = count > 0 ? "items" : "no items"; // unused ternary result`,
+    fixedExample: `let count = 0;
+
+count = 1; // assignment
+
+const label = count > 0 ? "items" : "no items";
+console.log(label); // result is used`,
+    commonCauses: [
+      "Using == (comparison) when = (assignment) was intended",
+      "A ternary expression whose result is never assigned or returned",
+      "A string literal on its own line — often a misplaced JSDoc comment",
+      "A function call whose return value was intended to be stored",
+      "A semicolon that accidentally terminated a statement too early",
+    ],
+    primaryCtaCopy: "Paste your code and catch expression warnings",
+    secondaryCtaLabel: "See more JavaScript errors",
+    secondaryCtaHref: "/fix/unexpected-token-javascript",
+    searchIntent: "error-fix",
+  },
+  {
+    title: "How to fix: var is function-scoped — use let or const instead",
+    slug: "javascript-var-use-let-const",
+    language: "JavaScript",
+    summary:
+      "var has function scope, not block scope — it leaks out of if blocks, loops, and any block that isn't a function. This causes bugs where variables are accessible and modifiable in places you didn't intend. Use let for variables that change, const for everything else.",
+    whyItHappens:
+      "var was JavaScript's only variable declaration for the first 20 years. It has two problems: it is function-scoped (not block-scoped), and it is hoisted to the top of its function with the value undefined. A var declared inside a for loop is accessible outside it. A var declared inside an if block is accessible outside it. This produces subtle bugs when code is refactored or extended. let and const were introduced in ES6 to fix this — they are block-scoped and not hoisted in the same way.",
+    brokenExample: `for (var i = 0; i < 3; i++) {
+  setTimeout(function() {
+    console.log(i); // prints 3, 3, 3 — not 0, 1, 2
+  }, 100);
+}
+
+if (true) {
+  var message = "hello";
+}
+console.log(message); // "hello" — leaks out of the if block`,
+    fixedExample: `for (let i = 0; i < 3; i++) {
+  setTimeout(function() {
+    console.log(i); // prints 0, 1, 2 — correct
+  }, 100);
+}
+
+if (true) {
+  const message = "hello";
+}
+// message is not accessible here — block-scoped`,
+    commonCauses: [
+      "Declaring loop counters with var instead of let",
+      "Declaring variables inside if blocks with var — they escape the block",
+      "Legacy code written before ES6 that was never updated",
+      "Using var in a module where let/const is the expected convention",
+      "Hoisting confusion — var declarations are moved to the top of their function silently",
+    ],
+    primaryCtaCopy: "Paste your JavaScript and catch var usage",
+    secondaryCtaLabel: "See more JavaScript errors",
+    secondaryCtaHref: "/fix/unexpected-token-javascript",
+    searchIntent: "syntax-explanation",
+  },
+  {
+    title: "How to fix: ModuleNotFoundError in Python",
+    slug: "python-modulenotfounderror",
+    language: "Python",
+    summary:
+      "A Python ModuleNotFoundError means you tried to import a package that isn't installed in your current environment. Either it needs to be installed with pip, or the import name is wrong.",
+    whyItHappens:
+      "Python's import system looks for modules in the current directory, then in installed packages, then in the standard library. If a module isn't found in any of these locations, Python raises ModuleNotFoundError. The most common cause is trying to use a third-party package that hasn't been installed yet, or running a script in the wrong virtual environment where the package isn't present.",
+    brokenExample: `import requests
+
+response = requests.get("https://api.example.com/data")
+print(response.json())`,
+    fixedExample: `# First install the package in your terminal:
+# pip install requests
+
+import requests
+
+response = requests.get("https://api.example.com/data")
+print(response.json())`,
+    commonCauses: [
+      "The package is not installed — run pip install <package-name>",
+      "Running the script in the wrong virtual environment where the package isn't present",
+      "A typo in the import name — package names are case-sensitive",
+      "The package was installed globally but the script runs in a virtualenv",
+      "A package that was renamed — e.g. PIL is installed as Pillow but imported as PIL",
+    ],
+    primaryCtaCopy: "Paste your Python and check for import errors",
+    secondaryCtaLabel: "See more Python errors",
+    secondaryCtaHref: "/fix/python-nameerror-not-defined",
+    searchIntent: "error-fix",
+  },
+  {
+    title: "How to fix: Deprecated HTML element warning",
+    slug: "html-deprecated-element",
+    language: "HTML",
+    summary:
+      "A deprecated HTML element is one that was removed from the HTML specification. Browsers may still render it, but it can break at any time, fails accessibility standards, and causes validation errors. Replace it with its modern equivalent.",
+    whyItHappens:
+      "HTML evolves and elements get replaced when better alternatives exist. Elements like <center>, <font>, <marquee>, and <b> (for bold without meaning) were part of early HTML when styling was done in markup rather than CSS. The HTML5 specification removed them in favour of CSS for visual styling and semantic elements for meaning. Using them today produces validator warnings and risks inconsistent rendering.",
+    brokenExample: `<center>
+  <font size="5" color="red">Welcome</font>
+</center>
+
+<b>Important notice</b>
+<i>Additional detail</i>`,
+    fixedExample: `<div style="text-align: center;">
+  <span style="font-size: 1.5rem; color: red;">Welcome</span>
+</div>
+
+<!-- Use strong for importance, em for emphasis -->
+<strong>Important notice</strong>
+<em>Additional detail</em>`,
+    commonCauses: [
+      "Using <center> instead of CSS text-align or flexbox/grid centering",
+      "Using <font> for text styling instead of CSS",
+      "Using <b> and <i> for visual style instead of <strong> and <em> for meaning",
+      "Legacy HTML copied from old tutorials or documentation",
+      "A CMS or template generator that still outputs outdated markup",
+    ],
+    primaryCtaCopy: "Paste your HTML and find deprecated elements",
+    secondaryCtaLabel: "See more HTML errors",
+    secondaryCtaHref: "/fix/html-unclosed-tag",
+    searchIntent: "error-fix",
+  },
+  {
+    title: "How to fix: RangeError — invalid array length in JavaScript",
+    slug: "javascript-rangeerror-invalid-array-length",
+    language: "JavaScript",
+    summary:
+      "A RangeError with 'invalid array length' means you tried to create an array with a negative size, a non-integer size, or a size larger than JavaScript allows. It almost always comes from a variable containing an unexpected value.",
+    whyItHappens:
+      "JavaScript arrays can only have lengths that are non-negative integers up to 2^32 - 1. If you pass new Array(n) where n is negative, a decimal, NaN, or Infinity — or if n comes from a calculation that produced an unexpected result — JavaScript throws this RangeError. The most common cause is a variable that was supposed to hold a count but ended up as undefined or NaN because a data source returned nothing.",
+    brokenExample: `const count = undefined;
+const items = new Array(count); // RangeError — undefined is not a valid length
+
+const size = -5;
+const buffer = new Array(size); // RangeError — negative length`,
+    fixedExample: `const count = undefined;
+const safeCount = Number.isInteger(count) && count >= 0 ? count : 0;
+const items = new Array(safeCount);
+
+const size = 5;
+const buffer = new Array(size);`,
+    commonCauses: [
+      "Passing undefined or NaN to new Array() because a data source returned nothing",
+      "A negative number from a calculation gone wrong",
+      "A decimal value where an integer was expected",
+      "A very large number that exceeds the maximum array length",
+      "Using the result of parseInt() on a non-numeric string — which returns NaN",
+    ],
+    primaryCtaCopy: "Paste your JavaScript and catch RangeErrors",
+    secondaryCtaLabel: "See more JavaScript errors",
+    secondaryCtaHref: "/fix/unexpected-token-javascript",
+    searchIntent: "error-fix",
+  },
+  {
+    title: "How to fix: Python ValueError",
+    slug: "python-valueerror",
+    language: "Python",
+    summary:
+      "A Python ValueError means a function received an argument of the right type but an inappropriate value. The most common examples are converting a non-numeric string to int, or unpacking the wrong number of values.",
+    whyItHappens:
+      "Python raises ValueError when a built-in function or operation gets a value that is structurally correct but semantically wrong. int('hello') fails not because 'hello' is the wrong type (it's a string, which is correct) but because its value can't be represented as an integer. Similarly, trying to unpack 3 values into 2 variables raises ValueError because the counts don't match.",
+    brokenExample: `age = int("twenty")
+
+# or
+
+a, b = [1, 2, 3]`,
+    fixedExample: `try:
+    age = int(input("Enter your age: "))
+except ValueError:
+    print("Please enter a number")
+    age = 0
+
+# or
+
+a, b, c = [1, 2, 3]  # match the number of variables to the list length`,
+    commonCauses: [
+      "Calling int() or float() on a string that isn't a valid number",
+      "Unpacking a list or tuple into the wrong number of variables",
+      "Passing an empty string to a conversion function",
+      "math.sqrt() or similar called with a negative value",
+      "A function parameter that rejects certain values even of the correct type",
+    ],
+    primaryCtaCopy: "Paste your Python and find ValueErrors before they crash",
+    secondaryCtaLabel: "See more Python errors",
+    secondaryCtaHref: "/fix/python-typeerror",
+    searchIntent: "error-fix",
+  },
+  {
+    title: "How to fix: document is not defined in JavaScript",
+    slug: "javascript-document-is-not-defined",
+    language: "JavaScript",
+    summary:
+      "This ReferenceError means your code referenced the document object in an environment where it doesn't exist — most commonly Node.js, a server-side renderer, or a build/test environment that isn't the browser.",
+    whyItHappens:
+      "document is a browser global — it represents the DOM. It only exists in browser environments. Node.js, server-side rendering frameworks, and some testing environments don't have a DOM, so document is simply not defined. Code that accesses document at the top level of a module will throw immediately in these environments. The fix is either to guard the access with an environment check, or to move the DOM code into a function that only runs in the browser.",
+    brokenExample: `// This runs in Node.js or SSR — document doesn't exist here
+const button = document.getElementById("submit-btn");
+button.addEventListener("click", handleClick);`,
+    fixedExample: `// Guard with an environment check
+if (typeof document !== "undefined") {
+  const button = document.getElementById("submit-btn");
+  button.addEventListener("click", handleClick);
+}
+
+// Or in a framework, run DOM code inside useEffect (React) or onMounted (Vue)`,
+    commonCauses: [
+      "Running browser code in Node.js — document only exists in the browser",
+      "A Next.js or Nuxt.js page accessing the DOM at module level instead of inside a lifecycle hook",
+      "A test runner (Jest, Vitest) without jsdom configured",
+      "A build script that imports a browser module as a side effect",
+      "An SSR framework rendering a component server-side where no DOM exists",
+    ],
+    primaryCtaCopy: "Paste your JavaScript and find environment errors",
+    secondaryCtaLabel: "See more JavaScript errors",
+    secondaryCtaHref: "/fix/referenceerror-not-defined-javascript",
+    searchIntent: "error-fix",
+  },
+  {
+    title: "How to fix: window is not defined in JavaScript",
+    slug: "javascript-window-is-not-defined",
+    language: "JavaScript",
+    summary:
+      "This ReferenceError means your code accessed the window object outside the browser — most commonly in Node.js, a server-side renderer, or a test environment. window is a browser-only global and does not exist in these environments.",
+    whyItHappens:
+      "window is the global object in browsers. It holds browser APIs like localStorage, location, and history. In Node.js and server-side rendering environments, there is no window — so any code that references it at module level throws immediately. The pattern is the same as document is not defined: the fix is to guard the access or move it into a browser-only lifecycle hook.",
+    brokenExample: `// Runs in Node.js or SSR — window doesn't exist
+const width = window.innerWidth;
+const token = window.localStorage.getItem("auth_token");`,
+    fixedExample: `// Guard with environment check
+if (typeof window !== "undefined") {
+  const width = window.innerWidth;
+  const token = window.localStorage.getItem("auth_token");
+}
+
+// In React — use inside useEffect, which only runs in the browser
+useEffect(() => {
+  const width = window.innerWidth;
+}, []);`,
+    commonCauses: [
+      "Accessing window at module level in a Next.js or Nuxt.js component",
+      "Using localStorage or sessionStorage in a server-side rendered page",
+      "A Jest or Vitest test environment without jsdom configured",
+      "A utility function that reads window.location being imported in a Node.js script",
+      "A browser-only library imported at the top of a file that runs server-side",
+    ],
+    primaryCtaCopy: "Paste your JavaScript and catch environment errors",
+    secondaryCtaLabel: "See more JavaScript errors",
+    secondaryCtaHref: "/fix/javascript-document-is-not-defined",
+    searchIntent: "error-fix",
+  },
+  {
+    title: "How to fix: Unexpected token < in JSON at position 0",
+    slug: "javascript-unexpected-token-in-json",
+    language: "JavaScript",
+    summary:
+      "This error means JSON.parse() received HTML instead of JSON. The server returned an error page, a redirect, or a HTML response and your code tried to parse it as JSON. The problem is server-side, not in your JavaScript.",
+    whyItHappens:
+      "When a server returns a 404, 500, or redirect, the response body is usually an HTML page — not JSON. If your code blindly calls response.json() or JSON.parse() on that response, it hits the opening < of the HTML doctype and throws immediately. The fix is to check response.ok before parsing, so you catch server errors before they become confusing client-side errors.",
+    brokenExample: `async function getData() {
+  const response = await fetch("/api/users");
+  const data = await response.json(); // throws if server returned HTML error page
+  return data;
+}`,
+    fixedExample: `async function getData() {
+  const response = await fetch("/api/users");
+
+  if (!response.ok) {
+    throw new Error("Server error: " + response.status);
+  }
+
+  const data = await response.json();
+  return data;
+}`,
+    commonCauses: [
+      "The API endpoint returned a 404 or 500 HTML error page instead of JSON",
+      "A server-side redirect returning a HTML page before the API route is reached",
+      "A proxy or CDN intercepting the request and returning its own HTML error page",
+      "The API URL is wrong — the server is returning the site's 404 page",
+      "response.ok not checked — the error was already signalled but ignored",
+    ],
+    primaryCtaCopy: "Paste your JavaScript and find JSON parsing errors",
+    secondaryCtaLabel: "See more JavaScript errors",
+    secondaryCtaHref: "/fix/unexpected-end-of-json-input",
+    searchIntent: "error-fix",
+  },
+  {
+    title: "How to fix: TypeError — map is not a function in JavaScript",
+    slug: "javascript-map-is-not-a-function",
+    language: "JavaScript",
+    summary:
+      ".map() is an array method. This error means the value you called it on is not an array — it is undefined, null, an object, or a string. The fix is to confirm you have an array before calling .map().",
+    whyItHappens:
+      "JavaScript's .map() method only exists on arrays. If the value is undefined (because an API hasn't responded yet), null, a plain object, or any non-array type, calling .map() throws a TypeError. This is extremely common in React when rendering data fetched from an API — the component renders before the data arrives, and the initial state is undefined or an empty object rather than an empty array.",
+    brokenExample: `// API returns { users: [...] } but code treats the whole response as an array
+const response = await fetch("/api/users");
+const data = await response.json();
+const names = data.map(user => user.name); // data is an object, not an array
+
+// or in React before data loads
+const [users, setUsers] = useState(null);
+return users.map(u => <div>{u.name}</div>); // null has no .map()`,
+    fixedExample: `const response = await fetch("/api/users");
+const data = await response.json();
+const names = data.users.map(user => user.name); // access the array property
+
+// or in React — initialise as empty array, not null
+const [users, setUsers] = useState([]);
+return users.map(u => <div key={u.id}>{u.name}</div>);`,
+    commonCauses: [
+      "The API returns an object with a nested array — you need to access the property first",
+      "Initial state set to null instead of [] — .map() is called before data loads",
+      "A fetch response that returned an error object instead of the expected array",
+      "Calling .map() on a string or number by mistake",
+      "A function that sometimes returns an array and sometimes returns undefined",
+    ],
+    primaryCtaCopy: "Paste your code and find type errors instantly",
+    secondaryCtaLabel: "See more JavaScript errors",
+    secondaryCtaHref: "/fix/cannot-read-properties-of-undefined",
+    searchIntent: "error-fix",
+  },
+  {
+    title: "How to fix: Infinite loop in JavaScript",
+    slug: "javascript-infinite-loop",
+    language: "JavaScript",
+    summary:
+      "An infinite loop runs forever because the exit condition is never met. It freezes the browser tab or crashes the Node.js process. The fix is always to ensure the loop condition will eventually become false.",
+    whyItHappens:
+      "Loops run until their condition evaluates to false. If the condition never becomes false — because the variable controlling it is never updated, or the update moves in the wrong direction — the loop never exits. In browsers this freezes the main thread and makes the tab unresponsive. In Node.js it pegs the CPU until the process is killed.",
+    brokenExample: `// Condition never becomes false — i is never incremented
+let i = 0;
+while (i < 10) {
+  console.log(i);
+}
+
+// or — wrong direction
+let count = 10;
+while (count > 0) {
+  count++;
+}`,
+    fixedExample: `let i = 0;
+while (i < 10) {
+  console.log(i);
+  i++; // increment the counter so the condition eventually becomes false
+}
+
+let count = 10;
+while (count > 0) {
+  count--; // decrement toward the exit condition
+}`,
+    commonCauses: [
+      "Forgetting to increment or decrement the loop variable",
+      "Updating the variable in the wrong direction — moving away from the exit condition",
+      "A break statement inside an if block that is never reached",
+      "Mutating an array while iterating over it — the length grows as fast as the index",
+      "A while(true) loop with a return or break that is never triggered",
+    ],
+    primaryCtaCopy: "Paste your code and find loop logic errors",
+    secondaryCtaLabel: "See more JavaScript errors",
+    secondaryCtaHref: "/fix/maximum-call-stack-size-exceeded-javascript",
+    searchIntent: "debug-help",
+  },
+  {
+    title: "How to fix: Python RecursionError — maximum recursion depth exceeded",
+    slug: "python-recursionerror-maximum-depth-exceeded",
+    language: "Python",
+    summary:
+      "Python's RecursionError means a function kept calling itself without stopping. Python has a default recursion limit of 1000 calls. The fix is to add a base case that ends the recursion, not to raise the limit.",
+    whyItHappens:
+      "Every function call in Python uses a stack frame. Python sets a hard limit on how deep the call stack can go — 1000 by default. If a recursive function has no base case, or the base case is never reached, Python hits this limit and raises RecursionError. Raising the limit with sys.setrecursionlimit() is almost never the right fix — a missing or unreachable base case is the real problem.",
+    brokenExample: `def factorial(n):
+    return n * factorial(n - 1)  # no base case — calls forever
+
+print(factorial(5))`,
+    fixedExample: `def factorial(n):
+    if n <= 1:          # base case — stops the recursion
+        return 1
+    return n * factorial(n - 1)
+
+print(factorial(5))`,
+    commonCauses: [
+      "A recursive function with no base case — it will always call itself",
+      "A base case that is unreachable because the condition is wrong",
+      "Two functions calling each other with no exit path",
+      "Accidentally calling a function from inside itself when it wasn't intended to be recursive",
+      "Processing a deeply nested data structure without an iterative alternative",
+    ],
+    primaryCtaCopy: "Paste your Python and find recursion errors",
+    secondaryCtaLabel: "See more Python errors",
+    secondaryCtaHref: "/fix/python-typeerror",
+    searchIntent: "error-fix",
+  },
+  {
+    title: "How to fix: Cannot find module in Node.js",
+    slug: "nodejs-cannot-find-module",
+    language: "JavaScript",
+    summary:
+      "This error means Node.js could not locate the file or package you tried to require or import. Either the path is wrong, the package isn't installed, or the file doesn't exist at that location.",
+    whyItHappens:
+      "Node.js resolves module paths in a specific order: built-in modules first, then node_modules for bare specifiers, then relative file paths. If none of these resolve to a real file, Node.js throws this error. The most common causes are a typo in the path, a missing npm install, or a file that was moved or renamed without updating the import.",
+    brokenExample: `// Wrong relative path
+const utils = require("./utls"); // typo — should be ./utils
+
+// Package not installed
+const axios = require("axios"); // axios not in node_modules`,
+    fixedExample: `// Correct relative path
+const utils = require("./utils");
+
+// Install the package first, then import
+// npm install axios
+const axios = require("axios");`,
+    commonCauses: [
+      "A typo in the file path — Node.js paths are case-sensitive on Linux and macOS",
+      "The package is not installed — run npm install",
+      "A relative path that points to the wrong directory",
+      "The file was moved or renamed but the import wasn't updated",
+      "Missing .js extension in environments that require explicit extensions",
+    ],
+    primaryCtaCopy: "Paste your JavaScript and catch module errors",
+    secondaryCtaLabel: "See more JavaScript errors",
+    secondaryCtaHref: "/fix/cannot-use-import-statement-outside-module",
+    searchIntent: "error-fix",
+  },
+  {
+    title: "How to fix: Duplicate ID in HTML",
+    slug: "html-duplicate-id",
+    language: "HTML",
+    summary:
+      "An HTML id must be unique across the entire page. Using the same id on more than one element breaks JavaScript DOM queries, CSS selectors, and accessibility tools — only the first match is ever used.",
+    whyItHappens:
+      "The HTML specification requires every id to appear exactly once per document. Browsers do not enforce this as an error — they silently use the first matching element — but the behaviour is unpredictable and inconsistent across browsers. document.getElementById() returns only the first match. CSS styles only apply to the first match in some browsers. Screen readers and assistive technologies rely on unique IDs for label associations and landmark navigation.",
+    brokenExample: `<div id="header">Main header</div>
+
+<!-- Later in the same page -->
+<div id="header">Secondary header</div>
+
+<label for="name">Name</label>
+<input id="name" type="text">
+
+<!-- Another form further down the page -->
+<label for="name">Email</label>
+<input id="name" type="email">`,
+    fixedExample: `<div id="main-header">Main header</div>
+<div id="secondary-header">Secondary header</div>
+
+<label for="contact-name">Name</label>
+<input id="contact-name" type="text">
+
+<label for="contact-email">Email</label>
+<input id="contact-email" type="email">`,
+    commonCauses: [
+      "Copy-pasting a block of HTML without updating the id values",
+      "A component or partial rendered multiple times on the same page",
+      "A template that hardcodes IDs instead of generating unique ones",
+      "Form elements reused in modals and inline — same IDs appearing twice",
+      "A CMS injecting content blocks with fixed IDs",
+    ],
+    primaryCtaCopy: "Paste your HTML and find duplicate IDs instantly",
+    secondaryCtaLabel: "See more HTML errors",
+    secondaryCtaHref: "/fix/html-unclosed-tag",
+    searchIntent: "error-fix",
+  },
+  {
+    title: "How to fix: console.log showing undefined in JavaScript",
+    slug: "javascript-console-log-undefined",
+    language: "JavaScript",
+    summary:
+      "When console.log prints undefined, the variable exists but has no value. The most common causes are a missing return statement, async data used before it has loaded, or a function parameter that was never passed.",
+    whyItHappens:
+      "undefined in JavaScript means a variable was declared but never assigned a value. It is also the implicit return value of any function that doesn't explicitly return something. When you see it in console.log, it almost always means either the function that was supposed to produce a value didn't return it, an async operation hasn't finished yet, or a property path contains a key that doesn't exist.",
+    brokenExample: `function getFullName(user) {
+  const full = user.firstName + " " + user.lastName;
+  // missing return — function implicitly returns undefined
+}
+
+const name = getFullName({ firstName: "Alice", lastName: "Smith" });
+console.log(name); // undefined`,
+    fixedExample: `function getFullName(user) {
+  const full = user.firstName + " " + user.lastName;
+  return full; // explicit return
+}
+
+const name = getFullName({ firstName: "Alice", lastName: "Smith" });
+console.log(name); // "Alice Smith"`,
+    commonCauses: [
+      "A function that transforms a value but forgets to return it",
+      "An async function logged before it has resolved — the Promise object is not the value",
+      "A property access on an object where that key doesn't exist",
+      "A function parameter not passed when the function is called",
+      "Array destructuring where the index doesn't exist in the array",
+    ],
+    primaryCtaCopy: "Paste your code and find undefined value sources",
+    secondaryCtaLabel: "See more JavaScript errors",
+    secondaryCtaHref: "/fix/cannot-read-properties-of-undefined",
+    searchIntent: "debug-help",
+  },
+  {
+    title: "How to fix: Python FileNotFoundError",
+    slug: "python-filenotfounderror",
+    language: "Python",
+    summary:
+      "A Python FileNotFoundError means the file path you provided does not exist at that location. The path is wrong, the file is in a different directory, or the file hasn't been created yet.",
+    whyItHappens:
+      "Python resolves file paths relative to the current working directory — which is wherever you ran the script from, not where the script file is stored. If you run a script from your home directory but the file is in a subdirectory, a path like 'data.csv' won't find it. Absolute paths avoid this entirely. The error is always about the path being wrong or the file being absent — Python is telling you exactly where it looked and found nothing.",
+    brokenExample: `# File is at /project/data/users.csv
+# Script is run from /project/
+
+with open("users.csv") as f:  # wrong path — data/ prefix missing
+    content = f.read()`,
+    fixedExample: `# Option 1: correct relative path
+with open("data/users.csv") as f:
+    content = f.read()
+
+# Option 2: path relative to the script file (more reliable)
+import os
+script_dir = os.path.dirname(__file__)
+file_path = os.path.join(script_dir, "data", "users.csv")
+
+with open(file_path) as f:
+    content = f.read()`,
+    commonCauses: [
+      "Running the script from a different directory than expected — the path is relative to cwd, not the script",
+      "A typo in the filename or directory name — paths are case-sensitive on Linux and macOS",
+      "The file hasn't been created yet and the code assumes it already exists",
+      "A trailing slash or forward/backslash mismatch on Windows",
+      "Using a relative path when an absolute path is required",
+    ],
+    primaryCtaCopy: "Paste your Python and check for file path errors",
+    secondaryCtaLabel: "See more Python errors",
+    secondaryCtaHref: "/fix/python-nameerror-not-defined",
+    searchIntent: "error-fix",
+  },
+  {
+    title: "How to fix: HTML form not submitting",
+    slug: "html-form-not-submitting",
+    language: "HTML",
+    summary:
+      "When an HTML form doesn't submit, the most common causes are a missing or incorrect action attribute, a button type that isn't submit, JavaScript preventing the default behaviour, or a required field failing validation silently.",
+    whyItHappens:
+      "HTML form submission depends on several things aligning: the form must have a valid action (or rely on a JavaScript handler), the button must be type='submit' or the Enter key must be pressed inside a text field, and no script must be calling event.preventDefault() without also handling the submission. Browser-native validation can also silently block a submit if a required field is empty or an input type constraint fails.",
+    brokenExample: `<!-- Button type not set — defaults to submit only inside a form, but... -->
+<form>
+  <input type="text" name="username" required>
+  <!-- This button type="button" does NOT submit the form -->
+  <button type="button">Submit</button>
+</form>`,
+    fixedExample: `<form action="/submit" method="POST">
+  <input type="text" name="username" required>
+  <!-- type="submit" triggers form submission -->
+  <button type="submit">Submit</button>
+</form>`,
+    commonCauses: [
+      "Button has type='button' — this explicitly prevents form submission",
+      "Missing action attribute with no JavaScript handler to intercept the submit event",
+      "JavaScript calling event.preventDefault() without handling the form data",
+      "A required input that is empty — browser validation blocks submit silently on some configs",
+      "The button is outside the form element — it has no connection to the form",
+    ],
+    primaryCtaCopy: "Paste your HTML and find form structure errors",
+    secondaryCtaLabel: "See more HTML errors",
+    secondaryCtaHref: "/fix/html-unclosed-tag",
+    searchIntent: "debug-help",
+  },
+  {
+    title: "How to fix: Credentials detected in source code",
+    slug: "javascript-credentials-in-source-code",
+    language: "JavaScript",
+    summary:
+      "Hardcoded API keys, passwords, and tokens in source code are a critical security risk. Anyone who can read the file — including anyone with access to your public repository — can use those credentials. Move them to environment variables immediately.",
+    whyItHappens:
+      "During development it is tempting to paste credentials directly into code to get something working quickly. The problem is that source code gets committed to version control, shared with collaborators, and sometimes made public. Once a secret is in Git history, it is compromised even if you delete it later — the history is permanent. Services like GitHub actively scan for committed secrets and will notify the issuing provider, who may revoke the key automatically.",
+    brokenExample: `const stripe = require("stripe")("sk_live_abc123realkey");
+
+const client = new OpenAI({
+  apiKey: "sk-proj-xyz789realkey"
+});
+
+const db = mysql.createConnection({
+  password: "MyDatabasePassword123"
+});`,
+    fixedExample: `// Store secrets in environment variables — never in source code
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
+
+const db = mysql.createConnection({
+  password: process.env.DB_PASSWORD
+});
+
+// Add a .env file for local development (never commit this file)
+// Add .env to your .gitignore`,
+    commonCauses: [
+      "Pasting an API key directly into code to test quickly — then committing it",
+      "Copying example code that included a placeholder key and replacing it with a real one",
+      "A .env file committed to version control instead of listed in .gitignore",
+      "Credentials stored in a config file that isn't excluded from the repository",
+      "Secrets included in client-side JavaScript where they are visible to all users",
+    ],
+    primaryCtaCopy: "Paste your code and detect exposed credentials",
+    secondaryCtaLabel: "See more JavaScript errors",
+    secondaryCtaHref: "/fix/unexpected-token-javascript",
+    searchIntent: "error-fix",
+  },
+  {
+    title: "How to fix: Missing semicolon warning in JavaScript",
+    slug: "javascript-missing-semicolon",
+    language: "JavaScript",
+    summary:
+      "JavaScript uses Automatic Semicolon Insertion (ASI) to add semicolons in most cases — but not all. Relying on ASI produces unpredictable bugs in specific edge cases. Adding explicit semicolons removes the ambiguity entirely.",
+    whyItHappens:
+      "JavaScript's ASI rules insert a semicolon at the end of a line in most situations, but there are well-known failure cases: lines starting with (, [, or / are not automatically terminated. This means a line ending with a value immediately followed by a line starting with ( will be read as a function call — a silent, hard-to-debug behaviour. Linters flag missing semicolons to protect against these cases.",
+    brokenExample: `const a = 1
+const b = 2
+const c = a + b
+
+// ASI failure case — this is parsed as: const fn = a(b)
+const fn = a
+(b)`,
+    fixedExample: `const a = 1;
+const b = 2;
+const c = a + b;
+
+const fn = a;
+(b);`,
+    commonCauses: [
+      "Omitting semicolons and relying on ASI — safe most of the time but not always",
+      "A line ending with a value followed by a line starting with ( — parsed as a function call",
+      "A line ending with a value followed by a line starting with [ — parsed as property access",
+      "Inconsistent style in a codebase that enforces semicolons via a linter",
+      "Copy-pasting code from a no-semicolon style project into a semicolon-required project",
+    ],
+    primaryCtaCopy: "Paste your JavaScript and catch semicolon warnings",
+    secondaryCtaLabel: "See more JavaScript errors",
+    secondaryCtaHref: "/fix/unexpected-token-javascript",
+    searchIntent: "syntax-explanation",
+  },
+  {
+    title: "How to fix: Python ZeroDivisionError",
+    slug: "python-zerodivisionerror",
+    language: "Python",
+    summary:
+      "A ZeroDivisionError means your code attempted to divide a number by zero. Python raises this immediately rather than returning infinity or NaN. The fix is to check the divisor before dividing.",
+    whyItHappens:
+      "Division by zero is mathematically undefined. Python raises ZeroDivisionError rather than silently returning a special value like infinity. This is intentional — silent division by zero produces incorrect results that are hard to trace. The error almost always means a variable that was expected to hold a non-zero value is zero — either because of a calculation that went wrong, an empty list, or user input that wasn't validated.",
+    brokenExample: `def average(numbers):
+    return sum(numbers) / len(numbers)
+
+print(average([]))  # len([]) is 0 — ZeroDivisionError`,
+    fixedExample: `def average(numbers):
+    if not numbers:
+        return 0  # or return None, depending on what makes sense
+    return sum(numbers) / len(numbers)
+
+print(average([]))  # returns 0 safely`,
+    commonCauses: [
+      "Dividing by a variable that is zero because a list or result is empty",
+      "A percentage or rate calculation where the total is zero",
+      "User input that wasn't validated — the user entered 0 or nothing",
+      "An integer division operator // used with a zero divisor",
+      "A modulo operation (%) with zero on the right side",
+    ],
+    primaryCtaCopy: "Paste your Python and find division errors",
+    secondaryCtaLabel: "See more Python errors",
+    secondaryCtaHref: "/fix/python-valueerror",
+    searchIntent: "error-fix",
+  },
 ];
