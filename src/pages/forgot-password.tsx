@@ -23,7 +23,7 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center px-4" style={{ background: "hsl(220 8% 9%)" }}>background: "hsl(222 16% 14%)",
+    <div className="min-h-screen w-full flex items-center justify-center px-4" style={{ background: "hsl(220 8% 9%)" }}>
       <NavMenu />
       <div className="w-full max-w-sm flex flex-col gap-5">
         <div className="text-center">
