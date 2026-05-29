@@ -1,7 +1,8 @@
+import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import Landing from "@/pages/landing";
-import Home from "@/pages/home";
 import About from "@/pages/about";
+const Home = lazy(() => import("@/pages/home"));
 import Success from "@/pages/success";
 import Shared from "@/pages/shared";
 import Login from "@/pages/login";
@@ -19,7 +20,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Landing} />
-      <Route path="/check" component={Home} />
+      <Route path="/check">{() => <Suspense fallback={<div style={{ background: "hsl(220 8% 9%)", minHeight: "100vh" }} />}><Home /></Suspense>}</Route>
       <Route path="/about" component={About} />
       <Route path="/success" component={Success} />
       <Route path="/s/:id" component={Shared} />

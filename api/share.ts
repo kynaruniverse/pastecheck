@@ -9,7 +9,7 @@ const supabase = createClient(
 const shareAttempts = new Map<string, { count: number; resetAt: number }>();
 
 function generateShareId(): string {
-  return Math.random().toString(36).slice(2, 9);
+  return require("crypto").randomBytes(10).toString("hex");
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

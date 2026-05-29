@@ -72,6 +72,7 @@ export default async function handler(req: any, res: any) {
     }
 
     if (updateError) {
+      console.error("[stripe-webhook] Failed to update is_pro on checkout.session.completed:", updateError);
       return res.status(500).json({ error: "Failed to update user pro status" });
     }
   }
@@ -98,6 +99,7 @@ export default async function handler(req: any, res: any) {
       .eq("email", email);
 
     if (error) {
+      console.error("[stripe-webhook] Failed to revoke is_pro on customer.subscription.deleted:", error);
       return res.status(500).json({ error: "Failed to revoke pro status on cancellation" });
     }
   }
@@ -123,6 +125,7 @@ export default async function handler(req: any, res: any) {
       .eq("email", email);
 
     if (error) {
+      console.error("[stripe-webhook] Failed to revoke is_pro on invoice.payment_failed:", error);
       return res.status(500).json({ error: "Failed to revoke pro status on payment failure" });
     }
   }
