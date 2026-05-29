@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { toast, Toaster } from "sonner";
 import NavMenu from "@/components/NavMenu";
@@ -613,8 +613,8 @@ export default function Home() {
     syncPro();
   }, []);
 
-  const errorCount = result?.lines.filter((l) => l.type === "error").length ?? 0;
-  const warningCount = result?.lines.filter((l) => l.type === "warning").length ?? 0;
+  const errorCount = useMemo(() => result?.lines.filter((l) => l.type === "error").length ?? 0, [result]);
+  const warningCount = useMemo(() => result?.lines.filter((l) => l.type === "warning").length ?? 0, [result]);
   const isLowConfidence = code.trim().split("\n").filter((l) => l.trim().length > 0).length < 5;
   const totalChecks = history.length;
   const showRateSignal = !isPro && totalChecks >= 5;
