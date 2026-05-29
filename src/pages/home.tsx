@@ -739,7 +739,7 @@ export default function Home() {
       });
       const data = await res.json();
       if (data.id) {
-        const url = `https://www.pastecheck.co.uk/s/${data.id}`;
+        const url = `${import.meta.env.VITE_APP_URL}/s/${data.id}`;
         setShareUrl(url);
         try {
           await navigator.clipboard.writeText(url);
@@ -841,7 +841,7 @@ export default function Home() {
               type="button"
               onClick={handleReset}
               className="w-full rounded-xl py-2.5 text-sm font-semibold tracking-wide transition-all duration-150 active:scale-[0.98]"
-              style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)", border: "none", cursor: "pointer" }}
+              style={{ background: "hsl(262 83% 75%)", color: "hsl", border: "none", cursor: "pointer" }}
             >Check New Code</button>
           </div>
         )}
