@@ -15,27 +15,28 @@ export default function Success() {
 
         const { data: { user } } = await supabase.auth.getUser();
 
-        if (sessionId && user) {
-          // Server-side verification: confirm session belongs to this user
-          const res = await fetch("/api/verify-checkout", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ session_id: sessionId, user_id: user.id }),
-          });
-          const json = await res.json();
-          if (!json.verified) {
-            setStatus("unverified");
-            return;
-          }
+        if (!sessionId || !user) {
+          setStatus("unverified");
+          return;
         }
 
-        // Write is_pro to Supabase and localStorage
-        if (user) {
-          await supabase
-            .from("users")
-            .update({ is_pro: true })
-            .eq("id", user.id);
+        // Server-side verification: confirm session belongs to this user
+        const res = await fetch("/api/verify-checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ session_id: sessionId, user_id: user.id }),
+        });
+        const json = await res.json();
+        if (!json.verified) {
+          setStatus("unverified");
+          return;
         }
+
+        // Write is_pro to Supabase and localStorage — only reached if verified
+        await supabase
+          .from("users")
+          .update({ is_pro: true })
+          .eq("id", user.id);
         localStorage.setItem("pastecheck_pro", "true");
       } catch {}
       setStatus("done");

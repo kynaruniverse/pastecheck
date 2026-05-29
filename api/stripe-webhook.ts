@@ -58,14 +58,12 @@ export default async function handler(req: any, res: any) {
     let updateError: any = null;
 
     if (userId) {
-      // Preferred path — match by Supabase user ID, no email collision risk
       const { error } = await supabase
         .from("users")
         .update({ is_pro: true })
         .eq("id", userId);
       updateError = error;
     } else if (email) {
-      // Fallback — guest checkout or session without auth token
       const { error } = await supabase
         .from("users")
         .update({ is_pro: true })
@@ -75,6 +73,57 @@ export default async function handler(req: any, res: any) {
 
     if (updateError) {
       return res.status(500).json({ error: "Failed to update user pro status" });
+    }
+  }
+
+  // ── Subscription cancelled ─────────────────────────────────────────────────
+  if (event.type === "customer.subscription.deleted") {
+    const subscription = event.data.object as Stripe.Subscription;
+    const customerId = subscription.customer as string;
+
+    // Look up Stripe customer to get email
+    const customer = await stripe.customers.retrieve(customerId);
+    if (customer.deleted) {
+      return res.status(200).json({ received: true });
+    }
+
+    const email = (customer as Stripe.Customer).email;
+    if (!email) {
+      return res.status(200).json({ received: true });
+    }
+
+    const { error } = await supabase
+      .from("users")
+      .update({ is_pro: false })
+      .eq("email", email);
+
+    if (error) {
+      return res.status(500).json({ error: "Failed to revoke pro status on cancellation" });
+    }
+  }
+
+  // ── Payment failed ─────────────────────────────────────────────────────────
+  if (event.type === "invoice.payment_failed") {
+    const invoice = event.data.object as Stripe.Invoice;
+    const customerId = invoice.customer as string;
+
+    const customer = await stripe.customers.retrieve(customerId);
+    if (customer.deleted) {
+      return res.status(200).json({ received: true });
+    }
+
+    const email = (customer as Stripe.Customer).email;
+    if (!email) {
+      return res.status(200).json({ received: true });
+    }
+
+    const { error } = await supabase
+      .from("users")
+      .update({ is_pro: false })
+      .eq("email", email);
+
+    if (error) {
+      return res.status(500).json({ error: "Failed to revoke pro status on payment failure" });
     }
   }
 
