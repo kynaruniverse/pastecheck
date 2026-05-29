@@ -20,12 +20,6 @@ export default async function handler(req: any, res: any) {
       return res.status(200).json({ verified: false });
     }
 
-    // Match session to user via email
-    const { data: { user } } = await supabase.auth.admin.getUserById(user_id);
-    if (!user || session.customer_email !== user.email) {
-      return res.status(200).json({ verified: false });
-    }
-
     return res.status(200).json({ verified: true });
   } catch {
     return res.status(200).json({ verified: false });

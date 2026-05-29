@@ -32,11 +32,7 @@ export default function Success() {
           return;
         }
 
-        // Write is_pro to Supabase and localStorage — only reached if verified
-        await supabase
-          .from("users")
-          .update({ is_pro: true })
-          .eq("id", user.id);
+        // Webhook handles is_pro write — success.tsx is read-only
         localStorage.setItem("pastecheck_pro", "true");
       } catch {}
       setStatus("done");

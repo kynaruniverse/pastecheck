@@ -2,6 +2,9 @@
   "buildCommand": "npm run build:vercel",
   "outputDirectory": "dist",
   "installCommand": "npm install",
+  "redirects": [
+    { "source": "/(.*)", "destination": "https://www.pastecheck.co.uk/$1", "permanent": true, "has": [{ "type": "host", "value": "pastecheck.co.uk" }] }
+  ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }

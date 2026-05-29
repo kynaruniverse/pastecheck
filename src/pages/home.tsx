@@ -560,6 +560,7 @@ export default function Home() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const prevErrorCount = useRef<number>(0);
   const [symbolBarVisible, setSymbolBarVisible] = useState(false);
+  const [textareaRows, setTextareaRows] = useState(16);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -665,6 +666,7 @@ export default function Home() {
     const r = lint(code);
     setResult(r);
     setChecked(true);
+    setTextareaRows(6);
     const firstThree = new Set(
       r.lines
         .map((l, i) => ({ l, i }))
@@ -697,6 +699,7 @@ export default function Home() {
     setExpanded(new Set());
     setInputError(null);
     setShareUrl(null);
+    setTextareaRows(16);
     setTimeout(() => textareaRef.current?.focus(), 0);
   }
 
@@ -972,7 +975,7 @@ export default function Home() {
                     onFocus={() => setSymbolBarVisible(true)}
                     onBlur={() => setSymbolBarVisible(false)}
                     placeholder="// Paste your code here..."
-                    rows={16}
+                    rows={textareaRows}
                     autoFocus
                     spellCheck={false}
                     autoCorrect="off"
