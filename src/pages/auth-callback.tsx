@@ -9,16 +9,20 @@ export default function AuthCallback() {
       const type = params.get("type");
 
       if (tokenHash && type) {
-        // Email confirmation link clicked
+        // Email confirmation or password recovery link clicked
+        const otpType = type === "recovery" ? "recovery" : "email";
         const { error } = await supabase.auth.verifyOtp({
           token_hash: tokenHash,
-          type: "email",
+          type: otpType as "email" | "recovery",
         });
 
         if (error) {
           window.location.href = "/login";
+        } else if (type === "recovery") {
+          // Password reset — send to a reset form (or login for now)
+          window.location.href = "/login?reset=1";
         } else {
-          // Confirmed — send to login with success banner
+          // Email confirmed — send to login with success banner
           window.location.href = "/login?confirmed=1";
         }
       } else {

@@ -113,14 +113,12 @@ export default function CollectionDetail() {
             <p className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>
               Run a check on the tool page, then save it to this collection.
             </p>
-            <a href="/check">
-              <button
-                type="button"
-                className="mt-2 px-4 py-2 rounded-lg text-xs font-semibold"
-                style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)", border: "none", cursor: "pointer" }}
-              >
-                Go to tool
-              </button>
+            <a
+              href="/check"
+              className="mt-2 px-4 py-2 rounded-lg text-xs font-semibold inline-block"
+              style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)", textDecoration: "none", borderRadius: "8px" }}
+            >
+              Go to tool
             </a>
           </div>
         ) : (

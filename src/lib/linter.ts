@@ -249,7 +249,7 @@ function lintJavaScript(code: string, useTypeScript = false): CodeLine[] {
   }
 
 // TS node stubs — prevent acorn-walk crashing on TS-specific AST nodes
-const tsStubs: Record<string, () => void> = {};
+  const tsStubs: Record<string, () => void> = {};
 [
   "TSTypeAnnotation","TSTypeReference","TSAnyKeyword","TSStringKeyword",
   "TSNumberKeyword","TSBooleanKeyword","TSVoidKeyword","TSNullKeyword",
@@ -361,16 +361,7 @@ try {
         );
       }
     },
-    AssignmentExpression(node: acorn.Node) {
-      const n = node as unknown as {
-        type: string;
-        loc?: NodeLoc;
-        parent?: { type: string };
-      };
-      if (!n.loc) return;
-// Catch assignment inside if/while/for condition via parent check
-      // acorn-walk doesn't pass parent so we use a regex fallback below
-    },
+    // Assignment-in-condition is handled via the regex pass below (acorn-walk has no parent references)
   }, { ...walk.base, ...tsStubs });
 } catch {
 
@@ -380,6 +371,9 @@ try {
   // Duplicate variable name check — only run on smaller files to avoid false positives
   const scopeStack: Map<string, number>[] = [new Map()];
   const skipDuplicateCheck = rawLines.length > 200;
+  if (skipDuplicateCheck) {
+    ann.add(0, "warning", "File is over 200 lines — duplicate variable check skipped to avoid false positives. Split into smaller files if you need full duplicate detection.");
+  }
   rawLines.forEach((text, idx) => {
     if (skipDuplicateCheck) return;
     const trimmed = text.trim();
@@ -905,12 +899,11 @@ function walkTree(doc: Document, source: string, tagLineMap: Map<string, number[
 
     if (parentInlineTag && BLOCK_ELEMENTS.has(tag)) {
       result.blockInInline.push({ block: tag, inline: parentInlineTag, line });
-}
-
+    }
 
     const nextInlineParent = INLINE_ELEMENTS.has(tag) ? tag : (BLOCK_ELEMENTS.has(tag) ? null : parentInlineTag);
     el.childNodes?.forEach((child) => visit(child, nextInlineParent));
-}
+  }
 
 
   doc.childNodes?.forEach((c) => visit(c, null));
@@ -1241,10 +1234,19 @@ function lintHTML(code: string): CodeLine[] {
   });
 
   lintEmbeddedScripts(code, ann);
-    lintEmbeddedStyles(code, ann);
+  lintEmbeddedStyles(code, ann);
 
-    return buildLines(rawLines, ann);
-  }
+  return buildLines(rawLines, ann);
+}
+
+const UNIT_PROPS = new Set([
+  "margin","margin-top","margin-right","margin-bottom","margin-left",
+  "padding","padding-top","padding-right","padding-bottom","padding-left",
+  "width","height","min-width","max-width","min-height","max-height",
+  "top","right","bottom","left","font-size","letter-spacing",
+  "line-height","border-width","border-radius","gap","row-gap","column-gap",
+  "outline-width","text-indent","word-spacing",
+]);
 
 function lintCSS(code: string): CodeLine[] {
   const rawLines = code.split("\n");
@@ -1267,15 +1269,7 @@ function lintCSS(code: string): CodeLine[] {
         ann.add(idx, "error", `Unknown CSS property '${prop}' — did you mean '${suggestion}'?`);
     }
 
-    // Missing units on non-zero numeric values
-    const UNIT_PROPS = new Set([
-      "margin","margin-top","margin-right","margin-bottom","margin-left",
-      "padding","padding-top","padding-right","padding-bottom","padding-left",
-      "width","height","min-width","max-width","min-height","max-height",
-      "top","right","bottom","left","font-size","letter-spacing",
-      "line-height","border-width","border-radius","gap","row-gap","column-gap",
-      "outline-width","text-indent","word-spacing",
-    ]);
+    // Missing units on non-zero numeric values (UNIT_PROPS defined at module scope)
     const unitPropMatch = trimmed.match(/^([\w-]+)\s*:\s*(-?\d+\.?\d*)\s*;?$/);
     if (unitPropMatch) {
       const prop = unitPropMatch[1].toLowerCase();

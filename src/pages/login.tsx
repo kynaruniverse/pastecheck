@@ -32,10 +32,11 @@ export default function Login() {
       return;
     }
     // Sync Pro status from Supabase to localStorage
+    const { data: { user: signedInUser } } = await supabase.auth.getUser();
     const { data: userData } = await supabase
       .from("users")
       .select("is_pro")
-      .eq("id", (await supabase.auth.getUser()).data.user?.id ?? "")
+      .eq("id", signedInUser?.id ?? "")
       .single();
     if (userData?.is_pro) {
       localStorage.setItem("pastecheck_pro", "true");

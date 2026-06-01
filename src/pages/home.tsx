@@ -6,7 +6,7 @@ import Logo from "@/components/Logo";
 import { lint, detectLanguage, type LintResult, type Language } from "@/lib/linter";
 import { supabase } from "@/lib/supabase";
 import FeedbackForm from "@/components/FeedbackForm";
-
+import type { CodeLine } from "@/lib/linter";
 function logFeedbackFormMissing() {
   if (!import.meta.env.VITE_FORMSPREE_ID) {
     if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
@@ -164,13 +164,13 @@ function DebugNudge({ errorCount, warningCount }: { errorCount: number; warningC
       >
         <span className="text-xs font-medium" style={{ color: "hsl(210 20% 72%)" }}>🛠 What to do next</span>
         <span
-          className="text-xs"
-          style={{
-            color: "hsl(215 14% 45%)",
-            display: "inline-block",
-            transform: open ? "rotate(90deg)" : "rotate(0deg)",
-            transition: "transform 0.15s",
-          }}
+          className="text-xs will-change-transform"
+            style={{
+              color: "hsl(215 14% 45%)",
+              display: "inline-block",
+              transform: open ? "rotate(90deg)" : "rotate(0deg)",
+              transition: "transform 0.15s",
+            }}
         >›</span>
       </button>
       {open && (
@@ -187,7 +187,7 @@ function DebugNudge({ errorCount, warningCount }: { errorCount: number; warningC
   );
 }
 
-function SaveToCollectionButton({ code, language, lines }: { code: string; language: string; lines: any[] }) {
+function SaveToCollectionButton({ code, language, lines }: { code: string; language: string; lines: CodeLine[] }) {
   const [collections, setCollections] = useState<{ id: string; name: string }[]>([]);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState<string | null>(null);
@@ -362,13 +362,12 @@ function FileResultPanel({ fileResult, defaultOpen }: { fileResult: FileResult; 
       >
         <div className="flex items-center gap-2 min-w-0">
           <span
-            className="text-xs"
+            className="text-xs will-change-transform"
             style={{
               color: "hsl(215 14% 45%)",
               display: "inline-block",
               transform: open ? "rotate(90deg)" : "rotate(0deg)",
               transition: "transform 0.15s",
-              flexShrink: 0,
             }}
           >›</span>
           <span className="text-xs font-medium truncate" style={{ color: "hsl(210 20% 78%)" }}>
@@ -536,7 +535,7 @@ function SymbolBar({ onInsert }: { onInsert: (sym: string) => void }) {
 
 export default function Home() {
   // Pro state
-  const [isPro, setIsPro] = useState<boolean>(false);
+  const [isPro, setIsPro] = useState<boolean>(getIsPro());
   const [proMode, setProMode] = useState<"single" | "multi">("single");
   const [tapCount, setTapCount] = useState(0);
   const [proToast, setProToast] = useState<string | null>(null);
@@ -571,7 +570,8 @@ export default function Home() {
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [checked, code]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checked, code, handleCheck]);
 
   // Multi-file mode (pro)
   const [files, setFiles] = useState<FileEntry[]>([makeFile("File 1")]);
@@ -585,7 +585,7 @@ export default function Home() {
   const upgradeRef = useRef<HTMLDivElement>(null);
 
   // Shared
-  const [history, setHistory] = useState<Array<{ code: string; result: LintResult }>>(() => {
+  const [history, setHistory] = useState<Array<{ code: string; result: LintResult; timestamp: number }>>(() => {
     try {
       const stored = localStorage.getItem("pastecheck_history");
       return stored ? JSON.parse(stored) : [];
@@ -678,7 +678,7 @@ export default function Home() {
     setInputError(null);
     setChecking(false);
     setHistory((prev) => {
-      const updated = [{ code, result: r }, ...prev].slice(0, isPro ? 100 : 5);
+      const updated = [{ code, result: r, timestamp: Date.now() }, ...prev].slice(0, isPro ? 100 : 5);
       try { localStorage.setItem("pastecheck_history", JSON.stringify(updated)); } catch {}
       const checkNumber = updated.length;
       if ([3, 5, 10].includes(checkNumber)) {
@@ -819,7 +819,7 @@ export default function Home() {
   return (
     <div className="min-h-screen w-full" style={{ background: "hsl(220 8% 9%)" }}>
       <Toaster position="bottom-center" theme="dark" richColors />
-      <div className={`mx-auto w-full px-4 pb-10 pt-8 ${checked ? "max-w-5xl" : "max-w-2xl"}`}>
+      <div className={`mx-auto w-full px-4 pb-10 ${checked ? "max-w-5xl" : "max-w-2xl"}`}>
         <Helmet>
           <title>PasteCheck — Paste and Check Your Code</title>
           <meta name="description" content="Paste your JavaScript, TypeScript, Python, HTML or CSS code and instantly see syntax errors and warnings highlighted. Free, no login, works on mobile." />
@@ -841,7 +841,7 @@ export default function Home() {
               type="button"
               onClick={handleReset}
               className="w-full rounded-xl py-2.5 text-sm font-semibold tracking-wide transition-all duration-150 active:scale-[0.98]"
-              style={{ background: "hsl(262 83% 75%)", color: "hsl", border: "none", cursor: "pointer" }}
+              style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)", border: "none", cursor: "pointer" }}
             >Check New Code</button>
           </div>
         )}
@@ -980,7 +980,7 @@ export default function Home() {
                       })()}
                     </div>
                     {code.length > 0 && (
-                      <span className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>{code.split("\n").length} lines</span>
+                      <span className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>{code.split("\n").length} lines · {code.length.toLocaleString()} chars</span>
                     )}
                   </div>
                   <textarea
@@ -1035,7 +1035,7 @@ export default function Home() {
                       const errors = item.result.lines.filter((l) => l.type === "error").length;
                       const warnings = item.result.lines.filter((l) => l.type === "warning").length;
                       const lang = item.result.language;
-                      const timestamp = new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+                      const timestamp = item.timestamp ? new Date(item.timestamp).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : "";
                       return (
                         <button
                           key={idx}
@@ -1112,8 +1112,8 @@ export default function Home() {
                         })()}
                       </div>
                       {code.length > 0 && (
-                        <span className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>{code.split("\n").length} lines</span>
-                      )}
+                      <span className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>{code.split("\n").length} lines · {code.length.toLocaleString()} chars</span>
+                    )}
                     </div>
                     <textarea
                       value={code}
@@ -1181,12 +1181,8 @@ export default function Home() {
                     <span className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>{result!.lines.length} lines</span>
                   </div>
                   <div className="overflow-x-auto" style={{ background: "hsl(220 8% 11%)", fontFamily: "var(--app-font-mono)", fontSize: "12.5px", lineHeight: "1.7" }}>
-                    {[...result!.lines]
+                    {result!.lines
                       .map((line, i) => ({ line, i }))
-                      .sort((a, b) => {
-                        const rank = (t: string) => t === "error" ? 0 : t === "warning" ? 1 : 2;
-                        return rank(a.line.type) - rank(b.line.type);
-                      })
                       .map(({ line, i }) => {
                       const isFlagged = line.type !== "normal" && line.messages.length > 0;
                       const isOpen = expanded.has(i);
@@ -1328,6 +1324,7 @@ export default function Home() {
                   className="w-full rounded-xl py-2.5 text-sm font-medium transition-all duration-150 active:scale-[0.98]"
                   style={{ background: "transparent", color: "hsl(215 14% 52%)", border: "1px solid hsl(220 13% 22%)", cursor: "pointer" }}
                 >Copy result as text</button>
+                <ResultRating language={result?.language ?? "unknown"} errorCount={errorCount} warningCount={warningCount} />
                 <FeedbackForm />
                 </div>{/* end right pane */}
               </div>
@@ -1355,6 +1352,7 @@ export default function Home() {
                       />
                       {files.length > 1 && (
                         <button
+                          type="button"
                           onClick={() => handleRemoveFile(file.id)}
                           className="text-xs ml-2 shrink-0 px-2 py-0.5 rounded"
                           style={{ color: "hsl(215 14% 45%)", background: "none", border: "none", cursor: "pointer" }}

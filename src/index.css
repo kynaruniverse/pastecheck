@@ -163,6 +163,11 @@
     background-color: rgba(234, 179, 8, 0.12);
     border-left: 3px solid rgb(234, 179, 8);
   }
+
+  /* GPU acceleration for expand/collapse animated elements */
+  .will-change-transform {
+    will-change: transform;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

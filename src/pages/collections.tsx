@@ -67,33 +67,33 @@ export default function Collections() {
     <div className="min-h-screen w-full" style={{ background: "hsl(220 8% 9%)" }}>
       <div className="mx-auto w-full max-w-2xl px-4 pb-10 pt-8">
         
-  <NavMenu />
-        <header className="mb-6">
-          <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center gap-2">
-              <a href="/check" style={{ textDecoration: "none" }}>
-                <span
+<NavMenu />
+      <header className="mb-6">
+        <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center gap-2">
+            <a href="/check" style={{ textDecoration: "none" }}>
+              <span
                   className="inline-flex items-center justify-center rounded-lg w-8 h-8 text-sm font-bold"
-                  style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)" }}
-                >P</span>
-              </a>
-              <h1 className="text-xl font-bold tracking-tight" style={{ color: "hsl(210 20% 92%)" }}>
+                style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)" }}
+              >P</span>
+            </a>
+            <h1 className="text-xl font-bold tracking-tight" style={{ color: "hsl(210 20% 92%)" }}>
                 My Collections
-              </h1>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowCreate((v) => !v)}
-              className="text-xs font-semibold px-3 py-1.5 rounded-lg"
-              style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)", border: "none", cursor: "pointer" }}
-            >
-              + New
-            </button>
+            </h1>
           </div>
-          <p className="text-sm" style={{ color: "hsl(215 14% 55%)" }}>
+          <button
+            type="button"
+            onClick={() => setShowCreate((v) => !v)}
+            className="text-xs font-semibold px-3 py-1.5 rounded-lg"
+            style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)", border: "none", cursor: "pointer" }}
+          >
+            + New
+          </button>
+        </div>
+        <p className="text-sm" style={{ color: "hsl(215 14% 55%)" }}>
             Your saved code checks, organised into collections.
-          </p>
-        </header>
+        </p>
+      </header>
 
         {showCreate && (
           <div

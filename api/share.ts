@@ -1,3 +1,4 @@
+import { randomBytes } from "crypto";
 import { createClient } from "@supabase/supabase-js";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
@@ -9,7 +10,7 @@ const supabase = createClient(
 const shareAttempts = new Map<string, { count: number; resetAt: number }>();
 
 function generateShareId(): string {
-  return require("crypto").randomBytes(10).toString("hex");
+  return randomBytes(10).toString("hex");
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

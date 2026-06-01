@@ -22,7 +22,7 @@ export default function FixPage() {
         <link rel="canonical" href={`https://www.pastecheck.co.uk/fix/${config.slug}`} />
         <meta property="og:title" content={`${config.title} | PasteCheck`} />
         <meta property="og:description" content={config.summary} />
-        <meta property="og:image" content="/opengraph.jpg" />
+        <meta property="og:image" content="https://www.pastecheck.co.uk/opengraph.jpg" />
       </Helmet>
 
       <NavMenu />

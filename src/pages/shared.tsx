@@ -77,7 +77,7 @@ export default function Shared() {
         <meta name="description" content="View a shared code check result from PasteCheck — instant syntax error and warning detection for JavaScript, TypeScript, Python, HTML and CSS." />
         <meta property="og:title" content="Shared Code Check — PasteCheck" />
         <meta property="og:description" content="View a shared code check result from PasteCheck — instant syntax error and warning detection for JavaScript, TypeScript, Python, HTML and CSS." />
-        <meta property="og:image" content="/opengraph.jpg" />
+        <meta property="og:image" content="https://www.pastecheck.co.uk/opengraph.jpg" />
         <meta name="robots" content="noindex" />
       </Helmet>
       <NavMenu />
