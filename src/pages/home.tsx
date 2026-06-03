@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { toast, Toaster } from "sonner";
 import NavMenu from "@/components/NavMenu";
@@ -76,12 +76,6 @@ function getIsPro(): boolean {
   } catch {
     return false;
   }
-}
-
-function setProMode(value: boolean) {
-  try {
-    localStorage.setItem("pastecheck_pro", String(value));
-  } catch {}
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -210,7 +204,7 @@ function SaveToCollectionButton({ code, language, lines }: { code: string; langu
     setSaving(collectionId);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { window.location.href = "/login"; return; }
-    await supabase.from("saved_checks").insert({
+    const { error: saveError } = await supabase.from("saved_checks").insert({
       user_id: user.id,
       collection_id: collectionId,
       code,
@@ -218,6 +212,10 @@ function SaveToCollectionButton({ code, language, lines }: { code: string; langu
       lines,
     });
     setSaving(null);
+    if (saveError) {
+      toast.error("Failed to save — please try again.");
+      return;
+    }
     setSaved(collectionId);
     setOpen(false);
     setTimeout(() => setSaved(null), 2500);
@@ -250,14 +248,12 @@ function SaveToCollectionButton({ code, language, lines }: { code: string; langu
           ) : collections.length === 0 ? (
             <div className="px-4 py-3 flex flex-col gap-2">
               <p className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>No collections yet.</p>
-              <a href="/collections">
-                <button
-                  type="button"
-                  className="text-xs font-semibold px-3 py-1.5 rounded-lg"
-                  style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)", border: "none", cursor: "pointer" }}
-                >
-                  Create one
-                </button>
+              <a
+                href="/collections"
+                className="text-xs font-semibold px-3 py-1.5 rounded-lg inline-block"
+                style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)", textDecoration: "none", borderRadius: "8px" }}
+              >
+                Create one
               </a>
             </div>
           ) : (
@@ -535,7 +531,7 @@ function SymbolBar({ onInsert }: { onInsert: (sym: string) => void }) {
 
 export default function Home() {
   // Pro state
-  const [isPro, setIsPro] = useState<boolean>(getIsPro());
+  const [isPro, setIsPro] = useState<boolean>(false);
   const [proMode, setProMode] = useState<"single" | "multi">("single");
   const [tapCount, setTapCount] = useState(0);
   const [proToast, setProToast] = useState<string | null>(null);
@@ -570,8 +566,7 @@ export default function Home() {
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [checked, code, handleCheck]);
+  }, [checked, handleCheck]);
 
   // Multi-file mode (pro)
   const [files, setFiles] = useState<FileEntry[]>([makeFile("File 1")]);
@@ -655,11 +650,12 @@ export default function Home() {
     });
   }
 
-  function handleCheck() {
+  const handleCheck = useCallback(() => {
     if (!code.trim()) { setInputError("Please paste some code first"); return; }
     if (code.length > 100000) { setInputError("That file is too large to check — please paste under 100KB of code."); return; }
     if (code.split("\n").length > 3000) { setInputError("Too many lines — please paste under 3,000 lines of code."); return; }
-    if (detectLanguage(code) === "unknown") { setInputError("No code detected — please paste JavaScript, Python or HTML code."); return; }
+    const detectedLang = detectLanguage(code);
+    if (detectedLang === "unknown") { setInputError("No code detected — please paste JavaScript, Python or HTML code."); return; }
     setChecking(true);
     setTimeout(() => {
     prevErrorCount.current = result?.lines.filter((l) => l.type === "error").length ?? 0;
@@ -690,7 +686,7 @@ export default function Home() {
       return updated;
     });
   }, 0);
-  }
+  }, [code, result, isPro, surveyDismissed]);
 
   function handleReset() {
     setCode("");
@@ -739,7 +735,8 @@ export default function Home() {
       });
       const data = await res.json();
       if (data.id) {
-        const url = `${import.meta.env.VITE_APP_URL}/s/${data.id}`;
+        const appUrl = import.meta.env.VITE_APP_URL || window.location.origin;
+        const url = `${appUrl}/s/${data.id}`;
         setShareUrl(url);
         try {
           await navigator.clipboard.writeText(url);
@@ -747,8 +744,11 @@ export default function Home() {
         } catch {
           toast.success("Share link generated");
         }
+      } else {
+        toast.error(data.error ?? "Failed to generate share link — please try again.");
       }
     } catch (err) {
+      toast.error("Something went wrong — please try again.");
       if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
         (window as any).gtag("event", "share_error", { event_category: "Error", event_label: String(err) });
       }
@@ -825,7 +825,8 @@ export default function Home() {
           <meta name="description" content="Paste your JavaScript, TypeScript, Python, HTML or CSS code and instantly see syntax errors and warnings highlighted. Free, no login, works on mobile." />
           <meta property="og:title" content="PasteCheck — Paste and Check Your Code" />
           <meta property="og:description" content="Paste your JavaScript, TypeScript, Python, HTML or CSS code and instantly see syntax errors and warnings highlighted. Free, no login, works on mobile." />
-          <meta property="og:image" content="/opengraph.jpg" />
+          <meta property="og:image" content="https://www.pastecheck.co.uk/opengraph.jpg" />
+          <link rel="canonical" href="https://www.pastecheck.co.uk/check" />
         </Helmet>
 
         {/* Nav */}
@@ -873,18 +874,26 @@ export default function Home() {
                 {totalChecks} checks today — Pro unlocks multi-file mode and saved history.
               </span>
               <a
-                href="/api/create-checkout"
+                href="#"
                 onClick={async (e) => {
                   e.preventDefault();
                   try {
-                    const res = await fetch("/api/create-checkout", { method: "POST" });
-                          const data = await res.json();
-                          if (data.url) window.location.href = data.url;
-                        } catch (err) {
-                          if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
-                            (window as any).gtag("event", "checkout_error", { event_category: "Error", event_label: String(err) });
-                          }
-                        }
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (!session) { window.location.href = "/login"; return; }
+                    const res = await fetch("/api/create-checkout", { 
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${session.access_token}`
+                      }
+                    });
+                    const data = await res.json();
+                    if (data.url) window.location.href = data.url;
+                  } catch (err) {
+                    if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
+                      (window as any).gtag("event", "checkout_error", { event_category: "Error", event_label: String(err) });
+                    }
+                  }
                 }}
                 className="text-xs font-semibold shrink-0"
                 style={{ color: "hsl(262 83% 75%)", textDecoration: "none" }}
@@ -902,7 +911,7 @@ export default function Home() {
         >
           <button
             type="button"
-            onClick={() => { if (isPro) { setProMode("single"); handleReset(); } }}
+            onClick={() => { if (isPro) { setProMode("single"); handleReset(); } else { handleReset(); } }}
             className="flex-1 rounded-lg py-2 text-xs font-semibold transition-all"
             style={{
               background: isPro && proMode === "single" ? "hsl(262 83% 75%)" : !isPro ? "hsl(262 83% 75%)" : "transparent",
@@ -1116,6 +1125,7 @@ export default function Home() {
                     )}
                     </div>
                     <textarea
+                      ref={textareaRef}
                       value={code}
                       onChange={handleCodeChange}
                       rows={24}
@@ -1293,7 +1303,15 @@ export default function Home() {
                         e.stopPropagation();
                         setShareAttempted(true);
                         try {
-                          const res = await fetch("/api/create-checkout", { method: "POST" });
+                          const { data: { session } } = await supabase.auth.getSession();
+                          if (!session) { window.location.href = "/login"; return; }
+                          const res = await fetch("/api/create-checkout", { 
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                              Authorization: `Bearer ${session.access_token}`
+                            }
+                          });
                           const data = await res.json();
                           if (data.url) window.location.href = data.url;
                         } catch (err) {
@@ -1311,15 +1329,15 @@ export default function Home() {
                   type="button"
                   onClick={() => {
                     if (!result) return;
-                    const flagged = result.lines.filter(l => l.type !== "normal" && l.messages.length > 0);
-                    if (flagged.length === 0) {
-                      navigator.clipboard.writeText("No issues found — looks clean!");
-                      return;
-                    }
-                    const text = flagged.map(l =>
-                      `Line ${result.lines.indexOf(l) + 1} [${l.type.toUpperCase()}]: ${l.messages.join(" | ")}`
-                    ).join("\n");
-                    navigator.clipboard.writeText(text);
+                    const flagged = result.lines
+                      .map((l, i) => ({ l, i }))
+                      .filter(({ l }) => l.type !== "normal" && l.messages.length > 0);
+                    const text = flagged.length === 0
+                      ? "No issues found — looks clean!"
+                      : flagged.map(({ l, i }) =>
+                          `Line ${i + 1} [${l.type.toUpperCase()}]: ${l.messages.join(" | ")}`
+                        ).join("\n");
+                    navigator.clipboard.writeText(text).catch(() => {});
                   }}
                   className="w-full rounded-xl py-2.5 text-sm font-medium transition-all duration-150 active:scale-[0.98]"
                   style={{ background: "transparent", color: "hsl(215 14% 52%)", border: "1px solid hsl(220 13% 22%)", cursor: "pointer" }}
@@ -1462,11 +1480,19 @@ export default function Home() {
             <button
               onClick={async () => {
                 try {
-                  const res = await fetch("/api/create-checkout", { method: "POST" });
+                  const { data: { session } } = await supabase.auth.getSession();
+                  if (!session) { window.location.href = "/login"; return; }
+                  const res = await fetch("/api/create-checkout", { 
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${session.access_token}`
+                    }
+                  });
                   const data = await res.json();
                   if (data.url) window.location.href = data.url;
                 } catch {
-                  alert("Something went wrong. Please try again.");
+                  toast.error("Something went wrong. Please try again.");
                 }
               }}
               type="button"

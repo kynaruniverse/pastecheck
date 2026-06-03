@@ -50,27 +50,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const userId = session.client_reference_id;
-    const email = session.customer_email;
 
-    if (!userId && !email) {
-      return res.status(200).json({ received: true });
+    if (!userId) {
+      console.error("[stripe-webhook] Missing client_reference_id on completed session.");
+      return res.status(400).json({ error: "Missing client reference linking parameter." });
     }
 
-    let updateError: any = null;
-
-    if (userId) {
-      const { error } = await supabase
-        .from("users")
-        .update({ is_pro: true })
-        .eq("id", userId);
-      updateError = error;
-    } else if (email) {
-      const { error } = await supabase
-        .from("users")
-        .update({ is_pro: true })
-        .eq("email", email);
-      updateError = error;
-    }
+    const { error: updateError } = await supabase
+      .from("users")
+      .update({ 
+        is_pro: true,
+        stripe_customer_id: session.customer as string 
+      })
+      .eq("id", userId);
 
     if (updateError) {
       console.error("[stripe-webhook] Failed to update is_pro on checkout.session.completed:", updateError);
@@ -83,21 +75,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const subscription = event.data.object as Stripe.Subscription;
     const customerId = subscription.customer as string;
 
-    // Look up Stripe customer to get email
-    const customer = await stripe.customers.retrieve(customerId);
-    if (customer.deleted) {
+    if (!customerId) {
       return res.status(200).json({ received: true });
     }
 
-    const email = (customer as Stripe.Customer).email;
-    if (!email) {
-      return res.status(200).json({ received: true });
-    }
-
+    // Resolve user deterministic identifier mapping directly via explicit customer ID column mapping
     const { error } = await supabase
       .from("users")
       .update({ is_pro: false })
-      .eq("email", email);
+      .eq("stripe_customer_id", customerId);
 
     if (error) {
       console.error("[stripe-webhook] Failed to revoke is_pro on customer.subscription.deleted:", error);
@@ -105,8 +91,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
+
   // ── Payment failed ─────────────────────────────────────────────────────────
-  if (event.type === "invoice.payment_failed") {
+  // NOTE: invoice.payment_failed fires on every retry attempt.
+  // Only revoke on subscription deletion (customer.subscription.deleted), not here.
+  // To safely revoke on persistent failure, handle `customer.subscription.updated`
+  // where status becomes "past_due" or "unpaid" after all retries exhausted.
+  if (false && event.type === "invoice.payment_failed") {
     const invoice = event.data.object as Stripe.Invoice;
     const customerId = invoice.customer as string;
 

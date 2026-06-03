@@ -9,7 +9,8 @@ export default function Privacy() {
         <meta name="description" content="Privacy policy for PasteCheck. How we handle your data." />
         <meta property="og:title" content="Privacy Policy — PasteCheck" />
         <meta property="og:description" content="Privacy policy for PasteCheck. How we handle your data." />
-        <meta property="og:image" content="/opengraph.jpg" />
+        <meta property="og:image" content="https://www.pastecheck.co.uk/opengraph.jpg" />
+        <link rel="canonical" href="https://www.pastecheck.co.uk/privacy" />
       </Helmet>
       <div className="mx-auto w-full max-w-2xl px-5 pb-16">
         <NavMenu />

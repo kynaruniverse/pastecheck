@@ -7,16 +7,12 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY as string
 );
 
-const shareAttempts = new Map<string, { count: number; resetAt: number }>();
-
 function generateShareId(): string {
   return randomBytes(10).toString("hex");
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // POST — save a check, return share ID
   if (req.method === "POST") {
-    // Auth check — Pro users only
     const authHeader = req.headers.authorization;
     const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
     if (!token) {
@@ -35,41 +31,50 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(403).json({ error: "Pro subscription required" });
     }
 
-    // Rate limit — 20 shares per user per hour (in-memory, resets on cold start)
-    const now = Date.now();
-    const shareEntry = shareAttempts.get(user.id);
-    if (shareEntry && now < shareEntry.resetAt) {
-      if (shareEntry.count >= 20) {
+    // Persistent Distributed Rate Limit for Shares via Supabase Tracker Table
+    const hourWindow = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    try {
+      await supabase.from("rate_limits").delete().lt("created_at", hourWindow);
+      const { count, error: countErr } = await supabase
+        .from("rate_limits")
+        .select("*", { count: "exact", head: true })
+        .eq("identifier", `share_${user.id}`);
+
+      if (countErr) throw countErr;
+
+      if (count && count >= 20) {
         return res.status(429).json({ error: "Rate limit exceeded — try again later" });
       }
-      shareEntry.count++;
-    } else {
-      shareAttempts.set(user.id, { count: 1, resetAt: now + 60 * 60 * 1000 });
+
+      await supabase.from("rate_limits").insert({ identifier: `share_${user.id}` });
+    } catch (limErr) {
+      console.error("[EXC_SHARE_LIMIT_ERR]", limErr);
+      return res.status(500).json({ error: "Internal compliance check failure." });
     }
 
-    // Payload size limit — 100KB
     const payloadSize = JSON.stringify(req.body).length;
     if (payloadSize > 100_000) {
       return res.status(413).json({ error: "Payload too large" });
     }
 
     const { code, language, lines } = req.body;
-
     if (!code || !language || !lines) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
     const id = generateShareId();
 
-    const { error } = await supabase
-      .from("shared_checks")
-      .insert({ id, code, language, lines });
+    try {
+      const { error } = await supabase
+        .from("shared_checks")
+        .insert({ id, code, language, lines });
 
-    if (error) {
-      return res.status(500).json({ error: error.message });
+      if (error) throw error;
+      return res.status(200).json({ id });
+    } catch (err: any) {
+      console.error("[EXC_SHARE_INSERT_ERR]", err);
+      return res.status(500).json({ error: "Failed to persist shared execution checkpoint safely." });
     }
-
-    return res.status(200).json({ id });
   }
 
   // GET — retrieve a check by ID
@@ -94,4 +99,3 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   return res.status(405).json({ error: "Method not allowed" });
-}

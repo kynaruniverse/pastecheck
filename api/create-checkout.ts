@@ -8,37 +8,50 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY as string
 );
 
-const checkoutAttempts = new Map<string, { count: number; resetAt: number }>();
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  // Rate limit — 5 checkout attempts per IP per hour (in-memory, resets on cold start)
-  const ip = (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ?? "unknown";
-  const now = Date.now();
-  const entry = checkoutAttempts.get(ip);
-  if (entry && now < entry.resetAt) {
-    if (entry.count >= 5) {
-      return res.status(429).json({ error: "Too many requests — try again later" });
-    }
-    entry.count++;
-  } else {
-    checkoutAttempts.set(ip, { count: 1, resetAt: now + 60 * 60 * 1000 });
+  // Resolve user from auth header first to bind limit verification securely
+  let clientReferenceId: string | undefined;
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  if (!token) {
+    return res.status(401).json({ error: "Authentication required to upgrade to Pro." });
   }
+  
+  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+  if (authError || !user) {
+    return res.status(401).json({ error: "You must be signed in to upgrade to Pro." });
+  }
+  clientReferenceId = user.id;
+
+  // Persistent Rate Limit using a dedicated tracking table in Supabase
+  const ip = (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ?? "unknown";
+  const nowWindow = new Date(Date.now() - 60 * 60 * 1000).toISOString();
 
   try {
-    // Resolve user from auth header if present
-    let clientReferenceId: string | undefined;
-    const authHeader = req.headers.authorization;
-    const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
-    if (token) {
-      const { data: { user } } = await supabase.auth.getUser(token);
-      if (user) clientReferenceId = user.id;
+    // Prune stale records historical to current threshold
+    await supabase.from("rate_limits").delete().lt("created_at", nowWindow);
+
+    // Count operations executed inside the active window
+    const { count, error: countErr } = await supabase
+      .from("rate_limits")
+      .select("*", { count: "exact", head: true })
+      .eq("identifier", clientReferenceId || ip);
+
+    if (countErr) throw countErr;
+
+    if (count && count >= 5) {
+      return res.status(429).json({ error: "Too many requests — try again later" });
     }
 
+    // Log the current operational access transaction securely
+    await supabase.from("rate_limits").insert({ identifier: clientReferenceId || ip });
+
     const { plan } = req.body || {};
+
     const priceId = plan === "annual"
       ? process.env.STRIPE_ANNUAL_PRICE_ID as string
       : process.env.STRIPE_PRICE_ID as string;
@@ -52,13 +65,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           quantity: 1,
         },
       ],
-      ...(clientReferenceId ? { client_reference_id: clientReferenceId } : {}),
+      client_reference_id: clientReferenceId,
+      customer_email: user.email,
       success_url: "https://www.pastecheck.co.uk/success?session_id={CHECKOUT_SESSION_ID}",
       cancel_url: "https://www.pastecheck.co.uk/check",
     });
 
     return res.status(200).json({ url: session.url });
   } catch (err: any) {
-    return res.status(500).json({ error: err.message });
+    console.error("[EXC_CHECKOUT_ERR]", err);
+    return res.status(500).json({ error: "An unexpected payment error occurred on the server. Please check your account state." });
   }
 }

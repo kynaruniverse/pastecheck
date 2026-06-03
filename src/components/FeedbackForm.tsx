@@ -13,6 +13,7 @@ export default function FeedbackForm() {
 
   async function handleSubmit() {
     if (!FORM_ID) return;
+    if (!accuracy && !suggestions.trim()) return;
     setStatus("submitting");
     try {
       const res = await fetch(`https://formspree.io/f/${FORM_ID}`, {
@@ -41,12 +42,6 @@ export default function FeedbackForm() {
   }
 
   if (!FORM_ID) {
-    if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
-      (window as any).gtag("event", "feedback_form_missing", {
-        event_category: "error",
-        event_label: "VITE_FORMSPREE_ID not set",
-      });
-    }
     return null;
   }
 
@@ -55,6 +50,7 @@ export default function FeedbackForm() {
       {!open ? (
         <div className="flex justify-center pt-1 pb-4">
           <button
+            type="button"
             onClick={() => setOpen(true)}
             className="w-full rounded-xl py-3 text-sm font-medium transition-all duration-150 active:scale-[0.98]"
             style={{
@@ -82,6 +78,7 @@ export default function FeedbackForm() {
                 Thanks for your feedback!
               </p>
               <button
+                type="button"
                 onClick={handleReset}
                 className="mt-1 text-xs"
                 style={{ color: "hsl(215 14% 45%)", background: "none", border: "none", cursor: "pointer" }}
@@ -96,6 +93,7 @@ export default function FeedbackForm() {
                   Quick feedback
                 </p>
                 <button
+                  type="button"
                   onClick={handleReset}
                   style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(215 14% 40%)", fontSize: "16px", lineHeight: 1, padding: "2px 4px" }}
                 >
@@ -112,8 +110,9 @@ export default function FeedbackForm() {
                   {(["yes", "no"] as const).map((val) => (
                     <button
                       key={val}
-                      onClick={() => setAccuracy(val)}
-                      className="flex-1 py-2 rounded-xl text-sm font-medium transition-all duration-100 active:scale-[0.97]"
+                      type="button"
+                    onClick={() => setAccuracy(val)}
+                    className="flex-1 py-2 rounded-xl text-sm font-medium transition-all duration-100 active:scale-[0.97]"
                       style={{
                         background:
                           accuracy === val
@@ -172,6 +171,7 @@ export default function FeedbackForm() {
               )}
 
               <button
+                type="button"
                 onClick={handleSubmit}
                 disabled={status === "submitting"}
                 className="w-full rounded-xl py-3 text-sm font-semibold transition-all duration-150 active:scale-[0.98]"

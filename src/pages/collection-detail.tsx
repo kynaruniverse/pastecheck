@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import { useParams } from "wouter";
 import { supabase } from "@/lib/supabase";
 import { type LintResult } from "@/lib/linter";
@@ -64,7 +65,11 @@ export default function CollectionDetail() {
   }
 
   async function handleDeleteCheck(id: string) {
-    await supabase.from("saved_checks").delete().eq("id", id);
+    const { error: deleteError } = await supabase.from("saved_checks").delete().eq("id", id);
+    if (deleteError) {
+      setError("Failed to delete check — please try again.");
+      return;
+    }
     setChecks((prev) => prev.filter((c) => c.id !== id));
   }
 
@@ -75,6 +80,10 @@ export default function CollectionDetail() {
 
   return (
     <div className="min-h-screen w-full" style={{ background: "hsl(220 8% 9%)" }}>
+      <Helmet>
+        <title>Collection — PasteCheck</title>
+        <meta name="robots" content="noindex" />
+      </Helmet>
       <NavMenu />
       <div className="mx-auto w-full max-w-2xl px-4 pb-10 pt-8">
 

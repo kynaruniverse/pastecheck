@@ -22,7 +22,7 @@ export default function Logo({ size = "sm", onClick }: LogoProps) {
         {"</>"}
       </span>
       <span
-        className={`font-bold tracking-tight ${isLg ? "text-base" : "text-base"}`}
+        className={`font-bold tracking-tight ${isLg ? "text-lg" : "text-base"}`}
         style={{ color: "hsl(210 20% 92%)" }}
       >
         PasteCheck

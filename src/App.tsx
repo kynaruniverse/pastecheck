@@ -8,13 +8,13 @@ import Shared from "@/pages/shared";
 import Login from "@/pages/login";
 import Signup from "@/pages/signup";
 import AuthCallback from "@/pages/auth-callback";
-import Collections from "@/pages/collections";
-import CollectionDetail from "@/pages/collection-detail";
-import ForgotPassword from "@/pages/forgot-password";
-import NotFound from "@/pages/not-found";
-import FixPage from "@/pages/fix";
-import Privacy from "@/pages/privacy";
-import Terms from "@/pages/terms";
+const Collections = lazy(() => import("@/pages/collections"));
+const CollectionDetail = lazy(() => import("@/pages/collection-detail"));
+const ForgotPassword = lazy(() => import("@/pages/forgot-password"));
+const NotFound = lazy(() => import("@/pages/not-found"));
+const FixPage = lazy(() => import("@/pages/fix"));
+const Privacy = lazy(() => import("@/pages/privacy"));
+const Terms = lazy(() => import("@/pages/terms"));
 
 function Router() {
   return (
@@ -27,13 +27,13 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Signup} />
       <Route path="/auth/callback" component={AuthCallback} />
-      <Route path="/collections" component={Collections} />
-      <Route path="/collections/:id" component={CollectionDetail} />
-      <Route path="/forgot-password" component={ForgotPassword} />
-      <Route path="/privacy" component={Privacy} />
-      <Route path="/terms" component={Terms} />
-      <Route path="/fix/:slug" component={FixPage} />
-      <Route component={NotFound} />
+      <Route path="/collections">{() => <Suspense fallback={<div style={{ background: "hsl(220 8% 9%)", minHeight: "100vh" }} />}><Collections /></Suspense>}</Route>
+      <Route path="/collections/:id">{() => <Suspense fallback={<div style={{ background: "hsl(220 8% 9%)", minHeight: "100vh" }} />}><CollectionDetail /></Suspense>}</Route>
+      <Route path="/forgot-password">{() => <Suspense fallback={<div style={{ background: "hsl(220 8% 9%)", minHeight: "100vh" }} />}><ForgotPassword /></Suspense>}</Route>
+      <Route path="/privacy">{() => <Suspense fallback={<div style={{ background: "hsl(220 8% 9%)", minHeight: "100vh" }} />}><Privacy /></Suspense>}</Route>
+      <Route path="/terms">{() => <Suspense fallback={<div style={{ background: "hsl(220 8% 9%)", minHeight: "100vh" }} />}><Terms /></Suspense>}</Route>
+      <Route path="/fix/:slug">{() => <Suspense fallback={<div style={{ background: "hsl(220 8% 9%)", minHeight: "100vh" }} />}><FixPage /></Suspense>}</Route>
+      <Route>{() => <Suspense fallback={<div style={{ background: "hsl(220 8% 9%)", minHeight: "100vh" }} />}><NotFound /></Suspense>}</Route>
     </Switch>
   );
 }

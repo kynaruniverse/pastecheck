@@ -9,7 +9,8 @@ export default function Terms() {
         <meta name="description" content="Terms of service for PasteCheck." />
         <meta property="og:title" content="Terms of Service — PasteCheck" />
         <meta property="og:description" content="Terms of service for PasteCheck." />
-        <meta property="og:image" content="/opengraph.jpg" />
+        <meta property="og:image" content="https://www.pastecheck.co.uk/opengraph.jpg" />
+        <link rel="canonical" href="https://www.pastecheck.co.uk/terms" />
       </Helmet>
       <div className="mx-auto w-full max-w-2xl px-5 pb-16">
         <NavMenu />

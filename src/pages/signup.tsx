@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/lib/supabase";
 import NavMenu from "@/components/NavMenu";
 import Logo from "@/components/Logo";
@@ -17,7 +18,13 @@ export default function Signup() {
     if (password.length < 6) { setError("Password must be at least 6 characters."); return; }
     setLoading(true);
     setError(null);
-    const { error: err } = await supabase.auth.signUp({ email, password });
+    const { error: err } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
     setLoading(false);
     if (err) { setError(err.message); return; }
     setDone(true);
@@ -48,6 +55,11 @@ export default function Signup() {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center px-4" style={{ background: "hsl(220 8% 9%)" }}>
+      <Helmet>
+        <title>Create Account — PasteCheck</title>
+        <meta name="robots" content="noindex" />
+        <link rel="canonical" href="https://www.pastecheck.co.uk/signup" />
+      </Helmet>
       <NavMenu />
       <div className="w-full max-w-sm flex flex-col gap-6">
 

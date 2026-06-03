@@ -21,7 +21,6 @@ export default function NavMenu() {
   async function handleSignOut() {
     await supabase.auth.signOut();
     localStorage.removeItem("pastecheck_pro");
-    localStorage.removeItem("pastecheck_licence");
     window.location.href = "/";
   }
 
@@ -172,6 +171,7 @@ export default function NavMenu() {
             <a
               key={item.href}
               href={item.href}
+              onClick={() => setOpen(false)}
               style={{ textDecoration: "none" }}
             >
               <div

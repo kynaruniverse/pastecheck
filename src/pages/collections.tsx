@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/lib/supabase";
 import NavMenu from "@/components/NavMenu";
 
@@ -53,18 +54,27 @@ export default function Collections() {
     } else {
       setNewName("");
       setShowCreate(false);
-      fetchCollections();
+      await fetchCollections();
     }
     setCreating(false);
   }
 
   async function handleDelete(id: string) {
-    await supabase.from("collections").delete().eq("id", id);
+    const { error: deleteError } = await supabase.from("collections").delete().eq("id", id);
+    if (deleteError) {
+      setError("Failed to delete collection — please try again.");
+      return;
+    }
     setCollections((prev) => prev.filter((c) => c.id !== id));
   }
 
   return (
     <div className="min-h-screen w-full" style={{ background: "hsl(220 8% 9%)" }}>
+      <Helmet>
+        <title>My Collections — PasteCheck</title>
+        <meta name="robots" content="noindex" />
+        <link rel="canonical" href="https://www.pastecheck.co.uk/collections" />
+      </Helmet>
       <div className="mx-auto w-full max-w-2xl px-4 pb-10 pt-8">
         
 <NavMenu />

@@ -54,7 +54,7 @@ function looksLikeCode(code: string): boolean {
   const nonSpaceChars = trimmed.replace(/\s/g, "").length;
   const ratio = codeChars / Math.max(nonSpaceChars, 1);
 
-  if (ratio >= 0.02) return true;
+  if (ratio >= 0.05) return true;
 
   return (
     /\b(function|const|let|var|if|else|for|while|return|class|import|export|async|await)\b/.test(trimmed) ||
@@ -159,7 +159,6 @@ function lintJavaScript(code: string, useTypeScript = false): CodeLine[] {
     // JSX/TSX detection — if file contains JSX patterns, skip line-by-line recovery
     // entirely to prevent cascade false positives from JSX syntax acorn can't parse
     const containsJSX = (
-      false || // placeholder to structure the check
       /<[A-Z][a-zA-Z]*[\s/>]/.test(code) ||     // <Component or <Component/>
       /<\/[A-Z][a-zA-Z]*>/.test(code) ||         // </Component>
       /return\s*\([\s\S]*?</.test(code) ||        // return ( ... <
@@ -371,9 +370,7 @@ try {
   // Duplicate variable name check — only run on smaller files to avoid false positives
   const scopeStack: Map<string, number>[] = [new Map()];
   const skipDuplicateCheck = rawLines.length > 200;
-  if (skipDuplicateCheck) {
-    ann.add(0, "warning", "File is over 200 lines — duplicate variable check skipped to avoid false positives. Split into smaller files if you need full duplicate detection.");
-  }
+  // Duplicate variable check skipped for files over 200 lines (too many false positives)
   rawLines.forEach((text, idx) => {
     if (skipDuplicateCheck) return;
     const trimmed = text.trim();
@@ -438,7 +435,7 @@ try {
     "Promise.all", "Promise.allSettled", "Promise.race", "Promise.any",
   ];
   const asyncAwaitPattern = new RegExp(
-    `(?<!await\\s)(?<!await\\()\\b(${KNOWN_ASYNC_CALLS.map(k => k.replace(".", "\\.")).join("|")})\\s*\\(`,
+    `\\b(${KNOWN_ASYNC_CALLS.map(k => k.replace(".", "\\.")).join("|")})\\s*\\(`,
     "g"
   );
   let insideAsyncFn = false;
@@ -481,6 +478,8 @@ try {
   while ((fnMatch = fnRegex.exec(code)) !== null) {
     const fnName = fnMatch[1] || fnMatch[2];
     if (!fnName || !RETURN_HINT_NAMES.test(fnName)) continue;
+    // Skip async functions — they commonly set state instead of returning a value
+    if (/\basync\b/.test(fnMatch[0])) continue;
     const fnStart = fnMatch.index;
     const braceOpen = code.indexOf("{", fnStart);
     if (braceOpen === -1) continue;
@@ -686,8 +685,8 @@ function lintPython(code: string): CodeLine[] {
       const nextTrimmed = next.trim();
       if (!nextTrimmed || nextTrimmed.startsWith("#")) continue;
       const nextIndent = next.match(/^(\s*)/)?.[1].length ?? 0;
-      if (nextIndent < passIndent) break;
-      if (nextIndent >= passIndent) {
+      if (nextIndent <= passIndent) break;
+      if (nextIndent > passIndent) {
         ann.add(idx, "warning", "'pass' is redundant — the block already contains other statements — remove this line");
         break;
       }
@@ -1244,7 +1243,7 @@ const UNIT_PROPS = new Set([
   "padding","padding-top","padding-right","padding-bottom","padding-left",
   "width","height","min-width","max-width","min-height","max-height",
   "top","right","bottom","left","font-size","letter-spacing",
-  "line-height","border-width","border-radius","gap","row-gap","column-gap",
+  "border-width","border-radius","gap","row-gap","column-gap",
   "outline-width","text-indent","word-spacing",
 ]);
 
@@ -1312,7 +1311,7 @@ export function lint(code: string): LintResult {
   if (language !== "unknown") {
     const credentialPatterns: Array<{ pattern: RegExp; message: string }> = [
       {
-        pattern: /(['"`])[A-Za-z0-9\/+]{40,}\1/,
+        pattern: /(['"`])(?=[A-Za-z0-9\/+]{40,}\1)(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])[A-Za-z0-9\/+]{40,}\1/,
         message: "Possible hardcoded secret detected — long base64-like string found. Never commit API keys or tokens — use environment variables instead.",
       },
       {

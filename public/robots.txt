@@ -5,3 +5,8 @@ Disallow: /collections/
 Disallow: /s/
 Disallow: /login
 Disallow: /signup
+Disallow: /auth/
+Disallow: /forgot-password
+Disallow: /success
+
+Sitemap: https://www.pastecheck.co.uk/sitemap.xml

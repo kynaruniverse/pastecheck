@@ -13,9 +13,9 @@ export default function Success() {
         const params = new URLSearchParams(window.location.search);
         const sessionId = params.get("session_id");
 
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { session } } = await supabase.auth.getSession();
 
-        if (!sessionId || !user) {
+        if (!sessionId || !session?.user) {
           setStatus("unverified");
           return;
         }
@@ -23,9 +23,13 @@ export default function Success() {
         // Server-side verification: confirm session belongs to this user
         const res = await fetch("/api/verify-checkout", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ session_id: sessionId, user_id: user.id }),
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ session_id: sessionId, user_id: session.user.id }),
         });
+
         const json = await res.json();
         if (!json.verified) {
           setStatus("unverified");
@@ -34,8 +38,10 @@ export default function Success() {
 
         // Webhook handles is_pro write — success.tsx is read-only
         localStorage.setItem("pastecheck_pro", "true");
-      } catch {}
-      setStatus("done");
+        setStatus("done");
+      } catch {
+        setStatus("unverified");
+      }
     }
     activate();
   }, []);

@@ -2,6 +2,9 @@ import { useLocation } from "wouter";
 import { Helmet } from "react-helmet-async";
 import NavMenu from "@/components/NavMenu";
 import Logo from "@/components/Logo";
+import { toast, Toaster } from "sonner";
+import { supabase } from "@/lib/supabase";
+
 
 const features = [
   {
@@ -56,7 +59,8 @@ export default function Landing() {
         <meta name="description" content="Paste your JavaScript, TypeScript, Python, HTML or CSS and instantly see every error highlighted. Free, no sign-up, works on mobile." />
         <meta property="og:title" content="PasteCheck — Free Online Code Error Checker" />
         <meta property="og:description" content="Paste your JavaScript, TypeScript, Python, HTML or CSS and instantly see every error highlighted. Free, no sign-up, works on mobile." />
-        <meta property="og:image" content="/opengraph.jpg" />
+        <meta property="og:image" content="https://www.pastecheck.co.uk/opengraph.jpg" />
+        <link rel="canonical" href="https://www.pastecheck.co.uk/" />
       </Helmet>
 
       <div className="mx-auto w-full max-w-2xl px-5 flex flex-col flex-1">
@@ -284,7 +288,7 @@ export default function Landing() {
                     const data = await res.json();
                     if (data.url) window.location.href = data.url;
                   } catch {
-                    alert("Something went wrong. Please try again.");
+                    toast.error("Something went wrong. Please try again.");
                   }
                 }}
                 className="w-full rounded-xl py-3 text-sm font-semibold transition-all duration-150 active:scale-[0.98]"
@@ -301,10 +305,14 @@ export default function Landing() {
               <button
                 type="button"
                 onClick={async () => {
+                  const { data: { session } } = await supabase.auth.getSession();
                   try {
                     const res = await fetch("/api/create-checkout", {
                       method: "POST",
-                      headers: { "Content-Type": "application/json" },
+                      headers: {
+                        "Content-Type": "application/json",
+                        ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+                      },
                       body: JSON.stringify({ plan: "monthly" }),
                     });
                     const data = await res.json();

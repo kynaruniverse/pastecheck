@@ -16,7 +16,8 @@ export default function About() {
         <meta name="description" content="Learn what syntax errors are in JavaScript, Python, HTML and CSS — and how PasteCheck finds them instantly in your browser. No sign-up, no installs, works on mobile." />
         <meta property="og:title" content="What is a Syntax Error? How PasteCheck Finds & Explains Code Errors" />
         <meta property="og:description" content="Learn what syntax errors are in JavaScript, Python, HTML and CSS — and how PasteCheck finds them instantly in your browser. No sign-up, no installs, works on mobile." />
-        <meta property="og:image" content="/opengraph.jpg" />
+        <meta property="og:image" content="https://www.pastecheck.co.uk/opengraph.jpg" />
+        <link rel="canonical" href="https://www.pastecheck.co.uk/about" />
       </Helmet>
       <div className="mx-auto w-full max-w-2xl px-5 flex flex-col flex-1">
         <NavMenu />

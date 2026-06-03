@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useParams } from "wouter";
 import { Helmet } from "react-helmet-async";
 import type { LintResult, Language } from "@/lib/linter";
 import NavMenu from "@/components/NavMenu";
@@ -22,7 +22,8 @@ const LANG_COLOR: Record<Exclude<Language, "unknown">, string> = {
 
 export default function Shared() {
   const [location] = useLocation();
-  const id = location.split("/").pop();
+  const params = useParams<{ id: string }>();
+  const id = params.id || location.split("/").pop();
   const [data, setData] = useState<{ code: string; language: Language; lines: LintResult["lines"] } | null>(null);
   const [status, setStatus] = useState<"loading" | "found" | "notfound">("loading");
   const [expanded, setExpanded] = useState<Set<number>>(new Set());

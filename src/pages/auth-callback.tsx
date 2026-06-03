@@ -26,12 +26,12 @@ export default function AuthCallback() {
           window.location.href = "/login?confirmed=1";
         }
       } else {
-        // Normal sign in callback
+        // Normal sign in callback (OAuth or magic link session exchange)
         const { data } = await supabase.auth.getSession();
         if (data.session) {
           window.location.href = "/check";
         } else {
-          window.location.href = "/login";
+          window.location.href = "/";
         }
       }
     }

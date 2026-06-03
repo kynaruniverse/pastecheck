@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/lib/supabase";
 import NavMenu from "@/components/NavMenu";
 import Logo from "@/components/Logo";
@@ -48,6 +49,11 @@ export default function Login() {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center px-4" style={{ background: "hsl(220 8% 9%)" }}>
+      <Helmet>
+        <title>Sign In — PasteCheck</title>
+        <meta name="robots" content="noindex" />
+        <link rel="canonical" href="https://www.pastecheck.co.uk/login" />
+      </Helmet>
       <NavMenu />
       <div className="w-full max-w-sm flex flex-col gap-6">
 

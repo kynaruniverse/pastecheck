@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import NavMenu from "@/components/NavMenu";
 import { supabase } from "@/lib/supabase";
 
@@ -24,6 +25,11 @@ export default function ForgotPassword() {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center px-4" style={{ background: "hsl(220 8% 9%)" }}>
+      <Helmet>
+        <title>Reset Password — PasteCheck</title>
+        <meta name="robots" content="noindex" />
+        <link rel="canonical" href="https://www.pastecheck.co.uk/forgot-password" />
+      </Helmet>
       <NavMenu />
       <div className="w-full max-w-sm flex flex-col gap-5">
         <div className="text-center">
