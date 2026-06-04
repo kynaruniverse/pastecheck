@@ -414,15 +414,16 @@ function FileResultPanel({ fileResult, defaultOpen }: { fileResult: FileResult; 
               <p className="text-xs text-center py-2" style={{ color: "hsl(215 14% 42%)", borderTop: "1px solid hsl(220 13% 20%)" }}>
                 Tap a highlighted line to see details
               </p>
-              <div
+              <ul
+                role="list"
                 className="overflow-x-auto"
-                style={{ background: "hsl(220 8% 11%)", fontFamily: "var(--app-font-mono)", fontSize: "12.5px", lineHeight: "1.7" }}
+                style={{ background: "hsl(220 8% 11%)", fontFamily: "var(--app-font-mono)", fontSize: "12.5px", lineHeight: "1.7", listStyle: "none", margin: 0, padding: 0 }}
               >
                 {fileResult.result.lines.map((line, i) => {
                   const isFlagged = line.type !== "normal" && line.messages.length > 0;
                   const isOpen = expanded.has(i);
                   return (
-                    <div key={i}>
+                    <li key={i}>
                       <div
                         onClick={isFlagged ? () => toggleLine(i, line.type) : undefined}
                         className="flex gap-0 px-0"
@@ -474,10 +475,10 @@ function FileResultPanel({ fileResult, defaultOpen }: { fileResult: FileResult; 
                           ))}
                         </div>
                       )}
-                    </div>
+                    </li>
                   );
                 })}
-              </div>
+              </ul>
             </>
           )}
         </div>
@@ -1202,7 +1203,8 @@ export default function Home() {
                   <div className="flex items-center justify-between px-4 py-2 border-b" style={{ background: "hsl(220 8% 12%)", borderColor: "hsl(220 13% 22%)" }}>
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "hsl(215 14% 45%)" }}>Results</span>
-                      <button 
+                      <button
+                        type="button"
                         onClick={() => setGroupBySeverity(!groupBySeverity)}
                         className="text-[10px] font-semibold px-1.5 py-0.5 rounded"
                         style={{ background: "hsl(220 13% 20%)", color: "hsl(210 20% 78%)" }}
@@ -1552,7 +1554,7 @@ export default function Home() {
             style={{ background: "none", border: "none", cursor: "default", WebkitTapHighlightColor: "transparent" }}
           >
             <span className="text-xs" style={{ color: "hsl(215 14% 30%)" }}>
-              PasteCheck v2.33
+              PasteCheck v2.35
             </span>
             <span className="text-xs mt-1 block" style={{ color: "hsl(215 14% 26%)" }}>
               📱 Coded entirely on an Android phone.

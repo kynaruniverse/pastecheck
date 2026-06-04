@@ -325,7 +325,7 @@ export default function Landing() {
                     const data = await res.json();
                     if (data.url) window.location.href = data.url;
                   } catch {
-                    alert("Something went wrong. Please try again.");
+                    toast.error("Something went wrong. Please try again.");
                   }
                 }}
                 className="w-full rounded-xl py-3 text-sm font-semibold transition-all duration-150 active:scale-[0.98]"
@@ -393,7 +393,7 @@ export default function Landing() {
             <a href="/about" className="text-xs" style={{ color: "hsl(215 14% 40%)", textDecoration: "none" }}>About</a>
           </div>
           <p className="text-xs" style={{ color: "hsl(215 14% 28%)" }}>© 2026 PasteCheck</p>
-          <p className="text-xs" style={{ color: "hsl(215 14% 26%)" }}>📱 Coded entirely on an Android phone. · v2.34</p>
+          <p className="text-xs" style={{ color: "hsl(215 14% 26%)" }}>📱 Coded entirely on an Android phone. · v2.35</p>
         </div>
 
       </div>
