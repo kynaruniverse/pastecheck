@@ -84,7 +84,7 @@ export default function Landing() {
           </div>
 
           <h1
-            className="text-4xl font-extrabold leading-tight tracking-tight mb-4"
+            className="text-4xl font-extrabold leading-tight tracking-tight mb-2"
             style={{ color: "hsl(210 20% 95%)" }}
           >
             Catch Code Errors
@@ -94,6 +94,13 @@ export default function Landing() {
               textShadow: "0 0 30px hsla(262,83%,75%,0.5)",
             }}>Instantly.</span>
           </h1>
+
+          <p
+            className="text-sm font-semibold tracking-widest uppercase mb-4"
+            style={{ color: "hsl(262 83% 70%)", letterSpacing: "0.12em" }}
+          >
+            Paste. Check. Ship.
+          </p>
 
           <p
             className="text-base leading-relaxed mb-6 max-w-sm"
@@ -386,7 +393,7 @@ export default function Landing() {
             <a href="/about" className="text-xs" style={{ color: "hsl(215 14% 40%)", textDecoration: "none" }}>About</a>
           </div>
           <p className="text-xs" style={{ color: "hsl(215 14% 28%)" }}>© 2026 PasteCheck</p>
-          <p className="text-xs" style={{ color: "hsl(215 14% 26%)" }}>📱 Coded entirely on an Android phone. · v2.33</p>
+          <p className="text-xs" style={{ color: "hsl(215 14% 26%)" }}>📱 Coded entirely on an Android phone. · v2.34</p>
         </div>
 
       </div>

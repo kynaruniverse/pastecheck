@@ -532,6 +532,8 @@ function SymbolBar({ onInsert }: { onInsert: (sym: string) => void }) {
 export default function Home() {
   // Pro state
   const [isPro, setIsPro] = useState<boolean>(false);
+  const [groupBySeverity, setGroupBySeverity] = useState(false);
+  const touchStart = useRef(0);
   const [proMode, setProMode] = useState<"single" | "multi">("single");
   const [tapCount, setTapCount] = useState(0);
   const [proToast, setProToast] = useState<string | null>(null);
@@ -547,6 +549,7 @@ export default function Home() {
     } catch {}
     return "";
   });
+
   const [result, setResult] = useState<LintResult | null>(null);
   const [checked, setChecked] = useState(false);
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
@@ -557,16 +560,7 @@ export default function Home() {
   const [symbolBarVisible, setSymbolBarVisible] = useState(false);
   const [textareaRows, setTextareaRows] = useState(16);
 
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
-        e.preventDefault();
-        if (!checked) handleCheck();
-      }
-    }
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [checked, handleCheck]);
+
 
   // Multi-file mode (pro)
   const [files, setFiles] = useState<FileEntry[]>([makeFile("File 1")]);
@@ -613,6 +607,13 @@ export default function Home() {
   const isLowConfidence = code.trim().split("\n").filter((l) => l.trim().length > 0).length < 5;
   const totalChecks = history.length;
   const showRateSignal = !isPro && totalChecks >= 5;
+
+  function handleTouchStart(e: React.TouchEvent) { touchStart.current = e.touches[0].clientX; }
+  function handleTouchEnd(e: React.TouchEvent) {
+    const touchEnd = e.changedTouches[0].clientX;
+    if (touchStart.current - touchEnd > 100) { /* Swipe left logic */ }
+    if (touchEnd - touchStart.current > 100) { /* Swipe right logic */ }
+  }
 
   // ── Dev toggle (tap version 5 times) ──────────────────────────────────────
   function handleVersionTap() {
@@ -817,7 +818,7 @@ export default function Home() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen w-full" style={{ background: "hsl(220 8% 9%)" }}>
+    <div className="min-h-screen w-full" style={{ background: "hsl(220 8% 9%)" }} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       <Toaster position="bottom-center" theme="dark" richColors />
       <div className={`mx-auto w-full px-4 pb-10 ${checked ? "max-w-5xl" : "max-w-2xl"}`}>
         <Helmet>
@@ -851,6 +852,10 @@ export default function Home() {
           <div className="flex items-center gap-2 mb-1">
             <Logo size="sm" />
             <h1 className="sr-only">PasteCheck</h1>
+            <p className="text-xs font-medium mb-4" style={{ color: "hsl(215 14% 55%)" }}>
+              You've run {totalChecks} {totalChecks === 1 ? "check" : "checks"} today.
+            </p>
+
             {isPro && (
               <span
                 className="text-xs font-bold px-2 py-0.5 rounded-full"
@@ -989,8 +994,11 @@ export default function Home() {
                       })()}
                     </div>
                     {code.length > 0 && (
-                      <span className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>{code.split("\n").length} lines · {code.length.toLocaleString()} chars</span>
-                    )}
+                      <div role="status" aria-live="polite" className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>
+                        {code.split("\n").length} lines · {code.length.toLocaleString()} chars
+                        </div>
+                      )}
+
                   </div>
                   <textarea
                     ref={textareaRef}
@@ -1022,7 +1030,7 @@ export default function Home() {
                 </p>
 
                 {inputError && (
-                  <div className="rounded-xl px-4 py-3 text-sm flex items-center gap-2" style={{ background: "rgba(234,179,8,0.08)", border: "1px solid rgba(234,179,8,0.25)", color: "rgb(253,224,71)" }}>
+                  <div role="alert" className="rounded-xl px-4 py-3 text-sm flex items-center gap-2" style={{ background: "rgba(234,179,8,0.08)", border: "1px solid rgba(234,179,8,0.25)", color: "rgb(253,224,71)" }}>
                     <span className="shrink-0">⚠</span><span>{inputError}</span>
                   </div>
                 )}
@@ -1121,8 +1129,11 @@ export default function Home() {
                         })()}
                       </div>
                       {code.length > 0 && (
-                      <span className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>{code.split("\n").length} lines · {code.length.toLocaleString()} chars</span>
-                    )}
+                        <div role="status" aria-live="polite" className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>
+                          {code.split("\n").length} lines · {code.length.toLocaleString()} chars
+                        </div>
+                      )}
+
                     </div>
                     <textarea
                       ref={textareaRef}
@@ -1155,11 +1166,13 @@ export default function Home() {
                 <div className="flex flex-col gap-4 md:flex-1">
                 <div className="flex items-center justify-between">
                   <div className="flex gap-3 flex-1">
-                    <div className="flex-1 rounded-xl px-4 py-3 flex flex-col items-center justify-center" style={{ background: "rgba(220, 38, 38, 0.12)", border: "1px solid rgba(220,38,38,0.25)" }}>
+                    <div role="status" aria-label={`${errorCount} ${errorCount === 1 ? "error" : "errors"}`} className="flex-1 rounded-xl px-4 py-3 flex flex-col items-center justify-center" style={{ background: "rgba(220, 38, 38, 0.12)", border: "1px solid rgba(220,38,38,0.25)" }}>
                       <span className="text-2xl font-bold" style={{ color: "rgb(248,113,113)" }}>{errorCount}</span>
                       <span className="text-xs mt-0.5" style={{ color: "rgb(248,113,113)", opacity: 0.85 }}>{errorCount === 1 ? "Error" : "Errors"}</span>
                     </div>
-                    <div className="flex-1 rounded-xl px-4 py-3 flex flex-col items-center justify-center" style={{ background: "rgba(234,179,8,0.10)", border: "1px solid rgba(234,179,8,0.22)" }}>
+
+                    <div role="status" aria-label={`${warningCount} ${warningCount === 1 ? "warning" : "warnings"}`} className="flex-1 rounded-xl px-4 py-3 flex flex-col items-center justify-center" style={{ background: "rgba(234,179,8,0.10)", border: "1px solid rgba(234,179,8,0.22)" }}>
+
                       <span className="text-2xl font-bold" style={{ color: "rgb(253,224,71)" }}>{warningCount}</span>
                       <span className="text-xs mt-0.5" style={{ color: "rgb(253,224,71)", opacity: 0.85 }}>{warningCount === 1 ? "Warning" : "Warnings"}</span>
                     </div>
@@ -1168,7 +1181,7 @@ export default function Home() {
                     <div className="ml-3 rounded-xl px-3 py-2 flex flex-col items-center justify-center shrink-0" style={{ background: "hsl(220 13% 16%)", border: "1px solid hsl(220 13% 24%)" }}>
                       <span className="text-xs font-semibold flex items-center gap-1" style={{ color: LANG_COLOR[result.language] }}>
                         {LANG_LABELS[result.language]}
-                        {isLowConfidence && <span title="Short snippet — language detection may be approximate" style={{ color: "hsl(215 14% 50%)", fontSize: "10px", fontWeight: "normal", cursor: "help" }}>?</span>}
+                        {isLowConfidence && (   <span      title="Short snippet — language detection may be approximate"      aria-label="Language detection may be approximate"     style={{ color: "hsl(215 14% 50%)", fontSize: "10px", fontWeight: "normal", cursor: "help" }}   >?</span> )}
                       </span>
                       <span className="text-xs mt-0.5" style={{ color: "hsl(215 14% 45%)" }}>detected</span>
                     </div>
@@ -1185,21 +1198,35 @@ export default function Home() {
                   <p className="text-xs text-center" style={{ color: "hsl(215 14% 42%)" }}>Tap a highlighted line to see details</p>
                 )}
 
-                <div className="rounded-xl overflow-hidden border" style={{ borderColor: "hsl(220 13% 22%)" }}>
+                <div role="region" aria-label="Code check results" className="rounded-xl overflow-hidden border" style={{ borderColor: "hsl(220 13% 22%)" }}>
                   <div className="flex items-center justify-between px-4 py-2 border-b" style={{ background: "hsl(220 8% 12%)", borderColor: "hsl(220 13% 22%)" }}>
-                    <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "hsl(215 14% 45%)" }}>Results</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "hsl(215 14% 45%)" }}>Results</span>
+                      <button 
+                        onClick={() => setGroupBySeverity(!groupBySeverity)}
+                        className="text-[10px] font-semibold px-1.5 py-0.5 rounded"
+                        style={{ background: "hsl(220 13% 20%)", color: "hsl(210 20% 78%)" }}
+                      >
+                        {groupBySeverity ? "Grouped" : "Default"}
+                      </button>
+                    </div>
                     <span className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>{result!.lines.length} lines</span>
                   </div>
-                  <div className="overflow-x-auto" style={{ background: "hsl(220 8% 11%)", fontFamily: "var(--app-font-mono)", fontSize: "12.5px", lineHeight: "1.7" }}>
+
+                  <ul className="overflow-x-auto" role="list" style={{ background: "hsl(220 8% 11%)", fontFamily: "var(--app-font-mono)", fontSize: "12.5px", lineHeight: "1.7", listStyle: "none", margin: 0, padding: 0 }}>
                     {result!.lines
                       .map((line, i) => ({ line, i }))
                       .map(({ line, i }) => {
                       const isFlagged = line.type !== "normal" && line.messages.length > 0;
                       const isOpen = expanded.has(i);
                       return (
-                        <div key={i}>
+                        <li key={i}>
                           <div
                             onClick={isFlagged ? () => toggleExpanded(i, line.type) : undefined}
+                            onKeyDown={isFlagged ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleExpanded(i, line.type); } } : undefined}
+                            role={isFlagged ? "button" : undefined}
+                            tabIndex={isFlagged ? 0 : undefined}
+                            aria-expanded={isFlagged ? expanded.has(i) : undefined}
                             className="flex gap-0 px-0"
                             style={{
                               background: line.type === "error" ? "rgba(220,38,38,0.14)" : line.type === "warning" ? "rgba(234,179,8,0.10)" : "transparent",
@@ -1226,10 +1253,10 @@ export default function Home() {
                               ))}
                             </div>
                           )}
-                        </div>
+                        </li>
                       );
                     })}
-                  </div>
+                  </ul>
                 </div>
 
                 {errorCount === 0 && warningCount === 0 && result !== null && prevErrorCount.current > 0 && (
@@ -1408,7 +1435,7 @@ export default function Home() {
                 )}
 
                 {multiInputError && (
-                  <div className="rounded-xl px-4 py-3 text-sm flex items-center gap-2" style={{ background: "rgba(234,179,8,0.08)", border: "1px solid rgba(234,179,8,0.25)", color: "rgb(253,224,71)" }}>
+                  <div role="alert" className="rounded-xl px-4 py-3 text-sm flex items-center gap-2" style={{ background: "rgba(234,179,8,0.08)", border: "1px solid rgba(234,179,8,0.25)", color: "rgb(253,224,71)" }}>
                     <span className="shrink-0">⚠</span><span>{multiInputError}</span>
                   </div>
                 )}
@@ -1424,11 +1451,12 @@ export default function Home() {
               <div className="flex flex-col gap-4">
                 {/* Summary bar */}
                 <div className="flex gap-3">
-                  <div className="flex-1 rounded-xl px-4 py-3 flex flex-col items-center justify-center" style={{ background: "rgba(220,38,38,0.12)", border: "1px solid rgba(220,38,38,0.25)" }}>
+                  <div role="status" aria-label={`${totalErrors} ${totalErrors === 1 ? "error" : "errors"}`} className="flex-1 rounded-xl px-4 py-3 flex flex-col items-center justify-center" style={{ background: "rgba(220,38,38,0.12)", border: "1px solid rgba(220,38,38,0.25)" }}>
                     <span className="text-2xl font-bold" style={{ color: "rgb(248,113,113)" }}>{totalErrors}</span>
                     <span className="text-xs mt-0.5" style={{ color: "rgb(248,113,113)", opacity: 0.85 }}>{totalErrors === 1 ? "Error" : "Errors"}</span>
                   </div>
-                  <div className="flex-1 rounded-xl px-4 py-3 flex flex-col items-center justify-center" style={{ background: "rgba(234,179,8,0.10)", border: "1px solid rgba(234,179,8,0.22)" }}>
+
+                  <div aria-label={`${totalWarnings} ${totalWarnings === 1 ? "warning" : "warnings"}`} className="flex-1 rounded-xl px-4 py-3 flex flex-col items-center justify-center" style={{ background: "rgba(234,179,8,0.10)", border: "1px solid rgba(234,179,8,0.22)" }}>
                     <span className="text-2xl font-bold" style={{ color: "rgb(253,224,71)" }}>{totalWarnings}</span>
                     <span className="text-xs mt-0.5" style={{ color: "rgb(253,224,71)", opacity: 0.85 }}>{totalWarnings === 1 ? "Warning" : "Warnings"}</span>
                   </div>
