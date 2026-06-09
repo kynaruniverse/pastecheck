@@ -479,47 +479,6 @@ function FileResultPanel({ fileResult, defaultOpen }: { fileResult: FileResult; 
   );
 }
 
-// ─── Symbol bar ───────────────────────────────────────────────────────────────
-
-const SYMBOLS = ["{", "}", "[", "]", "(", ")", ":", ";", "=>", '"', "'", "=", ".", ",", "!"];
-
-function SymbolBar({ onInsert }: { onInsert: (sym: string) => void }) {
-  return (
-    <div
-      className="md:hidden flex items-center gap-1 overflow-x-auto px-2 py-1.5"
-      style={{
-        background: "hsl(220 8% 12%)",
-        borderTop: "1px solid hsl(220 13% 22%)",
-        borderBottom: "1px solid hsl(220 13% 22%)",
-        WebkitOverflowScrolling: "touch" as any,
-        scrollbarWidth: "none" as any,
-      }}
-    >
-      {SYMBOLS.map((sym) => (
-        <button
-          key={sym}
-          type="button"
-          onPointerDown={(e) => {
-            e.preventDefault();
-            onInsert(sym);
-          }}
-          className="shrink-0 rounded-lg px-3 py-1.5 text-sm font-mono font-semibold transition-all active:scale-90"
-          style={{
-            background: "hsl(220 13% 20%)",
-            color: "hsl(210 20% 82%)",
-            border: "1px solid hsl(220 13% 28%)",
-            cursor: "pointer",
-            minWidth: "36px",
-            textAlign: "center",
-          }}
-        >
-          {sym}
-        </button>
-      ))}
-    </div>
-  );
-}
-
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function Home() {
@@ -530,6 +489,8 @@ export default function Home() {
   const [proMode, setProMode] = useState<"single" | "multi">("single");
   const [tapCount, setTapCount] = useState(0);
   const [proToast, setProToast] = useState<string | null>(null);
+  const [shareAttempted, setShareAttempted] = useState(false);
+
   
   // Single-file mode (free)
   const [code, setCode] = useState(() => {
@@ -550,7 +511,6 @@ export default function Home() {
   const [checking, setChecking] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const prevErrorCount = useRef<number>(0);
-  const [symbolBarVisible, setSymbolBarVisible] = useState(false);
   const [textareaRows, setTextareaRows] = useState(16);
 
 
@@ -637,21 +597,7 @@ export default function Home() {
     if (inputError) setInputError(null);
   }
 
-  function handleSymbolInsert(sym: string) {
-    const el = textareaRef.current;
-    if (!el) return;
-    const start = el.selectionStart ?? 0;
-    const end = el.selectionEnd ?? 0;
-    const newCode = code.slice(0, start) + sym + code.slice(end);
-    setCode(newCode);
-    requestAnimationFrame(() => {
-      el.focus();
-      el.setSelectionRange(start + sym.length, start + sym.length);
-    });
-  }
-
   const handleCheck = useCallback(() => {
-    setSymbolBarVisible(false);
     if (!code.trim()) { setInputError("Please paste some code first"); return; }
     if (code.length > 100000) { setInputError("That file is too large to check — please paste under 100KB of code."); return; }
     if (code.split("\n").length > 3000) { setInputError("Too many lines — please paste under 3,000 lines of code."); return; }
@@ -1021,8 +967,6 @@ export default function Home() {
                     ref={textareaRef}
                     value={code}
                     onChange={handleCodeChange}
-                    onFocus={() => setSymbolBarVisible(true)}
-                    onBlur={() => setSymbolBarVisible(false)}
                     placeholder="// Paste your code here..."
                     rows={textareaRows}
                     autoFocus
@@ -1039,7 +983,6 @@ export default function Home() {
                       lineHeight: "1.7",
                     }}
                   />
-                  {symbolBarVisible && <SymbolBar onInsert={handleSymbolInsert} />}
                 </div>
 
                 <p className="text-xs text-center" style={{ color: "hsl(215 14% 38%)" }}>
