@@ -68,16 +68,6 @@ function makeFile(name = ""): FileEntry {
   return { id: makeId(), name, code: "" };
 }
 
-// ─── Pro gate ─────────────────────────────────────────────────────────────────
-
-function getIsPro(): boolean {
-  try {
-    return localStorage.getItem("pastecheck_pro") === "true";
-  } catch {
-    return false;
-  }
-}
-
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 function InAppSurvey({ onDismiss }: { onDismiss: () => void }) {
@@ -576,7 +566,6 @@ export default function Home() {
   const [sharing, setSharing] = useState(false);
 
   // Upsell triggers
-  const [shareAttempted, setShareAttempted] = useState(false);
   const [multiAttempted, setMultiAttempted] = useState(false);
   const upgradeRef = useRef<HTMLDivElement>(null);
 
@@ -587,9 +576,13 @@ export default function Home() {
       return stored ? JSON.parse(stored) : [];
     } catch { return []; }
   });
+  const [totalChecks, setTotalChecks] = useState(() => {
+    try { return parseInt(localStorage.getItem("pastecheck_total") || "0", 10); } catch { return 0; }
+  });
   const [showHistory, setShowHistory] = useState(false);
   const [showSurvey, setShowSurvey] = useState(false);
   const [surveyDismissed, setSurveyDismissed] = useState(false);
+
 
   // Sync Pro status from Supabase on mount
   useEffect(() => {
@@ -609,10 +602,9 @@ export default function Home() {
     syncPro();
   }, []);
 
-  const errorCount = useMemo(() => result?.lines.filter((l) => l.type === "error").length ?? 0, [result]);
+    const errorCount = useMemo(() => result?.lines.filter((l) => l.type === "error").length ?? 0, [result]);
   const warningCount = useMemo(() => result?.lines.filter((l) => l.type === "warning").length ?? 0, [result]);
   const isLowConfidence = code.trim().split("\n").filter((l) => l.trim().length > 0).length < 5;
-  const totalChecks = history.length;
   const showRateSignal = !isPro && totalChecks >= 5;
 
   function handleTouchStart(e: React.TouchEvent) { touchStart.current = e.touches[0].clientX; }
@@ -667,41 +659,43 @@ export default function Home() {
     if (detectedLang === "unknown") { setInputError("No code detected — please paste JavaScript, Python or HTML code."); return; }
     setChecking(true);
     setTimeout(() => {
-    prevErrorCount.current = result?.lines.filter((l) => l.type === "error").length ?? 0;
-    const r = lint(code);
-    setResult(r);
-    setChecked(true);
-    setTextareaRows(6);
-    const firstThree = new Set(
-      r.lines
-        .map((l, i) => ({ l, i }))
-        .filter(({ l }) => l.type !== "normal" && l.messages.length > 0)
-        .slice(0, 3)
-        .map(({ i }) => i)
-    );
-    setExpanded(firstThree);
-    setInputError(null);
-    setChecking(false);
-        setHistory((prev) => {
-          const updated = [{ code, result: r, timestamp: Date.now() }, ...prev].slice(0, isPro ? 100 : 5);
-          
-          // Defer side effects to safely break out of the pure render phase
-          setTimeout(() => {
-            try { localStorage.setItem("pastecheck_history", JSON.stringify(updated)); } catch {}
-            const checkNumber = updated.length;
-            if ([3, 5, 10].includes(checkNumber)) {
-              if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
-                (window as any).gtag("event", "check_milestone", { event_category: "Engagement", event_label: `check_${checkNumber}` });
-              }
-            }
-            if (checkNumber === 5 && !surveyDismissed) setShowSurvey(true);
-          }, 0);
+      prevErrorCount.current = result?.lines.filter((l) => l.type === "error").length ?? 0;
+      const r = lint(code);
+      setResult(r);
+      setChecked(true);
+      setTextareaRows(6);
+      const firstThree = new Set(
+        r.lines
+          .map((l, i) => ({ l, i }))
+          .filter(({ l }) => l.type !== "normal" && l.messages.length > 0)
+          .slice(0, 3)
+          .map(({ i }) => i)
+      );
+      setExpanded(firstThree);
+      setInputError(null);
+      setChecking(false);
+      
+      const newTotal = totalChecks + 1;
+      setTotalChecks(newTotal);
+      
+      const updatedHistory = [{ code, result: r, timestamp: Date.now() }, ...history].slice(0, isPro ? 100 : 5);
+      setHistory(updatedHistory);
+      
+      try {
+        localStorage.setItem("pastecheck_history", JSON.stringify(updatedHistory));
+        localStorage.setItem("pastecheck_total", String(newTotal));
+      } catch {}
+      
+      if ([3, 5, 10].includes(newTotal)) {
+        if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
+          (window as any).gtag("event", "check_milestone", { event_category: "Engagement", event_label: `check_${newTotal}` });
+        }
+      }
+      if (newTotal === 5 && !surveyDismissed) setShowSurvey(true);
+      
+    }, 0);
+  }, [code, result, isPro, surveyDismissed, history, totalChecks]);
 
-          return updated;
-        });
-  }, 0);
-  }, [code, result, isPro, surveyDismissed]);
-  
   // Ctrl+Enter / Cmd+Enter keyboard shortcut
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -1585,7 +1579,7 @@ export default function Home() {
             style={{ background: "none", border: "none", cursor: "default", WebkitTapHighlightColor: "transparent" }}
           >
             <span className="text-xs" style={{ color: "hsl(215 14% 30%)" }}>
-              PasteCheck v2.35
+              PasteCheck v2.36
             </span>
             <span className="text-xs mt-1 block" style={{ color: "hsl(215 14% 26%)" }}>
               📱 Coded entirely on an Android phone.
