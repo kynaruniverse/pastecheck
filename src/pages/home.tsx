@@ -376,7 +376,9 @@ function FileResultPanel({ fileResult, defaultOpen }: { fileResult: FileResult; 
             >
               {LANG_LABELS[lang as Exclude<Language, "unknown">]}
               {isLowConfidence && (
-                <span title="Short snippet — language detection may be approximate" style={{ color: "hsl(215 14% 50%)", fontSize: "10px", fontWeight: "normal" }}>?</span>
+                <span aria-label="Language detection may be approximate" style={{ color: "hsl(215 14% 50%)", fontSize: "10px", fontWeight: "normal", cursor: "help" }} title="Short snippet — language detection may be approximate">
+                  <span aria-hidden="true">?</span>
+                </span>
               )}
             </span>
           )}
@@ -585,6 +587,18 @@ export default function Home() {
   const [showSurvey, setShowSurvey] = useState(false);
   const [surveyDismissed, setSurveyDismissed] = useState(false);
 
+  // Ctrl+Enter / Cmd+Enter keyboard shortcut
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        if (!checked) handleCheck();
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [checked, handleCheck]);
+
   // Sync Pro status from Supabase on mount
   useEffect(() => {
     async function syncPro() {
@@ -653,6 +667,7 @@ export default function Home() {
   }
 
   const handleCheck = useCallback(() => {
+    setSymbolBarVisible(false);
     if (!code.trim()) { setInputError("Please paste some code first"); return; }
     if (code.length > 100000) { setInputError("That file is too large to check — please paste under 100KB of code."); return; }
     if (code.split("\n").length > 3000) { setInputError("Too many lines — please paste under 3,000 lines of code."); return; }
@@ -854,7 +869,7 @@ export default function Home() {
             <Logo size="sm" />
             <h1 className="sr-only">PasteCheck</h1>
             <p className="text-xs font-medium mb-4" style={{ color: "hsl(215 14% 55%)" }}>
-              You've run {totalChecks} {totalChecks === 1 ? "check" : "checks"} today.
+              {totalChecks} {totalChecks === 1 ? "check" : "checks"} run.
             </p>
 
             {isPro && (
@@ -1182,7 +1197,11 @@ export default function Home() {
                     <div className="ml-3 rounded-xl px-3 py-2 flex flex-col items-center justify-center shrink-0" style={{ background: "hsl(220 13% 16%)", border: "1px solid hsl(220 13% 24%)" }}>
                       <span className="text-xs font-semibold flex items-center gap-1" style={{ color: LANG_COLOR[result.language] }}>
                         {LANG_LABELS[result.language]}
-                        {isLowConfidence && (   <span      title="Short snippet — language detection may be approximate"      aria-label="Language detection may be approximate"     style={{ color: "hsl(215 14% 50%)", fontSize: "10px", fontWeight: "normal", cursor: "help" }}   >?</span> )}
+                        {isLowConfidence && (
+                          <span aria-label="Language detection may be approximate" title="Short snippet — language detection may be approximate" style={{ color: "hsl(215 14% 50%)", fontSize: "10px", fontWeight: "normal", cursor: "help" }}>
+                            <span aria-hidden="true">?</span>
+                          </span>
+                        )}
                       </span>
                       <span className="text-xs mt-0.5" style={{ color: "hsl(215 14% 45%)" }}>detected</span>
                     </div>
@@ -1218,6 +1237,11 @@ export default function Home() {
                   <ul className="overflow-x-auto" role="list" style={{ background: "hsl(220 8% 11%)", fontFamily: "var(--app-font-mono)", fontSize: "12.5px", lineHeight: "1.7", listStyle: "none", margin: 0, padding: 0 }}>
                     {result!.lines
                       .map((line, i) => ({ line, i }))
+                      .sort((a, b) => {
+                        if (!groupBySeverity) return 0;
+                        const rank = (t: string) => t === "error" ? 0 : t === "warning" ? 1 : 2;
+                        return rank(a.line.type) - rank(b.line.type);
+                      })
                       .map(({ line, i }) => {
                       const isFlagged = line.type !== "normal" && line.messages.length > 0;
                       const isOpen = expanded.has(i);

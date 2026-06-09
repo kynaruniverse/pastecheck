@@ -80,7 +80,12 @@ export function detectLanguage(code: string): Language {
   if (
     (
       /^<!doctype\s+html/i.test(trimmed) ||
-      /^<html[\s>]/i.test(trimmed)
+      /^<html[\s>]/i.test(trimmed) ||
+      (
+        /^<[a-zA-Z][\w-]*[\s\/>]/.test(trimmed) &&
+        /<\/[a-zA-Z][\w-]*>/.test(trimmed) &&
+        !/\b(export|import|const|let|var|function|class|return|=>)\b/.test(trimmed)
+      )
     ) &&
     !/\b(export|import)\b/.test(trimmed)
   ) {
@@ -111,7 +116,8 @@ export function detectLanguage(code: string): Language {
     /\bclass\s+\w+\s*[:(]/.test(trimmed) ||
     /^\s*elif\b/m.test(trimmed) ||
     /^\s*except\s*[:\w]/m.test(trimmed) ||
-    /\bprint\s*\(/.test(trimmed)
+    /\bprint\s*\(/.test(trimmed) ||
+    /\bprint\s+[^(=]/.test(trimmed)
   ) {
     return "python";
   }
@@ -421,8 +427,8 @@ try {
       // Check for bare assignment: = not preceded or followed by = or ! or + or - or * or / or < or >
       // Also exclude compound assignments like +=, -=, *=, /=, %=, **=
       if (
-        /(?:^|[^=!<>])=(?!=)/.test(condContent) &&
-        !/[+\-*\/%&|^]=/.test(condContent)
+        /(?:^|[^=!<>+\-*\/%&|^])=(?!=)/.test(condContent) &&
+        !/[<>]=/.test(condContent)
       ) {
         ann.add(idx, "warning", "Possible assignment inside a condition — did you mean '===' instead of '='? Assignment in a condition always evaluates to the assigned value, which is rarely what you intend.");
       }
@@ -440,33 +446,33 @@ try {
   );
   let insideAsyncFn = false;
   let braceDepth = 0;
-  let asyncBraceStart = 0;
+  let asyncBraceStart = -1;
   rawLines.forEach((text, idx) => {
     const trimmed = text.trim();
     if (trimmed.startsWith("//")) return;
-    if (/\basync\s+function\b|\basync\s+\w+\s*[=(]/.test(text)) {
-      insideAsyncFn = true;
-      asyncBraceStart = braceDepth;
+    // Count braces on this line first, then check for async fn entry
+    let lineOpenCount = 0;
+    let lineCloseCount = 0;
+    for (const ch of text) {
+      if (ch === "{") lineOpenCount++;
+      else if (ch === "}") lineCloseCount++;
     }
+    if (!insideAsyncFn && /\basync\s+function\b|\basync\s+\w+\s*[=(]/.test(text)) {
+      insideAsyncFn = true;
+      asyncBraceStart = braceDepth + lineOpenCount - lineCloseCount - 1;
+    }
+    braceDepth += lineOpenCount - lineCloseCount;
     if (insideAsyncFn) {
-      for (const ch of text) {
-        if (ch === "{") braceDepth++;
-        else if (ch === "}") braceDepth--;
-      }
       if (braceDepth <= asyncBraceStart) {
         insideAsyncFn = false;
-      }
-      asyncAwaitPattern.lastIndex = 0;
-      let m;
-      while ((m = asyncAwaitPattern.exec(text)) !== null) {
-        const before = text.slice(0, m.index).trimEnd();
-        if (/\bawait\b/.test(before.split(/[;{]/).pop() ?? "")) continue;
-        ann.add(idx, "warning", `'${m[1]}()' is called without 'await' inside an async function — add 'await' before this call or the Promise will not be resolved before moving to the next line`);
-      }
-    } else {
-      for (const ch of text) {
-        if (ch === "{") braceDepth++;
-        else if (ch === "}") braceDepth--;
+      } else {
+        asyncAwaitPattern.lastIndex = 0;
+        let m;
+        while ((m = asyncAwaitPattern.exec(text)) !== null) {
+          const before = text.slice(0, m.index).trimEnd();
+          if (/\bawait\b/.test(before.split(/[;{]/).pop() ?? "")) continue;
+          ann.add(idx, "warning", `'${m[1]}()' is called without 'await' inside an async function — add 'await' before this call or the Promise will not be resolved before moving to the next line`);
+        }
       }
     }
   });
