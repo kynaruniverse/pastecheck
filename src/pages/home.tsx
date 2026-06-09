@@ -571,6 +571,10 @@ export default function Home() {
   const [multiChecked, setMultiChecked] = useState(false);
   const [multiInputError, setMultiInputError] = useState<string | null>(null);
 
+  // Share state (Hoisted to prevent use-before-declaration in handleReset)
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [sharing, setSharing] = useState(false);
+
   // Upsell triggers
   const [shareAttempted, setShareAttempted] = useState(false);
   const [multiAttempted, setMultiAttempted] = useState(false);
@@ -586,18 +590,6 @@ export default function Home() {
   const [showHistory, setShowHistory] = useState(false);
   const [showSurvey, setShowSurvey] = useState(false);
   const [surveyDismissed, setSurveyDismissed] = useState(false);
-
-  // Ctrl+Enter / Cmd+Enter keyboard shortcut
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
-        e.preventDefault();
-        if (!checked) handleCheck();
-      }
-    }
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [checked, handleCheck]);
 
   // Sync Pro status from Supabase on mount
   useEffect(() => {
@@ -690,20 +682,37 @@ export default function Home() {
     setExpanded(firstThree);
     setInputError(null);
     setChecking(false);
-    setHistory((prev) => {
-      const updated = [{ code, result: r, timestamp: Date.now() }, ...prev].slice(0, isPro ? 100 : 5);
-      try { localStorage.setItem("pastecheck_history", JSON.stringify(updated)); } catch {}
-      const checkNumber = updated.length;
-      if ([3, 5, 10].includes(checkNumber)) {
-        if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
-          (window as any).gtag("event", "check_milestone", { event_category: "Engagement", event_label: `check_${checkNumber}` });
-        }
-      }
-      if (checkNumber === 5 && !surveyDismissed) setShowSurvey(true);
-      return updated;
-    });
+        setHistory((prev) => {
+          const updated = [{ code, result: r, timestamp: Date.now() }, ...prev].slice(0, isPro ? 100 : 5);
+          
+          // Defer side effects to safely break out of the pure render phase
+          setTimeout(() => {
+            try { localStorage.setItem("pastecheck_history", JSON.stringify(updated)); } catch {}
+            const checkNumber = updated.length;
+            if ([3, 5, 10].includes(checkNumber)) {
+              if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
+                (window as any).gtag("event", "check_milestone", { event_category: "Engagement", event_label: `check_${checkNumber}` });
+              }
+            }
+            if (checkNumber === 5 && !surveyDismissed) setShowSurvey(true);
+          }, 0);
+
+          return updated;
+        });
   }, 0);
   }, [code, result, isPro, surveyDismissed]);
+  
+  // Ctrl+Enter / Cmd+Enter keyboard shortcut
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        if (!checked) handleCheck();
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [checked, handleCheck]);  
 
   function handleReset() {
     setCode("");
@@ -730,8 +739,6 @@ export default function Home() {
   }
 
   // ── Share handler ──────────────────────────────────────────────────────────
-  const [shareUrl, setShareUrl] = useState<string | null>(null);
-  const [sharing, setSharing] = useState(false);
 
   async function handleShare() {
     if (!result) return;
