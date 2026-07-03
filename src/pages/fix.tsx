@@ -23,6 +23,23 @@ export default function FixPage() {
         <meta property="og:title" content={`${config.title} | PasteCheck`} />
         <meta property="og:description" content={config.summary} />
         <meta property="og:image" content="https://www.pastecheck.co.uk/opengraph.jpg" />
+        <meta property="og:url" content={`https://www.pastecheck.co.uk/fix/${config.slug}`} />
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${config.title} | PasteCheck`} />
+        <meta name="twitter:description" content={config.summary} />
+        <meta name="twitter:image" content="https://www.pastecheck.co.uk/opengraph.jpg" />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "TechArticle",
+            headline: config.title,
+            description: config.summary,
+            proficiencyLevel: "Beginner",
+            dependencies: config.language,
+            url: `https://www.pastecheck.co.uk/fix/${config.slug}`,
+          })}
+        </script>
       </Helmet>
 
       <NavMenu />

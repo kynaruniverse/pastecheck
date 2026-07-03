@@ -1,4 +1,4 @@
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 
 interface FixPageCTAProps {
   primaryCopy: string;
@@ -20,13 +20,13 @@ export default function FixPageCTA({ primaryCopy, secondaryLabel, secondaryHref 
         {primaryCopy}
       </button>
       {secondaryLabel && secondaryHref && (
-        <a
+        <Link
           href={secondaryHref}
           className="text-sm underline underline-offset-4"
           style={{ color: "#a78bfa" }}
         >
           {secondaryLabel}
-        </a>
+        </Link>
       )}
     </div>
   );

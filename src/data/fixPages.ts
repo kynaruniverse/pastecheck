@@ -192,7 +192,7 @@ const json = await response.json();`,
     summary:
       "This TypeError means you called something as a function, but JavaScript found it was undefined, null, a string, or an object instead. The variable exists — it just isn't a function.",
     whyItHappens:
-      "JavaScript is dynamically typed, so nothing stops you writing myVar() even if myVar holds a number or is undefined. When execution reaches that line, JavaScript checks the value and throws this error if it can't be called. Common causes: a typo in the function name, calling a method that doesn't exist on that data type, or calling a callback before it has been assigned.",
+      "JavaScript is dynamically typed, so nothing stops you writing myVar() even if myVar holds a number, a string, an object, or is undefined. Functions are just values in JavaScript — the parentheses () are what actually attempt to invoke whatever value sits before them. If that value isn't a function, JavaScript checks its type at the exact moment it tries to call it and throws this TypeError. This is different from a ReferenceError, which means the name doesn't exist at all — here, the name exists, it just isn't something you can call. The most common real-world trigger is calling an array method on something that turned out to be an object once the API actually responded, or calling a prop passed into a component before checking it was actually provided as a function.",
     brokenExample: `const user = {
   name: "Alice",
   greet: "Hello"
@@ -211,8 +211,10 @@ user.greet();`,
       "A typo in the function name — check spelling and capitalisation",
       "Calling a property that holds a string or number as if it were a function",
       "Using a method that doesn't exist on that type (e.g. .map() on an object instead of an array)",
-      "A callback parameter that was never passed in",
-      "Calling a function before it has been defined",
+      "A callback or prop parameter that was never passed in, so it defaults to undefined",
+      "Calling a function before it has been defined (hoisting doesn't apply to const/let function expressions)",
+      "An API response shape changed — a field that used to be a function reference is now a plain value",
+      "Destructuring a method off an object incorrectly, losing its `this` binding so it's called as a bare value",
     ],
     primaryCtaCopy: "Paste your code and find the exact line",
     secondaryCtaLabel: "See more JavaScript errors",
@@ -412,7 +414,7 @@ print(user.get("age", "not provided"))`,
     summary:
       "A Python SyntaxError means the interpreter found code it cannot parse. Something breaks Python's grammar rules — a missing colon, mismatched bracket, or invalid statement structure.",
     whyItHappens:
-      "Python parses your entire file before running any of it. If it finds a line it cannot understand grammatically, it stops immediately and reports a SyntaxError. The reported line is where Python gave up, but the actual mistake is often one or two lines above — a missing colon at the end of a def or if statement is the most common cause.",
+      "Python parses your entire file before running any of it — unlike some languages, it won't execute the first half of a script and then fail partway through. If it finds a line it cannot understand grammatically, it stops immediately and reports a SyntaxError before a single line has run. The reported line is where Python gave up, but the actual mistake is often one or two lines above — a missing colon at the end of a def, if, for, or while statement is the single most common cause, because Python needs that colon to know a new indented block is starting. Because Python enforces this at parse time rather than at the point of use, the same typo can produce wildly different-looking error messages depending on what comes after it in the file.",
     brokenExample: `def greet(name)
     print("Hello", name)
 
@@ -429,7 +431,9 @@ if name == "Alice":
       "Mismatched or unclosed brackets, parentheses, or quotes",
       "Using a Python 2 print statement (print 'hello') in Python 3",
       "An assignment inside a condition (if x = 1 instead of if x == 1)",
-      "Indenting a line that should not be indented",
+      "Indenting a line that should not be indented, or dedenting to a level that doesn't match any enclosing block",
+      "A keyword used as a variable name (e.g. naming a variable class or list)",
+      "A trailing comma or stray character left over from editing a line without re-reading it",
     ],
     primaryCtaCopy: "Paste your Python and find the exact syntax error",
     secondaryCtaLabel: "See more Python errors",
@@ -933,7 +937,7 @@ const app = express();`,
     summary:
       "An unclosed string literal means a string was opened with a quote but never closed. JavaScript reads everything after it as part of the string — including the rest of your code — until it reaches the end of the line and throws a SyntaxError.",
     whyItHappens:
-      "Strings in JavaScript must open and close with matching quote characters — single, double, or backtick. If the closing quote is missing, forgotten, or mismatched (opening with one type, closing with another), the parser never sees the end of the string. Everything on that line after the opening quote is consumed — including other code — and the error is thrown at the end of the line or when the parser encounters something completely invalid.",
+      "Strings in JavaScript must open and close with matching quote characters — single, double, or backtick. If the closing quote is missing, forgotten, or mismatched (opening with one type, closing with another), the parser never sees the end of the string. Everything on that line after the opening quote is consumed as string content — including what was meant to be real code — until the parser either finds a matching quote further down or runs out of line to read. Regular string literals in JavaScript cannot contain a raw line break, so a missing closing quote is usually caught fast, at the end of that same line. Template literals (backticks) are the exception — they can legally span multiple lines, so a missing closing backtick can silently swallow much more of the file before the error finally surfaces, which is why the reported line is often far from the real mistake.",
     brokenExample: `const message = "Hello, world;
 const name = "Alice";
 
@@ -945,9 +949,10 @@ const greeting = \`Welcome back, \${name}\`;`,
     commonCauses: [
       "Forgetting the closing quote at the end of a string",
       "Using a different quote type to close than to open",
-      "An apostrophe inside a single-quoted string without escaping it",
-      "A template literal with a missing closing backtick",
-      "Copy-pasting code that used smart quotes instead of straight quotes",
+      "An apostrophe inside a single-quoted string without escaping it (e.g. 'don't')",
+      "A template literal with a missing closing backtick — especially risky since it can span multiple lines undetected",
+      "Copy-pasting code that used smart/curly quotes (\u201c \u201d) instead of straight quotes",
+      "An unescaped quote character pasted in from user-generated content or a CMS field",
     ],
     primaryCtaCopy: "Paste your code and find unclosed strings instantly",
     secondaryCtaLabel: "See more JavaScript errors",
