@@ -89,76 +89,91 @@
     <loc>https://www.pastecheck.co.uk/fix/is-not-a-function-javascript</loc>
     <priority>0.8</priority>
     <lastmod>2026-05-28</lastmod>
+    <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://www.pastecheck.co.uk/fix/referenceerror-not-defined-javascript</loc>
     <priority>0.8</priority>
     <lastmod>2026-05-28</lastmod>
+    <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://www.pastecheck.co.uk/fix/cannot-set-properties-of-null-javascript</loc>
     <priority>0.8</priority>
     <lastmod>2026-05-28</lastmod>
+    <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://www.pastecheck.co.uk/fix/maximum-call-stack-size-exceeded-javascript</loc>
     <priority>0.8</priority>
     <lastmod>2026-05-28</lastmod>
+    <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://www.pastecheck.co.uk/fix/syntaxerror-unexpected-identifier-javascript</loc>
     <priority>0.8</priority>
     <lastmod>2026-05-28</lastmod>
+    <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://www.pastecheck.co.uk/fix/python-nameerror-not-defined</loc>
     <priority>0.8</priority>
     <lastmod>2026-05-28</lastmod>
+    <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://www.pastecheck.co.uk/fix/python-keyerror</loc>
     <priority>0.8</priority>
     <lastmod>2026-05-28</lastmod>
+    <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://www.pastecheck.co.uk/fix/python-syntaxerror-invalid-syntax</loc>
     <priority>0.8</priority>
     <lastmod>2026-05-28</lastmod>
+    <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://www.pastecheck.co.uk/fix/html-unclosed-tag</loc>
     <priority>0.8</priority>
     <lastmod>2026-05-28</lastmod>
+    <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://www.pastecheck.co.uk/fix/javascript-cors-error</loc>
     <priority>0.8</priority>
     <lastmod>2026-05-28</lastmod>
+    <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://www.pastecheck.co.uk/fix/uncaught-typeerror-javascript</loc>
     <priority>0.8</priority>
     <lastmod>2026-05-28</lastmod>
+    <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://www.pastecheck.co.uk/fix/python-typeerror</loc>
     <priority>0.8</priority>
     <lastmod>2026-05-28</lastmod>
+    <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://www.pastecheck.co.uk/fix/python-attributeerror</loc>
     <priority>0.8</priority>
     <lastmod>2026-05-28</lastmod>
+    <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://www.pastecheck.co.uk/fix/html-missing-alt-attribute</loc>
     <priority>0.8</priority>
     <lastmod>2026-05-28</lastmod>
+    <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://www.pastecheck.co.uk/fix/javascript-promise-unhandled-rejection</loc>
     <priority>0.8</priority>
     <lastmod>2026-05-28</lastmod>
+    <changefreq>monthly</changefreq>
   </url>
 
 <url>
@@ -327,6 +342,48 @@
   <url>
     <loc>https://www.pastecheck.co.uk/fix/python-zerodivisionerror</loc>
     <lastmod>2026-05-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://www.pastecheck.co.uk/fix/chatgpt-code-has-errors</loc>
+    <lastmod>2026-07-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://www.pastecheck.co.uk/fix/ai-generated-code-not-working</loc>
+    <lastmod>2026-07-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://www.pastecheck.co.uk/fix/check-claude-copilot-code-errors</loc>
+    <lastmod>2026-07-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://www.pastecheck.co.uk/fix/vibe-coding-errors-explained</loc>
+    <lastmod>2026-07-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://www.pastecheck.co.uk/fix/ai-built-app-keeps-breaking</loc>
+    <lastmod>2026-07-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://www.pastecheck.co.uk/fix/how-to-read-an-error-message</loc>
+    <lastmod>2026-07-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>

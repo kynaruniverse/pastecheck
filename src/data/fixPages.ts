@@ -465,6 +465,8 @@ if name == "Alice":
       "Self-closing void elements like img or input given an unnecessary closing tag",
     ],
     primaryCtaCopy: "Paste your HTML and find unclosed tags instantly",
+    secondaryCtaLabel: "See more HTML errors",
+    secondaryCtaHref: "/fix/html-missing-alt-attribute",
     searchIntent: "error-fix",
   },
   {
@@ -1631,5 +1633,211 @@ print(average([]))  # returns 0 safely`,
     secondaryCtaLabel: "See more Python errors",
     secondaryCtaHref: "/fix/python-valueerror",
     searchIntent: "error-fix",
+  },
+  
+  {
+    title: "Why does ChatGPT keep giving me code with errors?",
+    slug: "chatgpt-code-has-errors",
+    language: "JavaScript",
+    summary:
+      "AI chat tools generate code by predicting likely-looking text, not by running it. The code often looks correct and even explains itself confidently — but it can still contain real bugs, missing imports, or logic errors that only show up when you actually run it.",
+    whyItHappens:
+      "Language models produce code token by token based on patterns in their training data, not by executing it against a real interpreter. This means syntactically plausible code can still be functionally wrong — a variable referenced before it's defined, a package that doesn't exist, an API used the way it worked a version ago. The model has no feedback loop telling it the code failed, so it states the answer with the same confidence whether it's right or wrong. Pasting the output through a linter before running it catches what the AI has no way of catching itself.",
+    brokenExample: `// ChatGPT-generated snippet — looks complete
+function getTotal(items) {
+  let total = 0
+  for (i = 0; i < items.length; i++) {
+    total += items[i].price
+  }
+  return total
+}`,
+    fixedExample: `function getTotal(items) {
+  let total = 0;
+  for (let i = 0; i < items.length; i++) {
+    total += items[i].price;
+  }
+  return total;
+}`,
+    commonCauses: [
+      "Missing variable declarations — AI-generated loops sometimes omit let/const, creating accidental globals",
+      "APIs or methods described the way they worked in an older, more common version",
+      "Confident explanations that don't match what the code actually does",
+      "Copy-pasted code missing the surrounding context (imports, setup) the AI assumed you already had",
+      "Logic that looks right but was never actually executed before being shown to you",
+    ],
+    primaryCtaCopy: "Paste the code ChatGPT gave you and check it before running it",
+    secondaryCtaLabel: "See more JavaScript errors",
+    secondaryCtaHref: "/fix/check-ai-generated-code-errors",
+    searchIntent: "debug-help",
+  },
+  {
+    title: "AI generated code not working — how to find out why",
+    slug: "ai-generated-code-not-working",
+    language: "JavaScript",
+    summary:
+      "When code from an AI tool doesn't run, the fastest way to find out why is to check it the same way you'd check any code — for undefined variables, missing awaits, and syntax mistakes. AI output isn't exempt from ordinary bugs.",
+    whyItHappens:
+      "Whether the code came from ChatGPT, Claude, Copilot, Cursor, or any other assistant, it's still just JavaScript, Python, or HTML once it's in your editor — the same rules apply. AI tools generate longer blocks of code faster than a human typically types, which means small mistakes (a missing await, an unclosed bracket, a typo'd variable name) are easy to miss on a quick read, especially if you don't fully understand every line yet.",
+    brokenExample: `// AI output — runs partway then fails silently
+async function loadUser(id) {
+  const res = fetch("/api/users/" + id);
+  const user = res.json();
+  return user.name;
+}`,
+    fixedExample: `async function loadUser(id) {
+  const res = await fetch("/api/users/" + id);
+  const user = await res.json();
+  return user.name;
+}`,
+    commonCauses: [
+      "Missing await keywords — one of the most common AI-generated mistakes",
+      "Code that depends on a package or setup step the AI didn't mention",
+      "A mismatch between what the AI assumed your data looks like and what it actually is",
+      "Copy-pasting only part of a longer AI response and missing a needed line",
+      "Outdated syntax or a deprecated method the AI still suggests",
+    ],
+    primaryCtaCopy: "Paste your AI-generated code and find the exact problem",
+    secondaryCtaLabel: "See more JavaScript errors",
+    secondaryCtaHref: "/fix/check-ai-generated-code-errors",
+    searchIntent: "debug-help",
+  },
+  {
+    title: "How to check Claude or Copilot code for errors before running it",
+    slug: "check-claude-copilot-code-errors",
+    language: "JavaScript",
+    summary:
+      "Code from any AI assistant — Claude, Copilot, Gemini, or others — benefits from a quick check before you run it, especially if you're still learning to read code yourself. A linter catches the mistakes an AI has no way to catch on its own.",
+    whyItHappens:
+      "AI coding assistants are trained to produce code that looks right, not to verify it runs correctly in your specific environment. They don't have access to your file structure, your installed packages, or your actual data — so they make reasonable assumptions that are sometimes wrong. The gap between 'looks right' and 'is right' is exactly where a linter is useful, because it checks the actual structure and logic of what you were given, not just how convincing the explanation sounded.",
+    brokenExample: `// AI-suggested code with a subtle scope bug
+function processItems(items) {
+  const results = []
+  items.forEach(item => {
+    if (item.valid) {
+      var total = item.price * item.qty
+    }
+    results.push(total)
+  })
+  return results
+}`,
+    fixedExample: `function processItems(items) {
+  const results = [];
+  items.forEach(item => {
+    let total = 0;
+    if (item.valid) {
+      total = item.price * item.qty;
+    }
+    results.push(total);
+  });
+  return results;
+}`,
+    commonCauses: [
+      "var used instead of let/const — leaks values across loop iterations",
+      "Code that assumes a data shape different from what your API actually returns",
+      "Missing error handling the AI omitted for brevity",
+      "A function that works for the example shown but breaks on edge cases (empty arrays, null values)",
+      "Style or syntax from a different language version than the one you're using",
+    ],
+    primaryCtaCopy: "Paste your AI-suggested code and check it in seconds",
+    secondaryCtaLabel: "See more JavaScript errors",
+    secondaryCtaHref: "/fix/check-ai-generated-code-errors",
+    searchIntent: "debug-help",
+  },
+  {
+    title: "Vibe coding errors — how to catch bugs in AI-built projects",
+    slug: "vibe-coding-errors-explained",
+    language: "JavaScript",
+    summary:
+      "Vibe coding — building an app mostly by describing what you want to an AI — moves fast, but it also means code enters your project that you may not have fully read. A quick check before shipping catches the errors that would otherwise surface in front of a real user.",
+    whyItHappens:
+      "When most of a codebase is AI-generated across many prompts, small inconsistencies accumulate — a variable named one thing in one file and something else in another, a function that used to return an array now returning an object, error handling that exists in some places and not others. None of this throws an error while you're prompting; it throws later, when a user hits the one path that wasn't tested. Checking each new piece of code as it's added catches these before they compound.",
+    brokenExample: `// Added in a later prompt — inconsistent with the rest of the app
+function getUserName(user) {
+  return user.profile.displayName
+}
+
+// Elsewhere in the same project, from an earlier prompt:
+// user objects don't have a .profile field, they have .name directly`,
+    fixedExample: `function getUserName(user) {
+  return user?.profile?.displayName ?? user?.name ?? "Unknown";
+}`,
+    commonCauses: [
+      "Inconsistent data shapes across code generated in separate AI sessions",
+      "Error handling present in some AI-generated functions but missing in others",
+      "A later prompt overwriting or duplicating logic from an earlier one",
+      "Functions that assume a happy path with no handling for empty or missing data",
+      "Credentials or config values pasted directly into generated code",
+    ],
+    primaryCtaCopy: "Paste your latest AI-generated code before you ship it",
+    secondaryCtaLabel: "See more JavaScript errors",
+    secondaryCtaHref: "/fix/check-ai-generated-code-errors",
+    searchIntent: "debug-help",
+  },
+  {
+    title: "Why does my AI-built app keep breaking?",
+    slug: "ai-built-app-keeps-breaking",
+    language: "JavaScript",
+    summary:
+      "If an app built mostly with AI assistance keeps breaking in new places, it's usually not one big bug — it's small, uncaught issues spread across the code that only show up one at a time as you use different parts of the app.",
+    whyItHappens:
+      "Each AI-generated piece of code is usually correct in isolation for the exact case it was asked about. Problems appear at the seams — where one AI-written function hands data to another, or where a case wasn't described in the prompt so the AI never accounted for it. Without reading and testing each addition, these seams stay invisible until a user (or you) hits one in the wrong order.",
+    brokenExample: `// Function A (added first)
+function getPrice(item) {
+  return item.price
+}
+
+// Function B (added later, different session)
+function getDiscountedPrice(item) {
+  return item.price.amount * 0.9  // assumes price is an object — it isn't
+}`,
+    fixedExample: `function getPrice(item) {
+  return item.price;
+}
+
+function getDiscountedPrice(item) {
+  return item.price * 0.9; // matches the actual shape used elsewhere
+}`,
+    commonCauses: [
+      "Two AI-generated functions assuming different shapes for the same data",
+      "A change made in one file that wasn't propagated to related files",
+      "No consistent error handling strategy across the app",
+      "Edge cases (empty state, loading state, errors) never described in any prompt",
+      "Copy-pasted code from different AI sessions with conflicting conventions",
+    ],
+    primaryCtaCopy: "Paste any part of your code and check it before it breaks in production",
+    secondaryCtaLabel: "See more JavaScript errors",
+    secondaryCtaHref: "/fix/check-ai-generated-code-errors",
+    searchIntent: "debug-help",
+  },
+  {
+    title: "How to read an error message you don't understand",
+    slug: "how-to-read-an-error-message",
+    language: "JavaScript",
+    summary:
+      "An error message you don't recognise is still readable without a CS background — it names an error type, a reason, and usually a line number. Learning to read these three parts is faster than asking an AI every time and helps you catch mistakes it introduces too.",
+    whyItHappens:
+      "Error messages follow a consistent shape: the error type (what kind of problem), a short description (what specifically went wrong), and a location (file and line number). Once you know to look for these three things in order, most errors — even unfamiliar ones — point you almost directly at the fix. This matters more, not less, now that AI tools generate code for you: you still need to be able to tell when that code is wrong.",
+    brokenExample: `TypeError: Cannot read properties of undefined (reading 'name')
+    at getUserName (app.js:12:24)
+    at main (app.js:20:3)
+
+// Error type: TypeError
+// Reason: tried to read 'name' on something that is undefined
+// Location: line 12 of app.js`,
+    fixedExample: `function getUserName(user) {
+  if (!user) return "Unknown";
+  return user.name;
+}`,
+    commonCauses: [
+      "Not knowing which part of the message is the type vs. the description",
+      "Assuming the reported line number is always exactly where the mistake is (it's often the line where the error surfaced, not where it started)",
+      "Skipping the stack trace, which usually shows the sequence of calls that led to the error",
+      "Pasting the whole error into an AI without first checking if the fix is obvious from reading it",
+      "Not recognising common error types (TypeError, ReferenceError, SyntaxError) that repeat across many bugs",
+    ],
+    primaryCtaCopy: "Paste your code and see plain-English explanations for every error",
+    secondaryCtaLabel: "See more JavaScript errors",
+    secondaryCtaHref: "/fix/check-ai-generated-code-errors",
+    searchIntent: "syntax-explanation",
   },
 ];
