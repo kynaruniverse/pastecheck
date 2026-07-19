@@ -1845,3 +1845,4 @@ function getDiscountedPrice(item) {
     searchIntent: "syntax-explanation",
   },
 ];
+
