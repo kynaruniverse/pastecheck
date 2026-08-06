@@ -34,7 +34,7 @@ export default function ForgotPassword() {
       <div className="w-full max-w-sm flex flex-col gap-5">
         <div className="text-center">
           <h1 className="text-xl font-bold mb-1" style={{ color: "hsl(210 20% 92%)" }}>Reset your password</h1>
-          <p className="text-sm" style={{ color: "hsl(215 14% 52%)" }}>
+          <p className="text-sm" style={{ color: "hsl(215 16% 62%)" }}>
             Enter your email and we'll send a reset link.
           </p>
         </div>
@@ -73,7 +73,7 @@ export default function ForgotPassword() {
               className="w-full rounded-xl py-3 text-sm font-semibold transition-all duration-150 active:scale-[0.98]"
               style={{
                 background: status === "loading" ? "hsl(220 13% 22%)" : "hsl(262 83% 75%)",
-                color: status === "loading" ? "hsl(215 14% 45%)" : "hsl(220 8% 6%)",
+                color: status === "loading" ? "hsl(215 16% 58%)" : "hsl(220 8% 6%)",
                 border: "none",
                 cursor: status === "loading" ? "not-allowed" : "pointer",
               }}
@@ -83,7 +83,7 @@ export default function ForgotPassword() {
           </>
         )}
 
-        <p className="text-xs text-center" style={{ color: "hsl(215 14% 40%)" }}>
+        <p className="text-xs text-center" style={{ color: "hsl(215 16% 48%)" }}>
           <a href="/login" style={{ color: "hsl(262 83% 75%)", textDecoration: "none" }}>Back to sign in</a>
         </p>
       </div>

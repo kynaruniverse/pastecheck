@@ -65,7 +65,7 @@ export default function Login() {
         <div className="rounded-2xl px-6 py-7 flex flex-col gap-5" style={{ background: "hsl(220 8% 13%)", border: "1px solid hsl(220 13% 22%)" }}>
           <div>
             <h1 className="text-xl font-bold mb-1" style={{ color: "hsl(210 20% 92%)" }}>Sign in</h1>
-            <p className="text-sm" style={{ color: "hsl(215 14% 52%)" }}>Welcome back to PasteCheck.</p>
+            <p className="text-sm" style={{ color: "hsl(215 16% 62%)" }}>Welcome back to PasteCheck.</p>
           </div>
 
           {confirmed && (
@@ -82,7 +82,7 @@ export default function Login() {
 
           <div className="flex flex-col gap-3">
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium" style={{ color: "hsl(215 14% 58%)" }}>Email</label>
+              <label className="text-xs font-medium" style={{ color: "hsl(215 16% 68%)" }}>Email</label>
               <input
                 type="email"
                 autoComplete="email"
@@ -95,7 +95,7 @@ export default function Login() {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium" style={{ color: "hsl(215 14% 58%)" }}>Password</label>
+              <label className="text-xs font-medium" style={{ color: "hsl(215 16% 68%)" }}>Password</label>
               <input
                 type="password"
                 autoComplete="current-password"
@@ -114,17 +114,17 @@ export default function Login() {
             onClick={handleLogin}
             disabled={loading}
             className="w-full rounded-xl py-3 text-sm font-bold"
-            style={{ background: loading ? "hsl(220 13% 22%)" : "hsl(262 83% 75%)", color: loading ? "hsl(215 14% 45%)" : "hsl(220 8% 6%)", border: "none", cursor: loading ? "not-allowed" : "pointer" }}
+            style={{ background: loading ? "hsl(220 13% 22%)" : "hsl(262 83% 75%)", color: loading ? "hsl(215 16% 58%)" : "hsl(220 8% 6%)", border: "none", cursor: loading ? "not-allowed" : "pointer" }}
           >
             {loading ? "Signing in…" : "Sign in"}
           </button>
 
-          <p className="text-center text-xs" style={{ color: "hsl(215 14% 48%)" }}>
+          <p className="text-center text-xs" style={{ color: "hsl(215 16% 58%)" }}>
             Don't have an account?{" "}
             <a href="/signup" style={{ color: "hsl(262 83% 75%)", textDecoration: "none", fontWeight: 600 }}>Sign up</a>
           </p>
-          <p className="text-center text-xs" style={{ color: "hsl(215 14% 48%)" }}>
-            <a href="/forgot-password" style={{ color: "hsl(215 14% 48%)", textDecoration: "none" }}>Forgot your password?</a>
+          <p className="text-center text-xs" style={{ color: "hsl(215 16% 58%)" }}>
+            <a href="/forgot-password" style={{ color: "hsl(215 16% 58%)", textDecoration: "none" }}>Forgot your password?</a>
           </p>
         </div>
 

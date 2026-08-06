@@ -89,7 +89,7 @@ export default function NavMenu() {
                   borderRadius: "8px",
                   fontSize: "13px",
                   fontWeight: 500,
-                  color: active ? "hsl(262 83% 75%)" : "hsl(215 14% 55%)",
+                  color: active ? "hsl(262 83% 75%)" : "hsl(215 16% 65%)",
                   background: active ? "hsl(262 83% 75% / 0.1)" : "transparent",
                   transition: "color 0.1s, background 0.1s",
                   borderBottom: active ? "1px solid hsl(262 83% 75% / 0.4)" : "1px solid transparent",
@@ -101,11 +101,49 @@ export default function NavMenu() {
           })}
         </nav>
 
-        {/* Right side — burger */}
+        {/* Right side — desktop nav actions */}
+        <div className="hidden-mobile flex items-center gap-2">
+          {isLoggedIn ? (
+            <a
+              href="/collections"
+              style={{
+                textDecoration: "none",
+                padding: "6px 12px",
+                borderRadius: "8px",
+                fontSize: "13px",
+                fontWeight: 500,
+                color: "hsl(215 16% 65%)",
+                transition: "color 0.1s",
+              }}
+            >
+              Collections
+            </a>
+          ) : (
+            <a
+              href="/login"
+              style={{
+                textDecoration: "none",
+                padding: "6px 14px",
+                borderRadius: "8px",
+                fontSize: "13px",
+                fontWeight: 600,
+                color: "hsl(262 83% 75%)",
+                background: "hsl(262 83% 75% / 0.1)",
+                border: "1px solid hsla(262,83%,75%,0.3)",
+                transition: "background 0.1s",
+              }}
+            >
+              Sign in
+            </a>
+          )}
+        </div>
+
+        {/* Right side — burger (mobile only) */}
         <button
           type="button"
           onClick={() => setOpen(true)}
           aria-label="Open menu"
+          className="mobile-only"
           style={{
             width: "36px",
             height: "36px",
@@ -113,7 +151,7 @@ export default function NavMenu() {
             background: "hsl(220 8% 15%)",
             border: "1px solid hsl(220 13% 24%)",
             cursor: "pointer",
-            display: "flex",
+            display: "none",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
@@ -171,7 +209,7 @@ export default function NavMenu() {
               background: "none",
               border: "none",
               cursor: "pointer",
-              color: "hsl(215 14% 50%)",
+              color: "hsl(215 16% 58%)",
               fontSize: "18px",
               lineHeight: 1,
               WebkitTapHighlightColor: "transparent",

@@ -41,7 +41,7 @@ export default function AuthCallback() {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center" style={{ background: "hsl(220 8% 9%)" }}>
-      <p className="text-sm" style={{ color: "hsl(215 14% 55%)" }}>Signing you in...</p>
+      <p className="text-sm" style={{ color: "hsl(215 16% 65%)" }}>Signing you in...</p>
     </div>
   );
 }

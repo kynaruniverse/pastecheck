@@ -96,7 +96,7 @@ export default function CollectionDetail() {
           <h1 className="text-xl font-bold tracking-tight" style={{ color: "hsl(210 20% 92%)" }}>
             {collection?.name ?? "Loading..."}
           </h1>
-          <p className="text-sm mt-1" style={{ color: "hsl(215 14% 55%)" }}>
+          <p className="text-sm mt-1" style={{ color: "hsl(215 16% 65%)" }}>
             Saved checks in this collection.
           </p>
         </header>
@@ -111,7 +111,7 @@ export default function CollectionDetail() {
         )}
 
         {loading ? (
-          <div className="text-sm text-center py-12" style={{ color: "hsl(215 14% 45%)" }}>Loading...</div>
+          <div className="text-sm text-center py-12" style={{ color: "hsl(215 16% 58%)" }}>Loading...</div>
         ) : checks.length === 0 ? (
           <div
             className="rounded-xl px-4 py-10 text-center flex flex-col items-center gap-2"
@@ -119,7 +119,7 @@ export default function CollectionDetail() {
           >
             <span style={{ fontSize: "1.75rem" }}>📋</span>
             <p className="text-sm font-medium" style={{ color: "hsl(210 20% 72%)" }}>No saved checks yet</p>
-            <p className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>
+            <p className="text-xs" style={{ color: "hsl(215 16% 58%)" }}>
               Run a check on the tool page, then save it to this collection.
             </p>
             <a
@@ -151,7 +151,7 @@ export default function CollectionDetail() {
                         {check.name || check.code.trim().split("\n")[0].slice(0, 48) || "Untitled check"}
                       </p>
                       <div className="flex items-center gap-3 mt-1 flex-wrap">
-                        <span className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>
+                        <span className="text-xs" style={{ color: "hsl(215 16% 58%)" }}>
                           {check.language}
                         </span>
                         {errors > 0 && (
@@ -167,7 +167,7 @@ export default function CollectionDetail() {
                         {errors === 0 && warnings === 0 && (
                           <span className="text-xs" style={{ color: "rgb(134,239,172)" }}>clean</span>
                         )}
-                        <span className="text-xs" style={{ color: "hsl(215 14% 40%)" }}>
+                        <span className="text-xs" style={{ color: "hsl(215 16% 48%)" }}>
                           {new Date(check.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
                         </span>
                       </div>
@@ -176,7 +176,7 @@ export default function CollectionDetail() {
                       <span
                         className="text-xs"
                         style={{
-                          color: "hsl(215 14% 45%)",
+                          color: "hsl(215 16% 58%)",
                           display: "inline-block",
                           transform: expanded.has(check.id) ? "rotate(90deg)" : "rotate(0deg)",
                           transition: "transform 0.15s",
@@ -186,7 +186,7 @@ export default function CollectionDetail() {
                         type="button"
                         onClick={(e) => { e.stopPropagation(); handleDeleteCheck(check.id); }}
                         className="text-xs px-2 py-1 rounded ml-1"
-                        style={{ background: "none", border: "none", color: "hsl(215 14% 40%)", cursor: "pointer" }}
+                        style={{ background: "none", border: "none", color: "hsl(215 16% 48%)", cursor: "pointer" }}
                       >✕</button>
                     </div>
                   </div>

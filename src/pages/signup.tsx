@@ -39,7 +39,7 @@ export default function Signup() {
           <div className="rounded-2xl px-6 py-7 flex flex-col gap-4 text-center" style={{ background: "hsl(220 8% 13%)", border: "1px solid hsl(220 13% 22%)" }}>
             <div className="text-3xl">📬</div>
             <h1 className="text-xl font-bold" style={{ color: "hsl(210 20% 92%)" }}>Check your email</h1>
-            <p className="text-sm leading-relaxed" style={{ color: "hsl(215 14% 52%)" }}>
+            <p className="text-sm leading-relaxed" style={{ color: "hsl(215 16% 62%)" }}>
               We've sent a confirmation link to <span style={{ color: "hsl(210 20% 80%)", fontWeight: 600 }}>{email}</span>. Click it to activate your account, then come back to sign in.
             </p>
             <a href="/login" style={{ textDecoration: "none" }}>
@@ -70,7 +70,7 @@ export default function Signup() {
         <div className="rounded-2xl px-6 py-7 flex flex-col gap-5" style={{ background: "hsl(220 8% 13%)", border: "1px solid hsl(220 13% 22%)" }}>
           <div>
             <h1 className="text-xl font-bold mb-1" style={{ color: "hsl(210 20% 92%)" }}>Create account</h1>
-            <p className="text-sm" style={{ color: "hsl(215 14% 52%)" }}>Free to join. Upgrade to Pro anytime.</p>
+            <p className="text-sm" style={{ color: "hsl(215 16% 62%)" }}>Free to join. Upgrade to Pro anytime.</p>
           </div>
 
           {error && (
@@ -81,7 +81,7 @@ export default function Signup() {
 
           <div className="flex flex-col gap-3">
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium" style={{ color: "hsl(215 14% 58%)" }}>Email</label>
+              <label className="text-xs font-medium" style={{ color: "hsl(215 16% 68%)" }}>Email</label>
               <input
                 type="email"
                 value={email}
@@ -93,7 +93,7 @@ export default function Signup() {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium" style={{ color: "hsl(215 14% 58%)" }}>Password</label>
+              <label className="text-xs font-medium" style={{ color: "hsl(215 16% 68%)" }}>Password</label>
               <input
                 type="password"
                 value={password}
@@ -105,7 +105,7 @@ export default function Signup() {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium" style={{ color: "hsl(215 14% 58%)" }}>Confirm password</label>
+              <label className="text-xs font-medium" style={{ color: "hsl(215 16% 68%)" }}>Confirm password</label>
               <input
                 type="password"
                 value={confirm}
@@ -123,12 +123,12 @@ export default function Signup() {
             onClick={handleSignup}
             disabled={loading}
             className="w-full rounded-xl py-3 text-sm font-bold"
-            style={{ background: loading ? "hsl(220 13% 22%)" : "hsl(262 83% 75%)", color: loading ? "hsl(215 14% 45%)" : "hsl(220 8% 6%)", border: "none", cursor: loading ? "not-allowed" : "pointer" }}
+            style={{ background: loading ? "hsl(220 13% 22%)" : "hsl(262 83% 75%)", color: loading ? "hsl(215 16% 58%)" : "hsl(220 8% 6%)", border: "none", cursor: loading ? "not-allowed" : "pointer" }}
           >
             {loading ? "Creating account…" : "Create account"}
           </button>
 
-          <p className="text-center text-xs" style={{ color: "hsl(215 14% 48%)" }}>
+          <p className="text-center text-xs" style={{ color: "hsl(215 16% 58%)" }}>
             Already have an account?{" "}
             <a href="/login" style={{ color: "hsl(262 83% 75%)", textDecoration: "none", fontWeight: 600 }}>Sign in</a>
           </p>

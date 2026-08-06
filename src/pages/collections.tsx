@@ -100,7 +100,7 @@ export default function Collections() {
             + New
           </button>
         </div>
-        <p className="text-sm" style={{ color: "hsl(215 14% 55%)" }}>
+        <p className="text-sm" style={{ color: "hsl(215 16% 65%)" }}>
             Your saved code checks, organised into collections.
         </p>
       </header>
@@ -134,7 +134,7 @@ export default function Collections() {
                 className="flex-1 rounded-lg py-2 text-xs font-semibold"
                 style={{
                   background: newName.trim() ? "hsl(262 83% 75%)" : "hsl(220 13% 20%)",
-                  color: newName.trim() ? "hsl(220 8% 6%)" : "hsl(215 14% 40%)",
+                  color: newName.trim() ? "hsl(220 8% 6%)" : "hsl(215 16% 48%)",
                   border: "none",
                   cursor: newName.trim() ? "pointer" : "not-allowed",
                 }}
@@ -145,7 +145,7 @@ export default function Collections() {
                 type="button"
                 onClick={() => { setShowCreate(false); setNewName(""); }}
                 className="px-4 rounded-lg py-2 text-xs"
-                style={{ background: "hsl(220 13% 18%)", color: "hsl(215 14% 55%)", border: "1px solid hsl(220 13% 26%)", cursor: "pointer" }}
+                style={{ background: "hsl(220 13% 18%)", color: "hsl(215 16% 65%)", border: "1px solid hsl(220 13% 26%)", cursor: "pointer" }}
               >
                 Cancel
               </button>
@@ -163,7 +163,7 @@ export default function Collections() {
         )}
 
         {loading ? (
-          <div className="text-sm text-center py-12" style={{ color: "hsl(215 14% 45%)" }}>
+          <div className="text-sm text-center py-12" style={{ color: "hsl(215 16% 58%)" }}>
             Loading...
           </div>
         ) : collections.length === 0 ? (
@@ -173,7 +173,7 @@ export default function Collections() {
           >
             <span style={{ fontSize: "1.75rem" }}>📁</span>
             <p className="text-sm font-medium" style={{ color: "hsl(210 20% 72%)" }}>No collections yet</p>
-            <p className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>
+            <p className="text-xs" style={{ color: "hsl(215 16% 58%)" }}>
               Create a collection, then save checks to it from the results panel.
             </p>
           </div>
@@ -192,7 +192,7 @@ export default function Collections() {
                   <p className="text-sm font-medium truncate" style={{ color: "hsl(210 20% 88%)" }}>
                     {col.name}
                   </p>
-                  <p className="text-xs mt-0.5" style={{ color: "hsl(215 14% 45%)" }}>
+                  <p className="text-xs mt-0.5" style={{ color: "hsl(215 16% 58%)" }}>
                     {new Date(col.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                   </p>
                 </a>
@@ -200,7 +200,7 @@ export default function Collections() {
                   type="button"
                   onClick={() => handleDelete(col.id)}
                   className="ml-3 shrink-0 text-xs px-2 py-1 rounded"
-                  style={{ background: "none", border: "none", color: "hsl(215 14% 40%)", cursor: "pointer" }}
+                  style={{ background: "none", border: "none", color: "hsl(215 16% 48%)", cursor: "pointer" }}
                 >
                   ✕
                 </button>

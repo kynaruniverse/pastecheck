@@ -81,7 +81,7 @@ export default function FeedbackForm() {
                 type="button"
                 onClick={handleReset}
                 className="mt-1 text-xs"
-                style={{ color: "hsl(215 14% 45%)", background: "none", border: "none", cursor: "pointer" }}
+                style={{ color: "hsl(215 16% 58%)", background: "none", border: "none", cursor: "pointer" }}
               >
                 Close
               </button>
@@ -89,13 +89,13 @@ export default function FeedbackForm() {
           ) : (
             <>
               <div className="flex items-center justify-between mb-4">
-                <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "hsl(215 14% 45%)" }}>
+                <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "hsl(215 16% 58%)" }}>
                   Quick feedback
                 </p>
                 <button
                   type="button"
                   onClick={handleReset}
-                  style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(215 14% 40%)", fontSize: "16px", lineHeight: 1, padding: "2px 4px" }}
+                  style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(215 16% 48%)", fontSize: "16px", lineHeight: 1, padding: "2px 4px" }}
                 >
                   ×
                 </button>
@@ -125,7 +125,7 @@ export default function FeedbackForm() {
                             ? val === "yes"
                               ? "rgb(134,239,172)"
                               : "rgb(252,165,165)"
-                            : "hsl(215 14% 55%)",
+                            : "hsl(215 16% 65%)",
                         border:
                           accuracy === val
                             ? val === "yes"
@@ -177,7 +177,7 @@ export default function FeedbackForm() {
                 className="w-full rounded-xl py-3 text-sm font-semibold transition-all duration-150 active:scale-[0.98]"
                 style={{
                   background: status === "submitting" ? "hsl(220 13% 22%)" : "hsl(262 83% 75%)",
-                  color: status === "submitting" ? "hsl(215 14% 45%)" : "hsl(220 8% 6%)",
+                  color: status === "submitting" ? "hsl(215 16% 58%)" : "hsl(220 8% 6%)",
                   border: "none",
                   cursor: status === "submitting" ? "not-allowed" : "pointer",
                 }}

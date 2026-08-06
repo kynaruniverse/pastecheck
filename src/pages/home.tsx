@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { toast, Toaster } from "sonner";
 import NavMenu from "@/components/NavMenu";
-import Logo from "@/components/Logo";
+import Footer from "@/components/Footer";
 import { lint, detectLanguage, type LintResult, type Language } from "@/lib/linter";
 import { supabase } from "@/lib/supabase";
 import FeedbackForm from "@/components/FeedbackForm";
@@ -34,6 +34,37 @@ const LANG_COLOR: Record<Exclude<Language, "unknown">, string> = {
   python: "rgb(96,165,250)",
   html: "rgb(251,146,60)",
   css: "rgb(139,92,246)",
+};
+
+const SAMPLE_CODE: Record<string, string> = {
+  JavaScript: `const API_KEY = "sk-abc123realkey";
+async function getUser(id) {
+  const res = fetch("/api/users/" + id);
+  return res.json();
+}`,
+  TypeScript: `interface User {
+  id: number;
+  name: string;
+}
+function getUser(id): User {
+  return fetch("/api/users/" + id).json();
+}`,
+  Python: `def get_user(id):
+    user = db.query("SELECT * FROM users WHERE id = " + id)
+    return user`,
+  HTML: `<div class="card">
+  <img src="logo.png" onclick="handleClick()">
+  <p>Click the image</p>
+</div>
+<script>
+  var x = eval(input.value);
+</script>`,
+  CSS: `.button {
+  color: white;
+  background-colour: blue;
+  !important;
+  border: 1px solid black
+}`,
 };
 
 const AI_COMMON_PATTERNS = [
@@ -132,7 +163,7 @@ function InAppSurvey({ onDismiss }: { onDismiss: () => void }) {
         type="button"
         onClick={onDismiss}
         className="text-xs text-center"
-        style={{ background: "none", border: "none", color: "hsl(215 14% 40%)", cursor: "pointer" }}
+        style={{ background: "none", border: "none", color: "hsl(215 16% 48%)", cursor: "pointer" }}
       >
         Skip
       </button>
@@ -171,7 +202,7 @@ function DebugNudge({ errorCount, warningCount }: { errorCount: number; warningC
         <span
           className="text-xs will-change-transform"
             style={{
-              color: "hsl(215 14% 45%)",
+              color: "hsl(215 16% 58%)",
               display: "inline-block",
               transform: open ? "rotate(90deg)" : "rotate(0deg)",
               transition: "transform 0.15s",
@@ -255,10 +286,10 @@ function SaveToCollectionButton({ code, language, lines }: { code: string; langu
           style={{ background: "hsl(222 16% 13%)", border: "1px solid hsl(220 13% 22%)" }}
         >
           {loadingCols ? (
-            <p className="text-xs px-4 py-3" style={{ color: "hsl(215 14% 45%)" }}>Loading collections...</p>
+            <p className="text-xs px-4 py-3" style={{ color: "hsl(215 16% 58%)" }}>Loading collections...</p>
           ) : collections.length === 0 ? (
             <div className="px-4 py-3 flex flex-col gap-2">
-              <p className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>No collections yet.</p>
+              <p className="text-xs" style={{ color: "hsl(215 16% 58%)" }}>No collections yet.</p>
               <a
                 href="/collections"
                 className="text-xs font-semibold px-3 py-1.5 rounded-lg inline-block"
@@ -279,7 +310,7 @@ function SaveToCollectionButton({ code, language, lines }: { code: string; langu
                   background: "none",
                   border: "none",
                   borderBottom: "1px solid hsl(220 13% 18%)",
-                  color: saving === col.id ? "hsl(215 14% 40%)" : "hsl(210 20% 78%)",
+                  color: saving === col.id ? "hsl(215 16% 48%)" : "hsl(210 20% 78%)",
                   cursor: saving === col.id ? "not-allowed" : "pointer",
                 }}
               >
@@ -312,12 +343,12 @@ function ResultRating({ language, errorCount, warningCount }: { language: string
   }
 
   if (rated) {
-    return <div className="text-center text-xs py-2" style={{ color: "hsl(215 14% 45%)" }}>Thanks for the feedback</div>;
+    return <div className="text-center text-xs py-2" style={{ color: "hsl(215 16% 58%)" }}>Thanks for the feedback</div>;
   }
 
   return (
     <div className="flex items-center justify-center gap-4 py-2">
-      <span className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>Was this result helpful?</span>
+      <span className="text-xs" style={{ color: "hsl(215 16% 58%)" }}>Was this result helpful?</span>
       <button type="button" onClick={() => handleRate("up")} className="text-lg transition-opacity hover:opacity-70 active:scale-90" style={{ background: "none", border: "none", cursor: "pointer" }} aria-label="Helpful">👍</button>
       <button type="button" onClick={() => handleRate("down")} className="text-lg transition-opacity hover:opacity-70 active:scale-90" style={{ background: "none", border: "none", cursor: "pointer" }} aria-label="Not helpful">👎</button>
     </div>
@@ -371,7 +402,7 @@ function FileResultPanel({ fileResult, defaultOpen }: { fileResult: FileResult; 
           <span
             className="text-xs will-change-transform"
             style={{
-              color: "hsl(215 14% 45%)",
+              color: "hsl(215 16% 58%)",
               display: "inline-block",
               transform: open ? "rotate(90deg)" : "rotate(0deg)",
               transition: "transform 0.15s",
@@ -387,7 +418,7 @@ function FileResultPanel({ fileResult, defaultOpen }: { fileResult: FileResult; 
             >
               {LANG_LABELS[lang as Exclude<Language, "unknown">]}
               {isLowConfidence && (
-                <span aria-label="Language detection may be approximate" style={{ color: "hsl(215 14% 50%)", fontSize: "10px", fontWeight: "normal", cursor: "help" }} title="Short snippet — language detection may be approximate">
+                <span aria-label="Language detection may be approximate" style={{ color: "hsl(215 16% 58%)", fontSize: "10px", fontWeight: "normal", cursor: "help" }} title="Short snippet — language detection may be approximate">
                   <span aria-hidden="true">?</span>
                 </span>
               )}
@@ -424,7 +455,7 @@ function FileResultPanel({ fileResult, defaultOpen }: { fileResult: FileResult; 
             </div>
           ) : (
             <>
-              <p className="text-xs text-center py-2" style={{ color: "hsl(215 14% 42%)", borderTop: "1px solid hsl(220 13% 20%)" }}>
+              <p className="text-xs text-center py-2" style={{ color: "hsl(215 16% 52%)", borderTop: "1px solid hsl(220 13% 20%)" }}>
                 Tap a highlighted line to see details
               </p>
               <ul
@@ -447,7 +478,7 @@ function FileResultPanel({ fileResult, defaultOpen }: { fileResult: FileResult; 
                           WebkitTapHighlightColor: "transparent",
                         }}
                       >
-                        <span className="select-none text-right shrink-0 px-3 py-0.5" style={{ color: "hsl(215 14% 35%)", minWidth: "42px", userSelect: "none" }}>
+                        <span className="select-none text-right shrink-0 px-3 py-0.5" style={{ color: "hsl(215 16% 35%)", minWidth: "42px", userSelect: "none" }}>
                           {i + 1}
                         </span>
                         <span
@@ -839,9 +870,9 @@ export default function Home() {
       <Toaster position="bottom-center" theme="dark" richColors />
       <div className={`mx-auto w-full px-4 pb-10 ${checked ? "max-w-5xl" : "max-w-2xl"}`}>
         <Helmet>
-          <title>PasteCheck — Is Your AI-Generated Code Safe to Run?</title>
+          <title>PasteCheck — Check Your AI Code for Errors</title>
           <meta name="description" content="Paste code from ChatGPT, Claude, Copilot or any AI tool and instantly see if it's safe to run. Free syntax and error checker for JavaScript, TypeScript, Python, HTML and CSS — no sign-up required." />
-          <meta property="og:title" content="PasteCheck — Is Your AI-Generated Code Safe to Run?" />
+          <meta property="og:title" content="PasteCheck — Check Your AI Code for Errors" />
           <meta property="og:description" content="Paste code from ChatGPT, Claude, Copilot or any AI tool and instantly see if it's safe to run. Free syntax and error checker — no sign-up required." />
           <meta property="og:image" content="https://www.pastecheck.co.uk/opengraph.jpg" />
           <link rel="canonical" href="https://www.pastecheck.co.uk/check" />
@@ -867,10 +898,11 @@ export default function Home() {
 
         <header className="mb-6">
           <div className="flex items-center gap-2 mb-1">
-            <Logo size="sm" />
-            <h1 className="sr-only">PasteCheck</h1>
-            <p className="text-xs font-medium mb-4" style={{ color: "hsl(215 14% 55%)" }}>
-              {totalChecks} {totalChecks === 1 ? "check" : "checks"} run.
+            <h1 className="text-lg font-bold tracking-tight" style={{ color: "hsl(210 20% 92%)" }}>
+              Check your AI-generated code
+            </h1>
+            <p className="text-xs font-medium" style={{ color: "hsl(215 16% 55%)" }}>
+              · {totalChecks} {totalChecks === 1 ? "check" : "checks"} run
             </p>
 
             {isPro && (
@@ -884,15 +916,15 @@ export default function Home() {
               >PRO</span>
             )}
           </div>
-          <p className="text-sm" style={{ color: "hsl(215 14% 55%)" }}>
+          <p className="text-sm" style={{ color: "hsl(215 16% 65%)" }}>
             Paste code from ChatGPT, Claude, Copilot or any AI tool — see instantly if it's safe to run.
           </p>
-          <p className="text-xs mt-1" style={{ color: "hsl(215 14% 38%)" }}>
+          <p className="text-xs mt-1" style={{ color: "hsl(215 16% 48%)" }}>
             Free AI-code checker for JavaScript, TypeScript, Python, HTML and CSS — no sign-up required.
           </p>
           {showRateSignal && (
             <div className="mt-3 rounded-lg px-3 py-2 flex items-center justify-between gap-3" style={{ background: "hsl(262 83% 75% / 0.07)", border: "1px solid hsl(262 83% 75% / 0.18)" }}>
-              <span className="text-xs" style={{ color: "hsl(215 14% 52%)" }}>
+              <span className="text-xs" style={{ color: "hsl(215 16% 62%)" }}>
                 {totalChecks} checks today — Pro unlocks multi-file mode and saved history.
               </span>
               <a
@@ -918,7 +950,7 @@ export default function Home() {
             className="flex-1 rounded-lg py-2 text-xs font-semibold transition-all"
             style={{
               background: isPro && proMode === "single" ? "hsl(262 83% 75%)" : !isPro ? "hsl(262 83% 75%)" : "transparent",
-              color: isPro && proMode === "single" ? "hsl(220 8% 6%)" : !isPro ? "hsl(220 8% 6%)" : "hsl(215 14% 55%)",
+              color: isPro && proMode === "single" ? "hsl(220 8% 6%)" : !isPro ? "hsl(220 8% 6%)" : "hsl(215 16% 65%)",
               border: "none",
               cursor: "pointer",
             }}
@@ -942,7 +974,7 @@ export default function Home() {
             className="flex-1 rounded-lg py-2 text-xs font-semibold transition-all flex items-center justify-center gap-1.5"
             style={{
               background: isPro && proMode === "multi" ? "hsl(262 83% 75%)" : "transparent",
-              color: isPro && proMode === "multi" ? "hsl(220 8% 6%)" : "hsl(215 14% 55%)",
+              color: isPro && proMode === "multi" ? "hsl(220 8% 6%)" : "hsl(215 16% 65%)",
               border: "none",
               cursor: isPro ? "pointer" : "pointer",
               opacity: isPro ? 1 : 0.6,
@@ -966,7 +998,7 @@ export default function Home() {
                     style={{ background: "hsl(220 8% 12%)", borderColor: "hsl(220 13% 22%)" }}
                   >
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "hsl(215 14% 45%)" }}>Code</span>
+                      <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "hsl(215 16% 58%)" }}>Code</span>
                       {(() => {
                         const detectedLang = detectLanguage(code);
                         if (code.trim().length > 0 && detectedLang !== "unknown") {
@@ -992,7 +1024,7 @@ export default function Home() {
                       })()}
                     </div>
                     {code.length > 0 && (
-                      <div role="status" aria-live="polite" className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>
+                      <div role="status" aria-live="polite" className="text-xs" style={{ color: "hsl(215 16% 58%)" }}>
                         {code.split("\n").length} lines · {code.length.toLocaleString()} chars
                         </div>
                       )}
@@ -1003,7 +1035,7 @@ export default function Home() {
                     value={code}
                     onChange={handleCodeChange}
                     placeholder="// Paste your code here..."
-                    rows={textareaRows}
+                    rows={code.trim() ? textareaRows : 8}
                     autoFocus
                     spellCheck={false}
                     autoCorrect="off"
@@ -1018,9 +1050,33 @@ export default function Home() {
                       lineHeight: "1.7",
                     }}
                   />
+                  {/* Empty state — sample code selector */}
+                  {!code.trim() && (
+                    <div className="px-4 py-3 flex flex-col gap-3" style={{ borderTop: "1px solid hsl(220 13% 18%)", background: "hsl(220 8% 10%)" }}>
+                      <p className="text-xs" style={{ color: "hsl(215 16% 58%)" }}>No code yet — paste from ChatGPT, Claude, or Copilot, or try a sample:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {Object.keys(SAMPLE_CODE).map((lang) => (
+                          <button
+                            key={lang}
+                            type="button"
+                            onClick={() => { setCode(SAMPLE_CODE[lang]); }}
+                            className="text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
+                            style={{
+                              background: "hsl(220 8% 15%)",
+                              color: "hsl(210 20% 82%)",
+                              border: "1px solid hsl(220 13% 24%)",
+                              cursor: "pointer",
+                            }}
+                          >
+                            {lang}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                <p className="text-xs text-center" style={{ color: "hsl(215 14% 38%)" }}>
+                <p className="text-xs text-center" style={{ color: "hsl(215 16% 48%)" }}>
                   🔒 Your code never leaves your browser.
                 </p>
 
@@ -1035,7 +1091,7 @@ export default function Home() {
                     type="button"
                     onClick={() => setShowHistory((v) => !v)}
                     className="w-full rounded-xl py-2.5 text-sm font-medium tracking-wide transition-all duration-150"
-                    style={{ background: "hsl(220 13% 16%)", color: "hsl(215 14% 55%)", border: "1px solid hsl(220 13% 22%)", cursor: "pointer" }}
+                    style={{ background: "hsl(220 13% 16%)", color: "hsl(215 16% 65%)", border: "1px solid hsl(220 13% 22%)", cursor: "pointer" }}
                   >
                     {showHistory ? "Hide History" : `Recent Checks (${history.length})`}
                   </button>
@@ -1062,7 +1118,7 @@ export default function Home() {
                                 {LANG_LABELS[lang as Exclude<Language, "unknown">]}
                               </span>
                             )}
-                            <span className="text-xs ml-auto" style={{ color: "hsl(215 14% 38%)" }}>{timestamp}</span>
+                            <span className="text-xs ml-auto" style={{ color: "hsl(215 16% 48%)" }}>{timestamp}</span>
                           </div>
                           <div className="flex gap-3 mt-1">
                             {errors > 0 && <span className="text-xs" style={{ color: "rgb(248,113,113)" }}>{errors} {errors === 1 ? "error" : "errors"}</span>}
@@ -1079,14 +1135,37 @@ export default function Home() {
                   type="button"
                   onClick={handleCheck}
                   disabled={!code.trim()}
-                  className="w-full rounded-xl py-3.5 text-sm font-semibold tracking-wide transition-all duration-150 active:scale-[0.98]"
+                  className="hidden md:block w-full rounded-xl py-3.5 text-sm font-semibold tracking-wide transition-all duration-150 active:scale-[0.98]"
                   style={{
                     background: code.trim() ? "hsl(262 83% 75%)" : "hsl(220 13% 20%)",
-                    color: code.trim() ? "hsl(220 8% 6%)" : "hsl(215 14% 40%)",
+                    color: code.trim() ? "hsl(220 8% 6%)" : "hsl(215 16% 40%)",
                     cursor: code.trim() ? "pointer" : "not-allowed",
                     border: "none",
                   }}
                 >{checking ? "Checking..." : "Check Code"}</button>
+
+                {/* Sticky check button — mobile only */}
+                <div
+                  className="md:hidden fixed bottom-0 left-0 right-0 z-40 px-4 py-3"
+                  style={{
+                    background: "linear-gradient(to top, hsl(220 8% 9%) 60%, transparent)",
+                    borderTop: "1px solid hsl(220 13% 18%)",
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={handleCheck}
+                    disabled={!code.trim()}
+                    className="w-full rounded-xl py-3.5 text-sm font-semibold tracking-wide transition-all duration-150 active:scale-[0.98]"
+                    style={{
+                      background: code.trim() ? "hsl(262 83% 75%)" : "hsl(220 13% 20%)",
+                      color: code.trim() ? "hsl(220 8% 6%)" : "hsl(215 16% 40%)",
+                      cursor: code.trim() ? "pointer" : "not-allowed",
+                      border: "none",
+                      boxShadow: code.trim() ? "0 0 20px hsla(262,83%,75%,0.3)" : "none",
+                    }}
+                  >{checking ? "Checking..." : "Check Code"}</button>
+                </div>
               </div>
             ) : (
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6">
@@ -1098,7 +1177,7 @@ export default function Home() {
                       style={{ background: "hsl(220 8% 12%)", borderColor: "hsl(220 13% 22%)" }}
                     >
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "hsl(215 14% 45%)" }}>Code</span>
+                        <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "hsl(215 16% 58%)" }}>Code</span>
                         {(() => {
                           const detectedLang = detectLanguage(code);
                           if (code.trim().length > 0 && detectedLang !== "unknown") {
@@ -1124,7 +1203,7 @@ export default function Home() {
                         })()}
                       </div>
                       {code.length > 0 && (
-                        <div role="status" aria-live="polite" className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>
+                        <div role="status" aria-live="polite" className="text-xs" style={{ color: "hsl(215 16% 58%)" }}>
                           {code.split("\n").length} lines · {code.length.toLocaleString()} chars
                         </div>
                       )}
@@ -1177,12 +1256,12 @@ export default function Home() {
                       <span className="text-xs font-semibold flex items-center gap-1" style={{ color: LANG_COLOR[result.language] }}>
                         {LANG_LABELS[result.language]}
                         {isLowConfidence && (
-                          <span aria-label="Language detection may be approximate" title="Short snippet — language detection may be approximate" style={{ color: "hsl(215 14% 50%)", fontSize: "10px", fontWeight: "normal", cursor: "help" }}>
+                          <span aria-label="Language detection may be approximate" title="Short snippet — language detection may be approximate" style={{ color: "hsl(215 16% 58%)", fontSize: "10px", fontWeight: "normal", cursor: "help" }}>
                             <span aria-hidden="true">?</span>
                           </span>
                         )}
                       </span>
-                      <span className="text-xs mt-0.5" style={{ color: "hsl(215 14% 45%)" }}>detected</span>
+                      <span className="text-xs mt-0.5" style={{ color: "hsl(215 16% 58%)" }}>detected</span>
                     </div>
                   )}
                 </div>
@@ -1194,13 +1273,13 @@ export default function Home() {
                 )}
 
                 {(errorCount > 0 || warningCount > 0) && (
-                  <p className="text-xs text-center" style={{ color: "hsl(215 14% 42%)" }}>Tap a highlighted line to see details</p>
+                  <p className="text-xs text-center" style={{ color: "hsl(215 16% 52%)" }}>Tap a highlighted line to see details</p>
                 )}
 
                 <div role="region" aria-label="Code check results" className="rounded-xl overflow-hidden border" style={{ borderColor: "hsl(220 13% 22%)" }}>
                   <div className="flex items-center justify-between px-4 py-2 border-b" style={{ background: "hsl(220 8% 12%)", borderColor: "hsl(220 13% 22%)" }}>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "hsl(215 14% 45%)" }}>Results</span>
+                      <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "hsl(215 16% 58%)" }}>Results</span>
                       <button
                         type="button"
                         onClick={() => setGroupBySeverity(!groupBySeverity)}
@@ -1210,7 +1289,7 @@ export default function Home() {
                         {groupBySeverity ? "Grouped" : "Default"}
                       </button>
                     </div>
-                    <span className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>{result!.lines.length} lines</span>
+                    <span className="text-xs" style={{ color: "hsl(215 16% 58%)" }}>{result!.lines.length} lines</span>
                   </div>
 
                   <ul className="overflow-x-auto" role="list" style={{ background: "hsl(220 8% 11%)", fontFamily: "var(--app-font-mono)", fontSize: "12.5px", lineHeight: "1.7", listStyle: "none", margin: 0, padding: 0 }}>
@@ -1240,7 +1319,7 @@ export default function Home() {
                               WebkitTapHighlightColor: "transparent",
                             }}
                           >
-                            <span className="select-none text-right shrink-0 px-3 py-0.5" style={{ color: "hsl(215 14% 35%)", minWidth: "42px", userSelect: "none" }}>{i + 1}</span>
+                            <span className="select-none text-right shrink-0 px-3 py-0.5" style={{ color: "hsl(215 16% 35%)", minWidth: "42px", userSelect: "none" }}>{i + 1}</span>
                             <span className="whitespace-pre py-0.5 flex-1" style={{ color: line.type === "error" ? "rgb(252,165,165)" : line.type === "warning" ? "rgb(253,224,71)" : "hsl(210 20% 82%)" }}>
                               {line.text || " "}
                             </span>
@@ -1315,7 +1394,7 @@ export default function Home() {
                           : "hsl(222 16% 16%)",
                         backgroundSize: sharing ? "200% 100%" : "auto",
                         animation: sharing ? "shimmer 1.2s ease-in-out infinite" : "none",
-                        color: sharing ? "hsl(215 14% 40%)" : "hsl(210 20% 75%)",
+                        color: sharing ? "hsl(215 16% 48%)" : "hsl(210 20% 75%)",
                         border: "1px solid hsl(220 13% 26%)",
                         cursor: sharing ? "not-allowed" : "pointer",
                       }}
@@ -1324,7 +1403,7 @@ export default function Home() {
                     </button>
                     {shareUrl && (
                       <div className="rounded-xl px-4 py-3 flex flex-col gap-2" style={{ background: "hsl(222 16% 13%)", border: "1px solid hsl(220 13% 22%)" }}>
-                        <p className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>Link copied to clipboard:</p>
+                        <p className="text-xs" style={{ color: "hsl(215 16% 58%)" }}>Link copied to clipboard:</p>
                         <p className="text-xs font-mono break-all" style={{ color: "hsl(262 83% 75%)" }}>{shareUrl}</p>
                       </div>
                     )}
@@ -1338,7 +1417,7 @@ export default function Home() {
                     style={{ background: "hsl(222 16% 13%)", border: "1px solid hsl(220 13% 22%)", cursor: "pointer" }}
                     onClick={() => setShareAttempted(true)}
                   >
-                    <span className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>🔗 Share this check — Pro feature</span>
+                    <span className="text-xs" style={{ color: "hsl(215 16% 58%)" }}>🔗 Share this check — Pro feature</span>
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); setShareAttempted(true); handleUpgrade(); }}
@@ -1372,7 +1451,7 @@ export default function Home() {
 
                   }}
                   className="w-full rounded-xl py-2.5 text-sm font-medium transition-all duration-150 active:scale-[0.98]"
-                  style={{ background: "transparent", color: "hsl(215 14% 52%)", border: "1px solid hsl(220 13% 22%)", cursor: "pointer" }}
+                  style={{ background: "transparent", color: "hsl(215 16% 62%)", border: "1px solid hsl(220 13% 22%)", cursor: "pointer" }}
                 >Copy result as text</button>
                 <ResultRating language={result?.language ?? "unknown"} errorCount={errorCount} warningCount={warningCount} />
                 <FeedbackForm />
@@ -1405,7 +1484,7 @@ export default function Home() {
                           type="button"
                           onClick={() => handleRemoveFile(file.id)}
                           className="text-xs ml-2 shrink-0 px-2 py-0.5 rounded"
-                          style={{ color: "hsl(215 14% 45%)", background: "none", border: "none", cursor: "pointer" }}
+                          style={{ color: "hsl(215 16% 58%)", background: "none", border: "none", cursor: "pointer" }}
                         >✕ Remove</button>
                       )}
                     </div>
@@ -1435,7 +1514,7 @@ export default function Home() {
                     type="button"
                     onClick={handleAddFile}
                     className="w-full rounded-xl py-2.5 text-sm font-medium transition-all duration-150"
-                    style={{ background: "hsl(220 13% 16%)", color: "hsl(215 14% 55%)", border: "1px solid hsl(220 13% 22%)", cursor: "pointer" }}
+                    style={{ background: "hsl(220 13% 16%)", color: "hsl(215 16% 65%)", border: "1px solid hsl(220 13% 22%)", cursor: "pointer" }}
                   >+ Add File ({files.length}/5)</button>
                 )}
 
@@ -1452,7 +1531,7 @@ export default function Home() {
                   className="w-full rounded-xl py-3.5 text-sm font-semibold tracking-wide transition-all duration-150 active:scale-[0.98]"
                   style={{
                     background: files.some((file) => file.code.trim()) ? "hsl(262 83% 75%)" : "hsl(220 13% 20%)",
-                    color: files.some((file) => file.code.trim()) ? "hsl(220 8% 6%)" : "hsl(215 14% 40%)",
+                    color: files.some((file) => file.code.trim()) ? "hsl(220 8% 6%)" : "hsl(215 16% 48%)",
                     border: "none",
                     cursor: files.some((file) => file.code.trim()) ? "pointer" : "not-allowed",
                   }}
@@ -1474,7 +1553,7 @@ export default function Home() {
                   </div>
                   <div className="rounded-xl px-3 py-2 flex flex-col items-center justify-center shrink-0" style={{ background: "hsl(220 13% 16%)", border: "1px solid hsl(220 13% 24%)" }}>
                     <span className="text-2xl font-bold" style={{ color: "hsl(210 20% 72%)" }}>{fileResults.filter(fr => fr.code.trim()).length}</span>
-                    <span className="text-xs mt-0.5" style={{ color: "hsl(215 14% 45%)" }}>Files</span>
+                    <span className="text-xs mt-0.5" style={{ color: "hsl(215 16% 58%)" }}>Files</span>
                   </div>
                 </div>
 
@@ -1491,7 +1570,7 @@ export default function Home() {
                 {worstFile && (totalErrors > 0 || totalWarnings > 0) && (
                   <div>
                     {worstFile.name && (
-                      <p className="text-xs mb-2" style={{ color: "hsl(215 14% 45%)" }}>
+                      <p className="text-xs mb-2" style={{ color: "hsl(215 16% 58%)" }}>
                         Most issues in: <span style={{ color: "hsl(210 20% 72%)" }}>{worstFile.name}</span>
                       </p>
                     )}
@@ -1531,29 +1610,18 @@ export default function Home() {
             >
               Upgrade to Pro — £4/month
             </button>
-            <p className="text-xs text-center mt-2" style={{ color: "hsl(215 14% 58%)" }}>
+            <p className="text-xs text-center mt-2" style={{ color: "hsl(215 16% 68%)" }}>
               Multi-file mode · Shareable links · Saved collections
             </p>
-            <p className="text-xs text-center mt-1.5" style={{ color: "hsl(215 14% 38%)" }}>
+            <p className="text-xs text-center mt-1.5" style={{ color: "hsl(215 16% 48%)" }}>
               🔒 Your code never leaves your browser.
             </p>
           </div>
         )}
 
-        {/* ── Footer with tap-5 dev toggle ── */}
-        <div className="mt-10 pt-4" style={{ borderTop: "1px solid hsl(220 13% 16%)" }}>
-          <button
-            onClick={handleVersionTap}
-            className="w-full text-center"
-            style={{ background: "none", border: "none", cursor: "default", WebkitTapHighlightColor: "transparent" }}
-          >
-            <span className="text-xs" style={{ color: "hsl(215 14% 30%)" }}>
-              PasteCheck v2.37
-            </span>
-            <span className="text-xs mt-1 block" style={{ color: "hsl(215 14% 26%)" }}>
-              📱 Coded entirely on an Android phone.
-            </span>
-          </button>
+        {/* ── Footer ── */}
+        <div className="mt-10">
+          <Footer />
         </div>
 
         {/* ── Pro mode toast ── */}

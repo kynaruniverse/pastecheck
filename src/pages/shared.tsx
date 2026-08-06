@@ -51,7 +51,7 @@ export default function Shared() {
   if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "hsl(220 8% 9%)" }}>
-        <span className="text-sm" style={{ color: "hsl(215 14% 55%)" }}>Loading check...</span>
+        <span className="text-sm" style={{ color: "hsl(215 16% 65%)" }}>Loading check...</span>
       </div>
     );
   }
@@ -60,7 +60,7 @@ export default function Shared() {
     return (
       <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "hsl(220 8% 9%)" }}>
         <div className="text-center flex flex-col gap-4">
-          <p className="text-sm" style={{ color: "hsl(215 14% 55%)" }}>Check not found or expired.</p>
+          <p className="text-sm" style={{ color: "hsl(215 16% 65%)" }}>Check not found or expired.</p>
           <a href="/check" className="text-sm font-semibold" style={{ color: "hsl(262 83% 75%)" }}>Check your own code →</a>
         </div>
       </div>
@@ -87,9 +87,9 @@ export default function Shared() {
           <div className="flex items-center gap-2 mb-1">
             <span className="inline-flex items-center justify-center rounded-lg w-8 h-8 text-sm font-bold" style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)" }}>P</span>
             <h1 className="text-xl font-bold tracking-tight" style={{ color: "hsl(210 20% 92%)" }}>PasteCheck</h1>
-            <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "hsl(220 13% 20%)", color: "hsl(215 14% 55%)" }}>Shared Result</span>
+            <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "hsl(220 13% 20%)", color: "hsl(215 16% 65%)" }}>Shared Result</span>
           </div>
-          <p className="text-sm" style={{ color: "hsl(215 14% 55%)" }}>Someone shared this code check with you.</p>
+          <p className="text-sm" style={{ color: "hsl(215 16% 65%)" }}>Someone shared this code check with you.</p>
         </header>
 
         {/* Summary */}
@@ -107,7 +107,7 @@ export default function Shared() {
               <span className="text-xs font-semibold" style={{ color: LANG_COLOR[lang as Exclude<Language, "unknown">] }}>
                 {LANG_LABELS[lang as Exclude<Language, "unknown">]}
               </span>
-              <span className="text-xs mt-0.5" style={{ color: "hsl(215 14% 45%)" }}>detected</span>
+              <span className="text-xs mt-0.5" style={{ color: "hsl(215 16% 58%)" }}>detected</span>
             </div>
           )}
         </div>
@@ -115,8 +115,8 @@ export default function Shared() {
         {/* Code results */}
         <div className="rounded-xl overflow-hidden border mb-4" style={{ borderColor: "hsl(220 13% 22%)" }}>
           <div className="flex items-center justify-between px-4 py-2 border-b" style={{ background: "hsl(220 8% 12%)", borderColor: "hsl(220 13% 22%)" }}>
-            <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "hsl(215 14% 45%)" }}>Results</span>
-            <span className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>{data!.lines.length} lines</span>
+            <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "hsl(215 16% 58%)" }}>Results</span>
+            <span className="text-xs" style={{ color: "hsl(215 16% 58%)" }}>{data!.lines.length} lines</span>
           </div>
           <div className="overflow-x-auto" style={{ background: "hsl(220 8% 11%)", fontFamily: "var(--app-font-mono)", fontSize: "12.5px", lineHeight: "1.7" }}>
             {data!.lines.map((line, i) => {
@@ -134,7 +134,7 @@ export default function Shared() {
                       WebkitTapHighlightColor: "transparent",
                     }}
                   >
-                    <span className="select-none text-right shrink-0 px-3 py-0.5" style={{ color: "hsl(215 14% 35%)", minWidth: "42px", userSelect: "none" }}>{i + 1}</span>
+                    <span className="select-none text-right shrink-0 px-3 py-0.5" style={{ color: "hsl(215 16% 35%)", minWidth: "42px", userSelect: "none" }}>{i + 1}</span>
                     <span className="whitespace-pre py-0.5 flex-1" style={{ color: line.type === "error" ? "rgb(252,165,165)" : line.type === "warning" ? "rgb(253,224,71)" : "hsl(210 20% 82%)" }}>
                       {line.text || " "}
                     </span>
@@ -158,7 +158,7 @@ export default function Shared() {
           </div>
         </div>
 
-        <p className="text-xs text-center mb-3" style={{ color: "hsl(215 14% 38%)" }}>
+        <p className="text-xs text-center mb-3" style={{ color: "hsl(215 16% 48%)" }}>
           🔗 This link is permanent — it won't expire.
         </p>
 

@@ -51,7 +51,7 @@ export default function Success() {
       <NavMenu />
       <div className="w-full max-w-sm flex flex-col items-center gap-6 text-center">
         {status === "loading" ? (
-          <div className="text-sm" style={{ color: "hsl(215 14% 55%)" }}>Activating Pro...</div>
+          <div className="text-sm" style={{ color: "hsl(215 16% 65%)" }}>Activating Pro...</div>
         ) : status === "unverified" ? (
           <div className="flex flex-col items-center gap-4">
             <div
@@ -60,7 +60,7 @@ export default function Success() {
             >✕</div>
             <div>
               <h1 className="text-xl font-bold mb-2" style={{ color: "hsl(210 20% 92%)" }}>Verification failed</h1>
-              <p className="text-sm" style={{ color: "hsl(215 14% 55%)" }}>
+              <p className="text-sm" style={{ color: "hsl(215 16% 65%)" }}>
                 We couldn't verify your payment. If you were charged, please contact support.
               </p>
             </div>
@@ -75,12 +75,12 @@ export default function Success() {
               <h1 className="text-xl font-bold mb-2" style={{ color: "hsl(210 20% 92%)" }}>
                 You're Pro
               </h1>
-              <p className="text-sm" style={{ color: "hsl(215 14% 55%)" }}>
+              <p className="text-sm" style={{ color: "hsl(215 16% 65%)" }}>
                 Multi-file mode, shareable links, and saved collections are now unlocked. Welcome to PasteCheck Pro.
               </p>
             </div>
             <div className="w-full flex flex-col gap-3">
-              <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "hsl(215 14% 45%)" }}>
+              <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "hsl(215 16% 58%)" }}>
                 What to do first
               </p>
               {[
@@ -102,9 +102,9 @@ export default function Success() {
                   <span className="text-xl shrink-0">{item.icon}</span>
                   <div>
                     <p className="text-sm font-semibold" style={{ color: "hsl(210 20% 88%)" }}>{item.label}</p>
-                    <p className="text-xs" style={{ color: "hsl(215 14% 48%)" }}>{item.desc}</p>
+                    <p className="text-xs" style={{ color: "hsl(215 16% 58%)" }}>{item.desc}</p>
                   </div>
-                  <span className="ml-auto text-sm shrink-0" style={{ color: "hsl(215 14% 40%)" }}>›</span>
+                  <span className="ml-auto text-sm shrink-0" style={{ color: "hsl(215 16% 48%)" }}>›</span>
                 </button>
               ))}
             </div>

@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { Helmet } from "react-helmet-async";
 import NavMenu from "@/components/NavMenu";
-import Logo from "@/components/Logo";
+import Footer from "@/components/Footer";
 
 export default function About() {
   const [, navigate] = useLocation();
@@ -19,33 +20,20 @@ export default function About() {
         <meta property="og:image" content="https://www.pastecheck.co.uk/opengraph.jpg" />
         <link rel="canonical" href="https://www.pastecheck.co.uk/about" />
       </Helmet>
-      <div className="mx-auto w-full max-w-2xl px-5 flex flex-col flex-1">
+      <div className="mx-auto w-full max-w-3xl px-5 flex flex-col flex-1">
         <NavMenu />
-
-        {/* Nav */}
-        <div className="pt-8 flex items-center justify-between">
-          <Logo size="sm" onClick={() => navigate("/")} />
-          <button
-            type="button"
-            onClick={() => navigate("/check")}
-            className="rounded-xl px-4 py-2 text-sm font-bold"
-            style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)", border: "none", cursor: "pointer" }}
-          >
-            Check My Code
-          </button>
-        </div>
 
         {/* Main Content */}
         <div className="py-14 flex flex-col gap-10">
 
           <div>
             <h1
-              className="text-3xl font-extrabold leading-tight tracking-tight mb-4"
+              className="text-3xl md:text-4xl font-extrabold leading-tight tracking-tight mb-4"
               style={{ color: "hsl(210 20% 95%)" }}
             >
-              Is Your AI-Generated Code Safe to Run?
+              About PasteCheck
             </h1>
-            <p className="text-base leading-relaxed" style={{ color: "hsl(215 14% 58%)" }}>
+            <p className="text-base leading-relaxed" style={{ color: "hsl(215 16% 68%)" }}>
               AI tools like ChatGPT, Claude, and Copilot generate code with total confidence — even when it's broken, insecure, or incomplete. PasteCheck is a free browser-based tool that checks JavaScript, TypeScript, Python, HTML and CSS instantly — catching syntax errors, hardcoded credentials, missing error handling, and other mistakes common in AI-generated code, and explains each one in plain English.
             </p>
           </div>
@@ -57,16 +45,16 @@ export default function About() {
             >
               Why PasteCheck exists
             </h2>
-            <p className="text-base leading-relaxed mb-4" style={{ color: "hsl(215 14% 58%)" }}>
+            <p className="text-base leading-relaxed mb-4" style={{ color: "hsl(215 16% 68%)" }}>
               I built PasteCheck entirely on an Android phone. No laptop, no desktop — just a mobile browser, a GitHub repo, and a lot of frustration at tools that assumed I was sitting at a desk.
             </p>
-            <p className="text-base leading-relaxed mb-4" style={{ color: "hsl(215 14% 58%)" }}>
+            <p className="text-base leading-relaxed mb-4" style={{ color: "hsl(215 16% 68%)" }}>
               Every time I pasted broken code into an AI assistant to check it, I got something back that was subtly different — reformatted, partially rewritten, or quietly broken in a new way. I didn't want my code changed. I wanted to know what was wrong with it and why, so I could fix it myself and actually understand what I'd done.
             </p>
-            <p className="text-base leading-relaxed mb-4" style={{ color: "hsl(215 14% 58%)" }}>
+            <p className="text-base leading-relaxed mb-4" style={{ color: "hsl(215 16% 68%)" }}>
               PasteCheck runs dedicated language parsers directly on your code — nothing is sent to an AI, nothing is rewritten. You get precise error locations, plain-English explanations, and a nudge toward understanding the mistake rather than just patching it.
             </p>
-            <p className="text-base leading-relaxed" style={{ color: "hsl(215 14% 58%)" }}>
+            <p className="text-base leading-relaxed" style={{ color: "hsl(215 16% 68%)" }}>
               It doesn't auto-fix. That's deliberate. The goal is to help you understand what broke and why — so you learn when you make the mistake, not when it reaches production.
             </p>
           </div>
@@ -76,9 +64,9 @@ export default function About() {
               className="text-xl font-bold mb-3"
               style={{ color: "hsl(210 20% 92%)" }}
             >
-              What PasteCheck Checks
+              What PasteCheck checks
             </h2>
-            <div className="flex flex-col gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
                 { lang: "JavaScript", detail: "Syntax errors, undeclared variables, unsafe patterns like eval and with, and code quality warnings including var usage and loose equality checks." },
                 { lang: "TypeScript", detail: "Full TypeScript syntax support including type annotations, interfaces, generics, and TS-specific constructs — detected and linted separately from JavaScript." },
@@ -92,7 +80,7 @@ export default function About() {
                   style={{ background: "hsl(222 16% 14%)", border: "1px solid hsl(220 13% 21%)" }}
                 >
                   <p className="text-sm font-semibold mb-1" style={{ color: "hsl(262 83% 75%)" }}>{item.lang}</p>
-                  <p className="text-xs leading-relaxed" style={{ color: "hsl(215 14% 52%)" }}>{item.detail}</p>
+                  <p className="text-xs leading-relaxed" style={{ color: "hsl(215 16% 62%)" }}>{item.detail}</p>
                 </div>
               ))}
             </div>
@@ -103,7 +91,7 @@ export default function About() {
               className="text-xl font-bold mb-3"
               style={{ color: "hsl(210 20% 92%)" }}
             >
-              How It Works
+              How it works
             </h2>
             <div className="flex flex-col gap-3">
               {[
@@ -124,7 +112,7 @@ export default function About() {
                   </span>
                   <div>
                     <p className="text-sm font-semibold mb-0.5" style={{ color: "hsl(210 20% 90%)" }}>{item.title}</p>
-                    <p className="text-xs leading-relaxed" style={{ color: "hsl(215 14% 52%)" }}>{item.detail}</p>
+                    <p className="text-xs leading-relaxed" style={{ color: "hsl(215 16% 62%)" }}>{item.detail}</p>
                   </div>
                 </div>
               ))}
@@ -136,35 +124,24 @@ export default function About() {
               className="text-xl font-bold mb-3"
               style={{ color: "hsl(210 20% 92%)" }}
             >
-              Frequently Asked Questions
+              Frequently asked questions
             </h2>
-            <div className="flex flex-col gap-3">
-              {[
-                { q: "Is PasteCheck free?", a: "The core tool is completely free — no sign-up, no installs, no limits on checks. A Pro tier is available at £4/month which unlocks multi-file mode, shareable check links, and saved collections across devices." },
-                { q: "Does it work on mobile?", a: "Yes. PasteCheck is built mobile-first and works on any Android or iOS browser." },
-                { q: "Is my code stored or sent anywhere?", a: "No. All checking happens locally in your browser. Your code never leaves your device." },
-                { q: "Which languages are supported?", a: "JavaScript, TypeScript, Python, HTML, and CSS — including embedded scripts and style blocks inside HTML." },
-                { q: "How is this different from pasting into ChatGPT or Claude?", a: "AI assistants are inconsistent at checking their own output — they sometimes miss errors, reformat your code, or introduce new bugs while 'fixing' it. PasteCheck uses dedicated language parsers instead, so you get the same precise, reliable check every time, without your code being silently rewritten." },
-                { q: "Does it just find errors or does it explain them?", a: "Both. Every flagged line includes a plain-English description of what's wrong and why — not just a line number. The goal is to help you understand the mistake, not just locate it." },
-                { q: "Can it check code from ChatGPT, Claude, or Copilot?", a: "Yes. PasteCheck works the same regardless of where the code came from. It's especially useful for AI-generated code, since it also flags patterns AI tools commonly miss — hardcoded API keys, missing await, and functions with no error handling." },
-              ].map((item) => (
-                <div
-                  key={item.q}
-                  className="rounded-2xl px-5 py-4"
-                  style={{ background: "hsl(222 16% 14%)", border: "1px solid hsl(220 13% 21%)" }}
-                >
-                  <p className="text-sm font-semibold mb-1" style={{ color: "hsl(210 20% 90%)" }}>{item.q}</p>
-                  <p className="text-xs leading-relaxed" style={{ color: "hsl(215 14% 52%)" }}>{item.a}</p>
-                </div>
-              ))}
-            </div>
+            <FAQAccordion faqs={[
+              { q: "Is PasteCheck free?", a: "The core tool is completely free — no sign-up, no installs, no limits on checks. A Pro tier is available at £4/month which unlocks multi-file mode, shareable check links, and saved collections across devices." },
+              { q: "Does it work on mobile?", a: "Yes. PasteCheck is built mobile-first and works on any Android or iOS browser." },
+              { q: "Is my code stored or sent anywhere?", a: "No. All checking happens locally in your browser. Your code never leaves your device." },
+              { q: "Which languages are supported?", a: "JavaScript, TypeScript, Python, HTML, and CSS — including embedded scripts and style blocks inside HTML." },
+              { q: "How is this different from pasting into ChatGPT or Claude?", a: "AI assistants are inconsistent at checking their own output — they sometimes miss errors, reformat your code, or introduce new bugs while 'fixing' it. PasteCheck uses dedicated language parsers instead, so you get the same precise, reliable check every time, without your code being silently rewritten." },
+              { q: "Does it just find errors or does it explain them?", a: "Both. Every flagged line includes a plain-English description of what's wrong and why — not just a line number. The goal is to help you understand the mistake, not just locate it." },
+              { q: "Can it check code from ChatGPT, Claude, or Copilot?", a: "Yes. PasteCheck works the same regardless of where the code came from. It's especially useful for AI-generated code, since it also flags patterns AI tools commonly miss — hardcoded API keys, missing await, and functions with no error handling." },
+            ]} />
           </div>
 
           <div>
             <h2 className="text-xl font-bold mb-3" style={{ color: "hsl(210 20% 92%)" }}>
               PasteCheck Pro
             </h2>
-            <p className="text-base leading-relaxed mb-4" style={{ color: "hsl(215 14% 58%)" }}>
+            <p className="text-base leading-relaxed mb-4" style={{ color: "hsl(215 16% 68%)" }}>
               The free tier gives you instant single-file checking with no account needed. Pro unlocks the full suite for developers who check code regularly across multiple files and projects.
             </p>
             <div className="flex flex-col gap-3 mb-4">
@@ -181,12 +158,12 @@ export default function About() {
                   <p className="text-sm font-semibold mb-1" style={{ color: "hsl(262 83% 75%)" }}>
                     {item.icon} {item.title}
                   </p>
-                  <p className="text-xs leading-relaxed" style={{ color: "hsl(215 14% 52%)" }}>{item.detail}</p>
+                  <p className="text-xs leading-relaxed" style={{ color: "hsl(215 16% 62%)" }}>{item.detail}</p>
                 </div>
               ))}
             </div>
-            <p className="text-xs text-center mb-6" style={{ color: "hsl(215 14% 42%)" }}>
-              £4/month · Cancel anytime · No price increases
+            <p className="text-sm text-center mb-6" style={{ color: "hsl(215 16% 58%)" }}>
+              £35/year or £4/month · Cancel anytime · No price increases
             </p>
           </div>
 
@@ -202,11 +179,65 @@ export default function About() {
               boxShadow: "0 0 32px hsla(262,83%,75%,0.25)",
             }}
           >
-            Check My Code — It's Free
+            Try PasteCheck free — no sign-up needed
           </button>
 
         </div>
+
+        {/* Footer */}
+        <Footer showHomeLink />
+
       </div>
+    </div>
+  );
+}
+
+/* ── FAQ Accordion component ── */
+function FAQAccordion({ faqs }: { faqs: { q: string; a: string }[] }) {
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
+
+  return (
+    <div className="flex flex-col gap-2">
+      {faqs.map((item, idx) => {
+        const isOpen = openIndex === idx;
+        return (
+          <div
+            key={item.q}
+            className="rounded-2xl overflow-hidden"
+            style={{ background: "hsl(222 16% 14%)", border: "1px solid hsl(220 13% 21%)" }}
+          >
+            <button
+              type="button"
+              onClick={() => setOpenIndex(isOpen ? null : idx)}
+              aria-expanded={isOpen}
+              className="w-full flex items-center justify-between px-5 py-4 text-left"
+              style={{ background: "none", border: "none", cursor: "pointer", gap: "12px" }}
+            >
+              <span className="text-sm font-semibold" style={{ color: "hsl(210 20% 90%)" }}>{item.q}</span>
+              <svg
+                width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                style={{
+                  color: "hsl(215 16% 58%)",
+                  flexShrink: 0,
+                  transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                  transition: "transform 0.2s ease",
+                }}
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+            <div
+              style={{
+                maxHeight: isOpen ? "300px" : "0",
+                overflow: "hidden",
+                transition: "max-height 0.25s ease",
+              }}
+            >
+              <p className="text-xs leading-relaxed px-5 pb-4" style={{ color: "hsl(215 16% 62%)" }}>{item.a}</p>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

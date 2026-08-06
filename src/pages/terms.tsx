@@ -17,7 +17,7 @@ export default function Terms() {
         <div className="flex flex-col gap-6 pt-8">
           <div>
             <h1 className="text-2xl font-extrabold mb-1" style={{ color: "hsl(210 20% 95%)" }}>Terms of Service</h1>
-            <p className="text-xs" style={{ color: "hsl(215 14% 40%)" }}>Last updated: May 2026</p>
+            <p className="text-xs" style={{ color: "hsl(215 16% 48%)" }}>Last updated: May 2026</p>
           </div>
 
           {[
@@ -60,7 +60,7 @@ export default function Terms() {
           ].map((section) => (
             <div key={section.title} className="flex flex-col gap-2">
               <h2 className="text-sm font-bold" style={{ color: "hsl(210 20% 88%)" }}>{section.title}</h2>
-              <p className="text-sm leading-relaxed" style={{ color: "hsl(215 14% 55%)" }}>{section.body}</p>
+              <p className="text-sm leading-relaxed" style={{ color: "hsl(215 16% 65%)" }}>{section.body}</p>
             </div>
           ))}
         </div>
