@@ -12,10 +12,10 @@ export default function About() {
       style={{ background: "hsl(220 8% 9%)" }}
     >
       <Helmet>
-        <title>What is a Syntax Error? How PasteCheck Finds & Explains Code Errors</title>
-        <meta name="description" content="Learn what syntax errors are in JavaScript, Python, HTML and CSS — and how PasteCheck finds them instantly in your browser. No sign-up, no installs, works on mobile." />
-        <meta property="og:title" content="What is a Syntax Error? How PasteCheck Finds & Explains Code Errors" />
-        <meta property="og:description" content="Learn what syntax errors are in JavaScript, Python, HTML and CSS — and how PasteCheck finds them instantly in your browser. No sign-up, no installs, works on mobile." />
+        <title>About PasteCheck — Checking AI-Generated Code Before You Run It</title>
+        <meta name="description" content="PasteCheck checks code from ChatGPT, Claude, Copilot and other AI tools for errors, security risks, and mistakes — instantly, in your browser, before you run it. No sign-up, works on mobile." />
+        <meta property="og:title" content="About PasteCheck — Checking AI-Generated Code Before You Run It" />
+        <meta property="og:description" content="PasteCheck checks code from ChatGPT, Claude, Copilot and other AI tools for errors, security risks, and mistakes — instantly, before you run it." />
         <meta property="og:image" content="https://www.pastecheck.co.uk/opengraph.jpg" />
         <link rel="canonical" href="https://www.pastecheck.co.uk/about" />
       </Helmet>
@@ -43,10 +43,10 @@ export default function About() {
               className="text-3xl font-extrabold leading-tight tracking-tight mb-4"
               style={{ color: "hsl(210 20% 95%)" }}
             >
-              What Is a Syntax Error — and How Do You Fix One?
+              Is Your AI-Generated Code Safe to Run?
             </h1>
             <p className="text-base leading-relaxed" style={{ color: "hsl(215 14% 58%)" }}>
-              A syntax error means your code has broken the rules of the language — a missing bracket, a wrong indent, an unclosed tag. The interpreter can't read it, so nothing runs. PasteCheck is a free browser-based tool that finds syntax errors in JavaScript, TypeScript, Python, HTML and CSS instantly — and explains each one in plain English so you know exactly what to fix and why.
+              AI tools like ChatGPT, Claude, and Copilot generate code with total confidence — even when it's broken, insecure, or incomplete. PasteCheck is a free browser-based tool that checks JavaScript, TypeScript, Python, HTML and CSS instantly — catching syntax errors, hardcoded credentials, missing error handling, and other mistakes common in AI-generated code, and explains each one in plain English.
             </p>
           </div>
 
@@ -144,8 +144,9 @@ export default function About() {
                 { q: "Does it work on mobile?", a: "Yes. PasteCheck is built mobile-first and works on any Android or iOS browser." },
                 { q: "Is my code stored or sent anywhere?", a: "No. All checking happens locally in your browser. Your code never leaves your device." },
                 { q: "Which languages are supported?", a: "JavaScript, TypeScript, Python, HTML, and CSS — including embedded scripts and style blocks inside HTML." },
-                { q: "How is this different from pasting into ChatGPT or Claude?", a: "AI assistants are inconsistent — they sometimes miss errors, reformat your code, or introduce new bugs. PasteCheck uses dedicated language parsers that give precise, reliable results every time." },
+                { q: "How is this different from pasting into ChatGPT or Claude?", a: "AI assistants are inconsistent at checking their own output — they sometimes miss errors, reformat your code, or introduce new bugs while 'fixing' it. PasteCheck uses dedicated language parsers instead, so you get the same precise, reliable check every time, without your code being silently rewritten." },
                 { q: "Does it just find errors or does it explain them?", a: "Both. Every flagged line includes a plain-English description of what's wrong and why — not just a line number. The goal is to help you understand the mistake, not just locate it." },
+                { q: "Can it check code from ChatGPT, Claude, or Copilot?", a: "Yes. PasteCheck works the same regardless of where the code came from. It's especially useful for AI-generated code, since it also flags patterns AI tools commonly miss — hardcoded API keys, missing await, and functions with no error handling." },
               ].map((item) => (
                 <div
                   key={item.q}

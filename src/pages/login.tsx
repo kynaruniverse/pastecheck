@@ -17,10 +17,11 @@ export default function Login() {
   }, []);
 
   async function handleLogin() {
-    if (!email || !password) { setError("Please enter your email and password."); return; }
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail || !password) { setError("Please enter your email and password."); return; }
     setLoading(true);
     setError(null);
-    const { error: err } = await supabase.auth.signInWithPassword({ email, password });
+    const { error: err } = await supabase.auth.signInWithPassword({ email: trimmedEmail, password });
     setLoading(false);
     if (err) {
       if (err.message.includes("Email not confirmed")) {
@@ -84,6 +85,7 @@ export default function Login() {
               <label className="text-xs font-medium" style={{ color: "hsl(215 14% 58%)" }}>Email</label>
               <input
                 type="email"
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
@@ -96,6 +98,7 @@ export default function Login() {
               <label className="text-xs font-medium" style={{ color: "hsl(215 14% 58%)" }}>Password</label>
               <input
                 type="password"
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import Logo from "@/components/Logo";
-import { supabase } from "@/lib/supabase";
 import { useLocation } from "wouter";
 
 export default function NavMenu() {
@@ -9,16 +8,31 @@ export default function NavMenu() {
   const [location] = useLocation();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsLoggedIn(!!session);
+    async function checkAuth() {
+      const { supabase } = await import("@/lib/supabase");
+
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setIsLoggedIn(!!session);
+      });
+
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        setIsLoggedIn(!!session);
+      });
+
+      return subscription;
+    }
+
+    let subscription: { unsubscribe: () => void } | undefined;
+
+    checkAuth().then((result) => {
+      subscription = result;
     });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsLoggedIn(!!session);
-    });
-    return () => subscription.unsubscribe();
+
+    return () => subscription?.unsubscribe();
   }, []);
 
   async function handleSignOut() {
+    const { supabase } = await import("@/lib/supabase");
     await supabase.auth.signOut();
     localStorage.removeItem("pastecheck_pro");
     window.location.href = "/";

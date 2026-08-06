@@ -27,7 +27,7 @@ export default function Terms() {
             },
             {
               title: "What PasteCheck is",
-              body: "PasteCheck is a browser-based code linting tool. It highlights syntax errors and warnings in JavaScript, TypeScript, Python, HTML, and CSS. It is provided as a development aid only. It does not guarantee that linted code is correct, complete, or production-ready.",
+              body: "PasteCheck is a browser-based tool that checks AI-generated and hand-written code for errors and risks. It highlights syntax errors and warnings in JavaScript, TypeScript, Python, HTML, and CSS. It is provided as a development aid only. It does not guarantee that checked code is correct, complete, or production-ready.",
             },
             {
               title: "Free and Pro tiers",

@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -108,8 +107,8 @@
 }
 
 @keyframes probadgepulse {
-  0%, 100% { box-shadow: 0 0 0 0 hsla(262,83%,75%,0.4); }
-  50% { box-shadow: 0 0 0 5px hsla(262,83%,75%,0); }
+  0%, 100% { filter: drop-shadow(0 0 0 hsla(262,83%,75%,0)); }
+  50% { filter: drop-shadow(0 0 5px hsla(262,83%,75%,0.7)); }
 }
 
 @keyframes shimmer {
@@ -118,13 +117,13 @@
 }
 
 @keyframes upgradeGlow {
-  0%, 100% { box-shadow: 0 0 12px hsla(262,83%,75%,0.3); }
-  50% { box-shadow: 0 0 24px hsla(262,83%,75%,0.6); }
+  0%, 100% { filter: drop-shadow(0 0 12px hsla(262,83%,75%,0.3)); }
+  50% { filter: drop-shadow(0 0 24px hsla(262,83%,75%,0.6)); }
 }
 
 @layer utilities {
   .hidden-mobile {
-    display: flex;
+    display: initial;
   }
 
   .font-mono {

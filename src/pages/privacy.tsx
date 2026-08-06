@@ -23,7 +23,7 @@ export default function Privacy() {
           {[
             {
               title: "What we collect",
-              body: "PasteCheck does not collect or store the code you paste. All linting runs entirely in your browser — your code never leaves your device. If you create a Pro account, we store your email address and account status in Supabase. If you use the Share feature, your code and lint results are stored in Supabase to generate a permanent link. Payment is handled by Stripe — we do not store card details.",
+              body: "PasteCheck does not collect or store the code you paste. All checking runs entirely in your browser — your code never leaves your device. If you create a Pro account, we store your email address and account status in Supabase. If you use the Share feature, your code and lint results are stored in Supabase to generate a permanent link. Payment is handled by Stripe — we do not store card details.",
             },
             {
               title: "How we use your data",

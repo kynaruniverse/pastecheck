@@ -891,6 +891,44 @@ async function getUser(id) {
     secondaryCtaHref: "/fix/unexpected-token-javascript",
     searchIntent: "debug-help",
   },
+  
+  {
+    title: "Is AI-generated code safe to run? How to check first",
+    slug: "is-ai-generated-code-safe-to-run",
+    language: "JavaScript",
+    summary:
+      "AI tools don't warn you when code is risky — they present broken, insecure, or incomplete code with the same confidence as correct code. 'Safe to run' means no hardcoded secrets, no unhandled failure paths, and no syntax errors that crash halfway through. A quick check confirms all three before you execute anything.",
+    whyItHappens:
+      "Safety and correctness are two different questions, and AI tools are only weakly checked against either. A snippet can run without crashing and still leak an API key, silently swallow an error, or behave unpredictably on input it wasn't shown during generation. None of that shows up by reading the code once — it shows up by checking it the way a linter does: line by line, against known-risk patterns, not just against 'does this look plausible.'",
+    brokenExample: `const OPENAI_KEY = "sk-proj-abc123";
+
+function saveUser(user) {
+  db.save(user)
+  return true
+}`,
+    fixedExample: `const OPENAI_KEY = process.env.OPENAI_KEY;
+
+async function saveUser(user) {
+  try {
+    await db.save(user);
+    return true;
+  } catch (error) {
+    console.error("Failed to save user:", error);
+    return false;
+  }
+}`,
+    commonCauses: [
+      "Hardcoded API keys or secrets left directly in the snippet",
+      "No error handling around database, network, or file operations",
+      "Missing await on async calls, causing silent failures",
+      "Syntax mistakes that only surface once the code actually runs",
+      "Assumptions about input data that were never validated",
+    ],
+    primaryCtaCopy: "Paste your AI-generated code and check if it's safe to run",
+    secondaryCtaLabel: "See more AI code checks",
+    secondaryCtaHref: "/fix/check-ai-generated-code-errors",
+    searchIntent: "debug-help",
+  },
   {
     title: "How to fix: SyntaxError — cannot use import statement outside a module",
     slug: "cannot-use-import-statement-outside-module",

@@ -36,8 +36,29 @@ const LANG_COLOR: Record<Exclude<Language, "unknown">, string> = {
   css: "rgb(139,92,246)",
 };
 
+const AI_COMMON_PATTERNS = [
+  "is called without 'await'",
+  "Possible hardcoded secret",
+  "Possible Stripe secret key",
+  "Possible Stripe publishable key",
+  "Possible Google API key",
+  "Possible AWS Access Key ID",
+  "Possible GitHub Personal Access Token",
+  "Possible Slack API token",
+  "Possible hardcoded password",
+  "Possible hardcoded secret value",
+  "Possible hardcoded API key",
+  "performs a risky operation but has no try/catch",
+  "Empty catch block",
+  "has no 'return' statement",
+];
+
+function isCommonInAI(msg: string): boolean {
+  return AI_COMMON_PATTERNS.some((p) => msg.includes(p));
+}
+
 const SURVEY_OPTIONS = [
-  "Learning to code",
+  "Checking my own code",
   "Debugging my own project",
   "Checking AI generated code",
   "Something else",
@@ -462,7 +483,17 @@ function FileResultPanel({ fileResult, defaultOpen }: { fileResult: FileResult; 
                               style={{ fontFamily: "var(--app-font-sans)", color: line.type === "error" ? "rgb(252,165,165)" : "rgb(253,224,71)" }}
                             >
                               <span className="mt-px shrink-0">{line.type === "error" ? "✕" : "⚠"}</span>
-                              <span style={{ opacity: 0.9 }}>{msg}</span>
+                              <span style={{ opacity: 0.9 }}>
+                                {msg}
+                                {isCommonInAI(msg) && (
+                                  <span
+                                    className="ml-1.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full align-middle"
+                                    style={{ background: "hsl(262 83% 75% / 0.15)", color: "hsl(262 83% 75%)" }}
+                                  >
+                                    Common in AI-generated code
+                                  </span>
+                                )}
+                              </span>
                             </div>
                           ))}
                         </div>
@@ -484,6 +515,27 @@ function FileResultPanel({ fileResult, defaultOpen }: { fileResult: FileResult; 
 export default function Home() {
   // Pro state
   const [isPro, setIsPro] = useState<boolean>(false);
+
+  async function handleUpgrade() {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { window.location.href = "/login"; return; }
+      const res = await fetch("/api/create-checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    } catch (err) {
+      toast.error("Something went wrong. Please try again.");
+      if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
+        (window as any).gtag("event", "checkout_error", { event_category: "Error", event_label: String(err) });
+      }
+    }
+  }
   const [groupBySeverity, setGroupBySeverity] = useState(false);
   const touchStart = useRef(0);
   const [proMode, setProMode] = useState<"single" | "multi">("single");
@@ -530,7 +582,8 @@ export default function Home() {
   const upgradeRef = useRef<HTMLDivElement>(null);
 
   // Shared
-  const [history, setHistory] = useState<Array<{ code: string; result: LintResult; timestamp: number }>>(() => {
+  const [history, setHistory] = useState<Array<{ id?: string; code: string; result: LintResult; timestamp: number }>>(() => {
+
     try {
       const stored = localStorage.getItem("pastecheck_history");
       return stored ? JSON.parse(stored) : [];
@@ -624,7 +677,8 @@ export default function Home() {
       const newTotal = totalChecks + 1;
       setTotalChecks(newTotal);
       
-      const updatedHistory = [{ code, result: r, timestamp: Date.now() }, ...history].slice(0, isPro ? 100 : 5);
+      const updatedHistory = [{ id: crypto.randomUUID(), code, result: r, timestamp: Date.now() }, ...history].slice(0, isPro ? 100 : 5);
+
       setHistory(updatedHistory);
       
       try {
@@ -785,10 +839,10 @@ export default function Home() {
       <Toaster position="bottom-center" theme="dark" richColors />
       <div className={`mx-auto w-full px-4 pb-10 ${checked ? "max-w-5xl" : "max-w-2xl"}`}>
         <Helmet>
-          <title>PasteCheck — Paste and Check Your Code</title>
-          <meta name="description" content="Paste your JavaScript, TypeScript, Python, HTML or CSS code and instantly see syntax errors and warnings highlighted. Free, no login, works on mobile." />
-          <meta property="og:title" content="PasteCheck — Paste and Check Your Code" />
-          <meta property="og:description" content="Paste your JavaScript, TypeScript, Python, HTML or CSS code and instantly see syntax errors and warnings highlighted. Free, no login, works on mobile." />
+          <title>PasteCheck — Is Your AI-Generated Code Safe to Run?</title>
+          <meta name="description" content="Paste code from ChatGPT, Claude, Copilot or any AI tool and instantly see if it's safe to run. Free syntax and error checker for JavaScript, TypeScript, Python, HTML and CSS — no sign-up required." />
+          <meta property="og:title" content="PasteCheck — Is Your AI-Generated Code Safe to Run?" />
+          <meta property="og:description" content="Paste code from ChatGPT, Claude, Copilot or any AI tool and instantly see if it's safe to run. Free syntax and error checker — no sign-up required." />
           <meta property="og:image" content="https://www.pastecheck.co.uk/opengraph.jpg" />
           <link rel="canonical" href="https://www.pastecheck.co.uk/check" />
         </Helmet>
@@ -831,10 +885,10 @@ export default function Home() {
             )}
           </div>
           <p className="text-sm" style={{ color: "hsl(215 14% 55%)" }}>
-            Paste your code and check for errors and warnings instantly.
+            Paste code from ChatGPT, Claude, Copilot or any AI tool — see instantly if it's safe to run.
           </p>
           <p className="text-xs mt-1" style={{ color: "hsl(215 14% 38%)" }}>
-            Free online checker for JavaScript, TypeScript, Python, HTML and CSS — no sign-up required.
+            Free AI-code checker for JavaScript, TypeScript, Python, HTML and CSS — no sign-up required.
           </p>
           {showRateSignal && (
             <div className="mt-3 rounded-lg px-3 py-2 flex items-center justify-between gap-3" style={{ background: "hsl(262 83% 75% / 0.07)", border: "1px solid hsl(262 83% 75% / 0.18)" }}>
@@ -843,26 +897,7 @@ export default function Home() {
               </span>
               <a
                 href="#"
-                onClick={async (e) => {
-                  e.preventDefault();
-                  try {
-                    const { data: { session } } = await supabase.auth.getSession();
-                    if (!session) { window.location.href = "/login"; return; }
-                    const res = await fetch("/api/create-checkout", { 
-                      method: "POST",
-                      headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${session.access_token}`
-                      }
-                    });
-                    const data = await res.json();
-                    if (data.url) window.location.href = data.url;
-                  } catch (err) {
-                    if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
-                      (window as any).gtag("event", "checkout_error", { event_category: "Error", event_label: String(err) });
-                    }
-                  }
-                }}
+                onClick={(e) => { e.preventDefault(); handleUpgrade(); }}
                 className="text-xs font-semibold shrink-0"
                 style={{ color: "hsl(262 83% 75%)", textDecoration: "none" }}
               >
@@ -1015,7 +1050,7 @@ export default function Home() {
                       const timestamp = item.timestamp ? new Date(item.timestamp).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : "";
                       return (
                         <button
-                          key={idx}
+                          key={item.id ?? idx}
                           type="button"
                           onClick={() => { setCode(item.code); setResult(item.result); setChecked(true); setExpanded(new Set()); setShowHistory(false); }}
                           className="w-full rounded-xl px-4 py-3 text-left transition-all duration-150"
@@ -1137,7 +1172,7 @@ export default function Home() {
                       <span className="text-xs mt-0.5" style={{ color: "rgb(253,224,71)", opacity: 0.85 }}>{warningCount === 1 ? "Warning" : "Warnings"}</span>
                     </div>
                   </div>
-                  {result && result.language !== "unknown" && (
+                  {result && result.language !== "unknown" && LANG_COLOR[result.language] && (
                     <div className="ml-3 rounded-xl px-3 py-2 flex flex-col items-center justify-center shrink-0" style={{ background: "hsl(220 13% 16%)", border: "1px solid hsl(220 13% 24%)" }}>
                       <span className="text-xs font-semibold flex items-center gap-1" style={{ color: LANG_COLOR[result.language] }}>
                         {LANG_LABELS[result.language]}
@@ -1218,7 +1253,17 @@ export default function Home() {
                               {line.messages.map((msg, mi) => (
                                 <div key={mi} className="px-3 py-1 text-xs flex items-start gap-1.5" style={{ fontFamily: "var(--app-font-sans)", color: line.type === "error" ? "rgb(252,165,165)" : "rgb(253,224,71)" }}>
                                   <span className="mt-px shrink-0">{line.type === "error" ? "✕" : "⚠"}</span>
-                                  <span style={{ opacity: 0.9 }}>{msg}</span>
+                                  <span style={{ opacity: 0.9 }}>
+                                    {msg}
+                                    {isCommonInAI(msg) && (
+                                      <span
+                                        className="ml-1.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full align-middle"
+                                        style={{ background: "hsl(262 83% 75% / 0.15)", color: "hsl(262 83% 75%)" }}
+                                      >
+                                        Common in AI-generated code
+                                      </span>
+                                    )}
+                                  </span>
                                 </div>
                               ))}
                             </div>
@@ -1296,27 +1341,7 @@ export default function Home() {
                     <span className="text-xs" style={{ color: "hsl(215 14% 45%)" }}>🔗 Share this check — Pro feature</span>
                     <button
                       type="button"
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        setShareAttempted(true);
-                        try {
-                          const { data: { session } } = await supabase.auth.getSession();
-                          if (!session) { window.location.href = "/login"; return; }
-                          const res = await fetch("/api/create-checkout", { 
-                            method: "POST",
-                            headers: {
-                              "Content-Type": "application/json",
-                              Authorization: `Bearer ${session.access_token}`
-                            }
-                          });
-                          const data = await res.json();
-                          if (data.url) window.location.href = data.url;
-                        } catch (err) {
-                          if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
-                            (window as any).gtag("event", "checkout_error", { event_category: "Error", event_label: String(err) });
-                          }
-                        }
-                      }}
+                      onClick={(e) => { e.stopPropagation(); setShareAttempted(true); handleUpgrade(); }}
                       className="text-xs font-semibold shrink-0 px-3 py-1.5 rounded-lg"
                       style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)", border: "none", cursor: "pointer" }}
                     >Upgrade</button>
@@ -1334,7 +1359,17 @@ export default function Home() {
                       : flagged.map(({ l, i }) =>
                           `Line ${i + 1} [${l.type.toUpperCase()}]: ${l.messages.join(" | ")}`
                         ).join("\n");
-                    navigator.clipboard.writeText(text).catch(() => {});
+                    navigator.clipboard.writeText(text)
+                      .then(() => {
+                        toast.success("Result copied to clipboard");
+                        if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
+                          (window as any).gtag("event", "copy_result_success");
+                        }
+                      })
+                      .catch(() => {
+                        toast.error("Unable to copy result");
+                      });
+
                   }}
                   className="w-full rounded-xl py-2.5 text-sm font-medium transition-all duration-150 active:scale-[0.98]"
                   style={{ background: "transparent", color: "hsl(215 14% 52%)", border: "1px solid hsl(220 13% 22%)", cursor: "pointer" }}
@@ -1413,9 +1448,16 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={handleCheckAll}
+                  disabled={!files.some((file) => file.code.trim())}
                   className="w-full rounded-xl py-3.5 text-sm font-semibold tracking-wide transition-all duration-150 active:scale-[0.98]"
-                  style={{ background: "hsl(262 83% 75%)", color: "hsl(220 8% 6%)", border: "none", cursor: "pointer" }}
+                  style={{
+                    background: files.some((file) => file.code.trim()) ? "hsl(262 83% 75%)" : "hsl(220 13% 20%)",
+                    color: files.some((file) => file.code.trim()) ? "hsl(220 8% 6%)" : "hsl(215 14% 40%)",
+                    border: "none",
+                    cursor: files.some((file) => file.code.trim()) ? "pointer" : "not-allowed",
+                  }}
                 >Check All Files</button>
+
               </div>
             ) : (
               <div className="flex flex-col gap-4">
@@ -1476,23 +1518,7 @@ export default function Home() {
         {!isPro && multiAttempted && (
           <div className="mt-8" ref={upgradeRef}>
             <button
-              onClick={async () => {
-                try {
-                  const { data: { session } } = await supabase.auth.getSession();
-                  if (!session) { window.location.href = "/login"; return; }
-                  const res = await fetch("/api/create-checkout", { 
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                      Authorization: `Bearer ${session.access_token}`
-                    }
-                  });
-                  const data = await res.json();
-                  if (data.url) window.location.href = data.url;
-                } catch {
-                  toast.error("Something went wrong. Please try again.");
-                }
-              }}
+              onClick={handleUpgrade}
               type="button"
               className="w-full rounded-xl py-3.5 text-sm font-semibold tracking-wide transition-all duration-150 active:scale-[0.97]"
               style={{
@@ -1522,7 +1548,7 @@ export default function Home() {
             style={{ background: "none", border: "none", cursor: "default", WebkitTapHighlightColor: "transparent" }}
           >
             <span className="text-xs" style={{ color: "hsl(215 14% 30%)" }}>
-              PasteCheck v2.36
+              PasteCheck v2.37
             </span>
             <span className="text-xs mt-1 block" style={{ color: "hsl(215 14% 26%)" }}>
               📱 Coded entirely on an Android phone.

@@ -1,10 +1,7 @@
 import { useLocation } from "wouter";
 import { Helmet } from "react-helmet-async";
 import NavMenu from "@/components/NavMenu";
-import Logo from "@/components/Logo";
-import { toast, Toaster } from "sonner";
-import { supabase } from "@/lib/supabase";
-
+import { toast } from "sonner";
 
 const features = [
   {
@@ -42,6 +39,25 @@ const features = [
 export default function Landing() {
   const [, navigate] = useLocation();
 
+  async function handleCheckout(plan: "annual" | "monthly") {
+    try {
+      const { supabase } = await import("@/lib/supabase");
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch("/api/create-checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
+        body: JSON.stringify({ plan }),
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    } catch {
+      toast.error("Something went wrong. Please try again.");
+    }
+  }
+
   return (
     <div
       className="min-h-screen w-full flex flex-col"
@@ -55,10 +71,10 @@ export default function Landing() {
       }}
     >
       <Helmet>
-        <title>PasteCheck — Free Online Code Error Checker</title>
-        <meta name="description" content="Paste your JavaScript, TypeScript, Python, HTML or CSS and instantly see every error highlighted. Free, no sign-up, works on mobile." />
-        <meta property="og:title" content="PasteCheck — Free Online Code Error Checker" />
-        <meta property="og:description" content="Paste your JavaScript, TypeScript, Python, HTML or CSS and instantly see every error highlighted. Free, no sign-up, works on mobile." />
+        <title>PasteCheck — Is Your AI-Generated Code Safe to Run?</title>
+        <meta name="description" content="Paste code from ChatGPT, Claude, Copilot or any AI tool and instantly see if it's safe to run. Free checker for JavaScript, TypeScript, Python, HTML and CSS — no sign-up needed." />
+        <meta property="og:title" content="PasteCheck — Is Your AI-Generated Code Safe to Run?" />
+        <meta property="og:description" content="Paste code from ChatGPT, Claude, Copilot or any AI tool and instantly see if it's safe to run. Free checker — no sign-up needed." />
         <meta property="og:image" content="https://www.pastecheck.co.uk/opengraph.jpg" />
         <link rel="canonical" href="https://www.pastecheck.co.uk/" />
       </Helmet>
@@ -69,7 +85,7 @@ export default function Landing() {
         <NavMenu />
 
         {/* Hero */}
-        <div className="flex-1 flex flex-col justify-center py-14">
+        <main className="flex-1 flex flex-col justify-center py-14">
           <div className="mb-3">
             <span
               className="inline-block text-xs font-semibold uppercase tracking-widest px-3 py-1 rounded-full"
@@ -87,12 +103,12 @@ export default function Landing() {
             className="text-4xl font-extrabold leading-tight tracking-tight mb-2"
             style={{ color: "hsl(210 20% 95%)" }}
           >
-            Catch Code Errors
+            Is Your AI Code
             <br />
             <span style={{
               color: "hsl(262 83% 75%)",
               textShadow: "0 0 30px hsla(262,83%,75%,0.5)",
-            }}>Instantly.</span>
+            }}>Safe to Run?</span>
           </h1>
 
           <p
@@ -104,9 +120,9 @@ export default function Landing() {
 
           <p
             className="text-base leading-relaxed mb-6 max-w-sm"
-            style={{ color: "hsl(215 14% 58%)" }}
+            style={{ color: "hsl(215 14% 68%)" }}
           >
-            Paste your JavaScript, TypeScript, Python, HTML or CSS and see every error highlighted instantly — with plain-English explanations, not just line numbers.
+            Paste code from ChatGPT, Claude, Copilot or any AI tool and see every error highlighted instantly — with plain-English explanations, not just line numbers.
           </p>
 
           {/* Annotated hero snippet */}
@@ -120,7 +136,7 @@ export default function Landing() {
               style={{ background: "hsl(220 8% 12%)", borderBottom: "1px solid hsl(220 13% 18%)" }}
             >
               <div className="flex items-center gap-2">
-                <span className="text-xs font-medium" style={{ color: "hsl(210 20% 72%)" }}>example.js</span>
+                <span className="text-xs font-medium" style={{ color: "hsl(210 20% 72%)" }}>chatgpt-code.js</span>
                 <span className="text-xs font-semibold" style={{ color: "rgb(250,204,21)" }}>JavaScript</span>
               </div>
               <div className="flex items-center gap-2">
@@ -135,40 +151,40 @@ export default function Landing() {
               {/* Line 1 — normal */}
               <div className="flex" style={{ borderLeft: "3px solid transparent" }}>
                 <span className="select-none text-right shrink-0 px-3 py-0.5" style={{ color: "hsl(215 14% 35%)", minWidth: "42px" }}>1</span>
-                <span className="whitespace-pre py-0.5" style={{ color: "hsl(210 20% 82%)" }}>{"function greet(name) {"}</span>
+                <span className="whitespace-pre py-0.5" style={{ color: "hsl(210 20% 82%)" }}>{"const API_KEY = \"sk-abc123realkey\";"}</span>
               </div>
 
-              {/* Line 2 — warning */}
-              <div className="flex" style={{ background: "rgba(234,179,8,0.10)", borderLeft: "3px solid rgb(234,179,8)" }}>
-                <span className="select-none text-right shrink-0 px-3 py-0.5" style={{ color: "hsl(215 14% 35%)", minWidth: "42px" }}>2</span>
-                <span className="whitespace-pre py-0.5 flex-1" style={{ color: "rgb(253,224,71)" }}>{"  var message = 'Hello, ' + name;"}</span>
-                <span className="shrink-0 px-2 py-0.5 self-center text-xs" style={{ color: "rgba(253,224,71,0.6)", fontFamily: "var(--app-font-sans)" }}>›</span>
-              </div>
-              {/* Warning explanation */}
-              <div style={{ background: "rgba(234,179,8,0.06)", borderLeft: "3px solid rgba(234,179,8,0.45)" }}>
-                <div className="px-3 py-1 text-xs flex items-start gap-1.5" style={{ fontFamily: "var(--app-font-sans)", color: "rgb(253,224,71)" }}>
-                  <span className="mt-px shrink-0">⚠</span>
-                  <span style={{ opacity: 0.9 }}>{"Avoid 'var' — use 'const' or 'let' instead. 'var' leaks out of blocks and causes hard-to-find bugs."}</span>
-                </div>
-              </div>
-
-              {/* Line 3 — normal */}
-              <div className="flex" style={{ borderLeft: "3px solid transparent" }}>
-                <span className="select-none text-right shrink-0 px-3 py-0.5" style={{ color: "hsl(215 14% 35%)", minWidth: "42px" }}>3</span>
-                <span className="whitespace-pre py-0.5" style={{ color: "hsl(210 20% 82%)" }}>{"  console.log(message)"}</span>
-              </div>
-
-              {/* Line 4 — error */}
+              {/* Line 2 — error */}
               <div className="flex" style={{ background: "rgba(220,38,38,0.14)", borderLeft: "3px solid rgb(220,38,38)" }}>
-                <span className="select-none text-right shrink-0 px-3 py-0.5" style={{ color: "hsl(215 14% 35%)", minWidth: "42px" }}>4</span>
-                <span className="whitespace-pre py-0.5 flex-1" style={{ color: "rgb(252,165,165)" }}>{"}"}</span>
+                <span className="select-none text-right shrink-0 px-3 py-0.5" style={{ color: "hsl(215 14% 35%)", minWidth: "42px" }}>2</span>
+                <span className="whitespace-pre py-0.5 flex-1" style={{ color: "rgb(252,165,165)" }}>{""}</span>
                 <span className="shrink-0 px-2 py-0.5 self-center text-xs" style={{ color: "rgba(252,165,165,0.6)", fontFamily: "var(--app-font-sans)" }}>›</span>
               </div>
               {/* Error explanation */}
               <div style={{ background: "rgba(220,38,38,0.07)", borderLeft: "3px solid rgba(220,38,38,0.45)" }}>
                 <div className="px-3 py-1 text-xs flex items-start gap-1.5" style={{ fontFamily: "var(--app-font-sans)", color: "rgb(252,165,165)" }}>
                   <span className="mt-px shrink-0">✕</span>
-                  <span style={{ opacity: 0.9 }}>{"Missing return statement — the function exits without returning 'message'. Add: return message;"}</span>
+                  <span style={{ opacity: 0.9 }}>{"Possible hardcoded secret detected — move API_KEY to an environment variable."}</span>
+                </div>
+              </div>
+
+              {/* Line 3 — normal */}
+              <div className="flex" style={{ borderLeft: "3px solid transparent" }}>
+                <span className="select-none text-right shrink-0 px-3 py-0.5" style={{ color: "hsl(215 14% 35%)", minWidth: "42px" }}>3</span>
+                <span className="whitespace-pre py-0.5" style={{ color: "hsl(210 20% 82%)" }}>{"async function getUser(id) {"}</span>
+              </div>
+
+              {/* Line 4 — warning */}
+              <div className="flex" style={{ background: "rgba(234,179,8,0.10)", borderLeft: "3px solid rgb(234,179,8)" }}>
+                <span className="select-none text-right shrink-0 px-3 py-0.5" style={{ color: "hsl(215 14% 35%)", minWidth: "42px" }}>4</span>
+                <span className="whitespace-pre py-0.5 flex-1" style={{ color: "rgb(253,224,71)" }}>{"  const res = fetch(\"/api/users/\" + id);"}</span>
+                <span className="shrink-0 px-2 py-0.5 self-center text-xs" style={{ color: "rgba(253,224,71,0.6)", fontFamily: "var(--app-font-sans)" }}>›</span>
+              </div>
+              {/* Warning explanation */}
+              <div style={{ background: "rgba(234,179,8,0.06)", borderLeft: "3px solid rgba(234,179,8,0.45)" }}>
+                <div className="px-3 py-1 text-xs flex items-start gap-1.5" style={{ fontFamily: "var(--app-font-sans)", color: "rgb(253,224,71)" }}>
+                  <span className="mt-px shrink-0">⚠</span>
+                  <span style={{ opacity: 0.9 }}>{"'fetch()' is called without 'await' inside an async function — the response will be a Promise, not the data you expect."}</span>
                 </div>
               </div>
 
@@ -202,7 +218,7 @@ export default function Landing() {
           >
             🔒 Your code never leaves your browser.
           </p>
-        </div>
+        </main>
 
         {/* Pro section */}
         <div className="pb-6 flex flex-col gap-3">
@@ -285,19 +301,7 @@ export default function Landing() {
             <div className="flex flex-col gap-2">
               <button
                 type="button"
-                onClick={async () => {
-                  try {
-                    const res = await fetch("/api/create-checkout", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ plan: "annual" }),
-                    });
-                    const data = await res.json();
-                    if (data.url) window.location.href = data.url;
-                  } catch {
-                    toast.error("Something went wrong. Please try again.");
-                  }
-                }}
+                onClick={() => handleCheckout("annual")}
                 className="w-full rounded-xl py-3 text-sm font-semibold transition-all duration-150 active:scale-[0.98]"
                 style={{
                   background: "hsl(262 83% 75%)",
@@ -307,27 +311,11 @@ export default function Landing() {
                   boxShadow: "0 0 16px hsla(262,83%,75%,0.3)",
                 }}
               >
-                Get Pro — £35/year <span style={{ opacity: 0.7, fontSize: "0.75rem" }}>save £13</span>
+                Get Pro — £35/year <span style={{ opacity: 1, fontSize: "0.75rem", color: "hsl(220 8% 20%)" }}>save £13</span>
               </button>
               <button
                 type="button"
-                onClick={async () => {
-                  const { data: { session } } = await supabase.auth.getSession();
-                  try {
-                    const res = await fetch("/api/create-checkout", {
-                      method: "POST",
-                      headers: {
-                        "Content-Type": "application/json",
-                        ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
-                      },
-                      body: JSON.stringify({ plan: "monthly" }),
-                    });
-                    const data = await res.json();
-                    if (data.url) window.location.href = data.url;
-                  } catch {
-                    toast.error("Something went wrong. Please try again.");
-                  }
-                }}
+                onClick={() => handleCheckout("monthly")}
                 className="w-full rounded-xl py-3 text-sm font-semibold transition-all duration-150 active:scale-[0.98]"
                 style={{
                   background: "transparent",
@@ -371,7 +359,7 @@ export default function Landing() {
                 </p>
                 <p
                   className="text-xs leading-relaxed"
-                  style={{ color: "hsl(215 14% 52%)" }}
+                  style={{ color: "hsl(215 14% 65%)" }}
                 >
                   {f.desc}
                 </p>
@@ -392,8 +380,8 @@ export default function Landing() {
             <span style={{ color: "hsl(215 14% 28%)", fontSize: "10px" }}>·</span>
             <a href="/about" className="text-xs" style={{ color: "hsl(215 14% 40%)", textDecoration: "none" }}>About</a>
           </div>
-          <p className="text-xs" style={{ color: "hsl(215 14% 28%)" }}>© 2026 PasteCheck</p>
-          <p className="text-xs" style={{ color: "hsl(215 14% 26%)" }}>📱 Coded entirely on an Android phone. · v2.35</p>
+          <p className="text-xs" style={{ color: "hsl(215 14% 28%)" }}>© {new Date().getFullYear()} PasteCheck</p>
+          <p className="text-xs" style={{ color: "hsl(215 14% 26%)" }}>📱 Coded entirely on an Android phone. · v2.37</p>
         </div>
 
       </div>
